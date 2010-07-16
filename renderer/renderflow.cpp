@@ -16,6 +16,7 @@
 
 #include "nodedumper.h"
 #include "agef_global.h"
+#include "projection.h"
 
 using namespace std; 
 
@@ -86,6 +87,7 @@ Rendering::Rendering ( RenderList& renderlist, RenderOption& opt )
 RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
 {
     CameraOrtho* cam = vp.camera();
+    Projection& proj = vp.projection();
     int camid = vp.cameraid();
 
     int state = CAMERACHECKING;
@@ -119,12 +121,13 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
         case RENDERING:
             {
                 mat4f old = opt.matrix;
-                opt.matrix = vp.vpmatrix() * cam->mvmatrix();
+                opt.matrix = vp.vpmatrix() * proj.projmatrix() * cam->mvmatrix();
                 //opt.matrix = cam->mvmatrix();
                 //opt.scale = cam->mvmatrix().sx();
                 opt.painter->setMatrix ( QMatrix( opt.matrix.m00(), opt.matrix.m10(), opt.matrix.m01(), opt.matrix.m11(), opt.matrix.dx(), opt.matrix.dy() ) );
                 Rendering ( *(Culling::getInst()[camid]), opt );
                 opt.matrix = old;
+
             }
             state = END;
             break;

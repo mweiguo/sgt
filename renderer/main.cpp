@@ -2,7 +2,7 @@
 #include <QPushButton>
 #include <QThread>
 
-#include <tinylog.h>
+// #include <tinylog.h>
 
 #include "qviewport.h"
 #include "interface.h"
@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
 
     QViewport& vp = QViewport::getInst();
     vp.setWindowTitle( "viewport 1" );
-    LOG_DESTINATION ( tinyLog::info, "d:\\info.log" );
-    LOG_LEVEL ( tinyLog::info );
-    LOG_FORMAT ( "%25(asctime)'%(filename)' : %(lineno) : %(funame)\t:\t" );
-    LOG_INFO    ( "log message%10d", 1 );
+//     LOG_DESTINATION ( tinyLog::info, "d:\\info.log" );
+//     LOG_LEVEL ( tinyLog::info );
+//     LOG_FORMAT ( "%25(asctime)'%(filename)' : %(lineno) : %(funame)\t:\t" );
+//     LOG_INFO    ( "log message%10d", 1 );
 
     vp.resize(400, 300);
     vp.show();

@@ -10,11 +10,13 @@
 #include "arrayexpander.h"
 #include "volumepicker.h"
 #include "nodedumper.h"
-#include "colorchanger.h"
+//#include "colorchanger.h"
 #include "colornode.h"
 #include "attrset.h"
 
 #include <fstream>
+#include <stdexcept>
+
 using namespace std;
 // camera management
 
@@ -73,7 +75,7 @@ float find_view ( float* min, float* max, float percentOfView, int camid, int vp
     {
         stringstream ss;
         ss << "min max should be different";
-        throw std::exception ( ss.str().c_str() );
+        throw std::invalid_argument ( ss.str().c_str() );
     }
     float scale        = 2 * percentOfView / maxDimension;
 
@@ -263,7 +265,7 @@ int attrset_create ( int layerid )
     }
     stringstream ss;
     ss << "layer node not exist or id " << layerid << " is not a layer";
-    throw std::exception ( ss.str().c_str() );
+    throw std::invalid_argument ( ss.str().c_str() );
 }
 
 void attrset_fgcolor ( int id, int colorid )

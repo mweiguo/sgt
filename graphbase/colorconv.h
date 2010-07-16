@@ -3,7 +3,7 @@
 
 #include <sstream>
 #include <string>
-
+#include <stdexcept>
 using namespace std;
 #include "agef_global.h"
 

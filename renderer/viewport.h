@@ -4,21 +4,21 @@
 #include <string>
 #include "vec2.h"
 #include "cameraortho.h"
+#include "projection.h"
 #include "nodemgr.h"
 
 class AGEF_EXPORT Viewport : public SGNode
 {
 public:
     void attachcamera ( int camid ) {_camid = camid;}
-    CameraOrtho* camera() const {
+    CameraOrtho* camera() const 
+    {
         return NodeMgr::getInst().getNodePtr<CameraOrtho>(_camid);
-        //CameraMgr& mgr = CameraMgr::getInst();
-        //CameraMgr::iterator pp = mgr.find (_camid);
-        //if ( pp == mgr.end() )
-        //    return NULL;
-        //return pp->second;
     }
     int cameraid() const { return _camid; }
+    void projection ( const Projection& proj ) { _proj=proj; }
+    Projection& projection () { return _proj; }
+    const Projection& projection () const { return _proj; }
     //RnederList& getRenderList ( const string& cameraname );
     bool dirty() { return _dirty; }
     void dirty( bool v ) { _dirty = v; }
@@ -67,6 +67,7 @@ private:
     int _camid;
     bool _dirty;
     mat4f _vpmatrix, _inversemvmatrix;
+    Projection _proj;
 };
 
 #endif

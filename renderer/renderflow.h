@@ -23,7 +23,7 @@ class AGEF_EXPORT RenderFlow
     static const int CULLING           = 4;
     static const int RENDERING         = 5;
 public:
-    RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt );
+    RenderFlow ( Viewport& vp, RenderOption& opt );
 };
 
 #endif

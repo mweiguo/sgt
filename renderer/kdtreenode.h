@@ -6,6 +6,8 @@
 #include "groupnode.h"
 
 #include "drawablenode.h"
+#include "rendernodecollector.h"
+
 template<class T>
 class GetBBox
 {

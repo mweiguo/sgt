@@ -11,14 +11,14 @@ class AGEF_EXPORT quickvector : public vector<T>
 public:
     // typedef const T& const_reference;
     // typedef T& reference;
-    // typedef typename vector<T>::iterator iterator;
-    // typedef typename vector<T>::const_iterator const_iterator;
+    typedef typename vector<T>::iterator iterator;
+    typedef typename vector<T>::const_iterator const_iterator;
 
     quickvector () : vector<T>() { _currIdx = 0; }
     // quickvector (const_reference rhs ) { _data = rhs._data; _currIdx = rhs._currIdx; }
     // quickvector& operator= (const_reference rhs){ _data = rhs._data; _currIdx = rhs._currIdx; return *this; }
     void push_back (const T& d) { 
-        if ( _currIdx >= size() )
+        if ( _currIdx >= vector<T>::size() )
             vector<T>::push_back(d); 
         else
             (*this)[_currIdx] = d;

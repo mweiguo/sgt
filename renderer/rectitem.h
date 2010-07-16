@@ -23,7 +23,7 @@ public:
 
     virtual void updateBBox( const mat4f& mat=mat4f() )
     {
-        _bb = boundingbox();
+        _bb = Rectangle<T>::boundingbox();
         
         vec4f min = mat * vec4f ( _bb.min() );
         vec4f max = mat * vec4f ( _bb.max() );

@@ -1,7 +1,9 @@
-#include "includes.h"
 #include "tcltkconsole.h"
 #include <locale.h>
-//#include <tclapi.h>
+#include <stdexcept>
+
+#include "interface.h"
+
 void WishPanic( CONST char *format, ...)
 {
     va_list argList;
@@ -17,21 +19,21 @@ int Tcl_AppInit( Tcl_Interp *interp)
     try
     {
         if ( TCL_OK != Tcl_Init(interp) )
-            throw std::exception ( Tcl_GetStringResult ( interp ));
+            throw std::logic_error ( Tcl_GetStringResult ( interp ));
 
         if ( TCL_OK != Tk_Init(interp) )
-            throw std::exception ( Tcl_GetStringResult ( interp ));
+            throw std::logic_error ( Tcl_GetStringResult ( interp ));
 
         Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
 
         Tk_InitConsoleChannels(interp);
         if ( TCL_OK != Tk_CreateConsoleWindow(interp) )
-            throw std::exception ( Tcl_GetStringResult ( interp ));
+            throw std::logic_error ( Tcl_GetStringResult ( interp ));
 
         if ( TCL_OK != Tcl_Eval (interp, "wm withdraw ." ) )
-            throw std::exception ( Tcl_GetStringResult ( interp ));
+            throw std::logic_error ( Tcl_GetStringResult ( interp ));
         if ( TCL_OK != Tcl_Eval (interp, "console show" ) )
-            throw std::exception ( Tcl_GetStringResult ( interp ));
+            throw std::logic_error ( Tcl_GetStringResult ( interp ));
 
         register_tclcmds ( interp );
         Tcl_SetVar(interp, "tcl_rcFileName", "./.rc", TCL_GLOBAL_ONLY);
