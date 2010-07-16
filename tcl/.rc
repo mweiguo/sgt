@@ -1,0 +1,15 @@
+#setup camera
+set camid [camera_create "cam1"]
+
+# setup viewport
+set vpid  [viewport_create "viewport1"]
+viewport_geometry $vpid 0 0 400 300
+viewport_attachcamera $vpid $camid 
+viewport_add $vpid
+
+# create a rectangle for test
+set rcid [rectangle_create]
+rectangle_size $rcid 2 2
+add_child 0 $rcid
+
+update_bbox 0
