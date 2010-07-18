@@ -12,45 +12,46 @@ button .ctrl.btnzoomout  -text "-"       -command "camera_change zoomout"
 pack .ctrl.btnleft .ctrl.btnright .ctrl.btnup .ctrl.btndown .ctrl.reset
 pack .ctrl.btnzoomin .ctrl.btnzoomout
 
-set dx 0
-set dy 0
-set scale 1
+set currentX 0
+set currentY 0
+set currentZ 0
+set currentScale 1
 
 proc camera_change { action } {
     global camid
     global vpid
-    global dx
-    global dy
-    global scale
+    global currentX
+    global currentY
+    global currentScale
     set delta 0.1
     if { $action == "left" } {
-        set dx [expr $dx - $delta]
-        camera_translate $camid $dx $dy 0
+        set currentX [expr $currentX - $delta]
+        camera_translate $camid $currentX $currentY 0
     } elseif { $action == "right" } {
-        set dx [expr $dx + $delta]
-        camera_translate $camid $dx $dy 0
+        set currentX [expr $currentX + $delta]
+        camera_translate $camid $currentX $currentY 0
     } elseif { $action == "up" } {
-        set dy [expr $dy + $delta]
-        camera_translate $camid $dx $dy 0
+        set currentY [expr $currentY + $delta]
+        camera_translate $camid $currentX $currentY 0
     } elseif { $action == "down" } {
-        set dy [expr $dy - $delta]
-        camera_translate $camid $dx $dy 0
+        set currentY [expr $currentY - $delta]
+        camera_translate $camid $currentX $currentY 0
     } elseif { $action == "zoomin" } {
-        set scale [expr $scale * 1.2]
-        camera_scale $camid $scale
+        set currentScale [expr $currentScale * 1.2]
+        camera_scale $camid $currentScale
     } elseif { $action == "zoomout" } {
-        set scale [expr $scale / 1.2]
-        camera_scale $camid $scale
+        set currentScale [expr $currentScale / 1.2]
+        camera_scale $camid $currentScale
     } elseif { $action == "reset" } {
-        set dx 0
-        set dy 0
-        set scale 1
-        camera_scale $camid $scale
-        camera_translate $camid $dx $dy 0
+        set currentX 0
+        set currentY 0
+        set currentScale 1
+        camera_scale $camid $currentScale
+        camera_translate $camid $currentX $currentY 0
     } else {
         return
     }
-    puts "dx=$dx dy=$dy scale=$scale"
+    puts "currentX=$currentX currentY=$currentY currentScale=$currentScale"
     update $vpid
 }
 
