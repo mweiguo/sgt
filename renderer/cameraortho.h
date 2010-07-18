@@ -63,8 +63,6 @@ inline void CameraOrtho::zoom ( float scale )
 {
     if ( scale < 0 )
         scale = -1/scale;
-    if ( scale == 1 )
-        return;
 
     _scale = scale;
     recalcuMatrix ();
