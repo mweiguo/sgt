@@ -30,18 +30,6 @@ void ArrayExpander::operator () ( ArrayNode& node )
     _curparent->addChild ( group );
     _curparent = group;
 
-    //// set attrset's renderOrder
-    //for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
-    //{
-    //    DrawableNode* pDrawable = dynamic_cast <DrawableNode*>(*pp);
-    //    if ( pDrawable )
-    //    {
-    //        ParentFinder<LayerNode> finder(&node);
-    //        int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
-    //        pDrawable->getAttrSet()->setRenderOrder ( renderOrder );
-    //    }
-    //}
-
     //_result.reserve ( node.rowCnt() * node.columnCnt() * 8);
     for ( int j=0; j<node.rowCnt(); j++ ) {
         float y = node.getVOffset ( j );
@@ -57,11 +45,8 @@ void ArrayExpander::operator () ( ArrayNode& node )
             SGNode* oldparent = _curparent;
             _curparent = trans;
 
-
             for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
-            {
                 (*pp)->accept ( *this );
-            }
             _curparent = oldparent;
         }
     }
