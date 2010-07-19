@@ -29,6 +29,7 @@ public:
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( AttrSet& node );
 };
 
 
@@ -111,6 +112,12 @@ inline void ChildVisitor::apply ( SwitchNode& node )
 }
 
 inline void ChildVisitor::apply ( LineNodef& node )
+{
+    for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
+        (*pp)->accept ( *this );
+}
+
+inline void ChildVisitor::apply ( AttrSet& node )
 {
     for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
         (*pp)->accept ( *this );

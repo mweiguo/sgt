@@ -91,6 +91,9 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
     int camid = vp.cameraid();
 
     int state = CAMERACHECKING;
+    int cullingstart, renderstart;
+    int cullingend, renderend;
+
     while ( state != END )
     {
         switch ( state )
@@ -114,12 +117,19 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 state = END;
             break;
         case CULLING:
+            cullingstart = clock ();
+
             Culling::getInst()( camid, cam->viewvolume(), NodeMgr::getInst().root() );
             cam->dirty( false );
             state = RENDERING;
+
+            cullingend = clock ();
+            qDebug ( "culling: %d clock", cullingend-cullingstart );
             break;
         case RENDERING:
             {
+                renderstart = clock();
+
                 mat4f old = opt.matrix;
                 opt.matrix = vp.vpmatrix() * proj.projmatrix() * cam->mvmatrix();
                 //opt.matrix = cam->mvmatrix();
@@ -128,9 +138,12 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 Rendering ( *(Culling::getInst()[camid]), opt );
                 opt.matrix = old;
 
+                renderend = clock();
+                qDebug ( "rendering: %d clock;  render objects: %d", renderend-renderstart, (Culling::getInst()[camid])->size() );
             }
             state = END;
             break;
         }
+
     }
 }

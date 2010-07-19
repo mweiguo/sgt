@@ -95,6 +95,7 @@ extern "C"
 
     // attrset
     int AGEF_EXPORT attrset_create ( int layerid );
+    int AGEF_EXPORT attrset_create_byrenderorder ( int layerid );
     void AGEF_EXPORT attrset_fgcolor ( int id, int colorid );
     void AGEF_EXPORT attrset_bgcolor ( int id, int colorid );
     void AGEF_EXPORT set_attrset ( int nodeid, int attrsetid );

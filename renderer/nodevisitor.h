@@ -25,6 +25,7 @@ typedef KdTreeNodeT<DrawableNode*> KdTreeNode;
 template < class T >
 class LineNode;
 typedef LineNode<float> LineNodef;
+class AttrSet;
 
 class AGEF_EXPORT NodeVisitor 
 {
@@ -57,6 +58,7 @@ public:
     virtual void apply ( GroupNode& node ) {}
     virtual void apply ( SwitchNode& node ) {}
     virtual void apply ( LineNodef& node ) {}
+    virtual void apply ( AttrSet& node ){}
 };
 
 

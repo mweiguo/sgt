@@ -23,6 +23,7 @@ public:
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( AttrSet& node );
     void operator() ( SGNode* node )
     {
         _dump.str("");
@@ -88,7 +89,14 @@ inline void NodeDumper::apply ( RectangleNodef& node )
 
     AttrSet* pAttrSet = node.getAttrSet();
     if ( pAttrSet )
-        _dump << "bordercolor=" << pAttrSet->getFgColor()->toString() << " fillcolor=" << pAttrSet->getBgColor()->toString();
+    {
+        _dump << " renderOrder=" << pAttrSet->getRenderOrder();
+
+        if ( pAttrSet->getFgColor() )
+            _dump << " bordercolor=" << pAttrSet->getFgColor()->toString(); 
+        if ( pAttrSet->getBgColor() )
+            _dump << " fillcolor=" << pAttrSet->getBgColor()->toString();
+    }
     _dump << endl;
 
     ChildVisitor::apply ( node );
@@ -217,8 +225,33 @@ inline void NodeDumper::apply ( LineNodef& node )
     _ident.insert ( 0, "  " );
     _dump << _ident << "LineNodef: x1=" << node.x1() << " y1=" << node.y1() << " x2=" << node.x2() << " y2=" << node.y2() <<
         " bbox.min=(" << node.getBBox().min().x() << ", " << node.getBBox().min().y() << ", " << node.getBBox().min().z() << 
-        ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ") linecolor=" <<
-        node.getLineColor().toString() << endl;
+        ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ") ";
+
+    AttrSet* pAttrSet = node.getAttrSet();
+    if ( pAttrSet )
+    {
+        _dump << " renderOrder=" << pAttrSet->getRenderOrder();
+
+        if ( pAttrSet->getFgColor() )
+            _dump << " fgrcolor=" << pAttrSet->getFgColor()->toString(); 
+        if ( pAttrSet->getBgColor() )
+            _dump << " bgcolor=" << pAttrSet->getBgColor()->toString();
+    }
+    _dump << endl;
+
+    ChildVisitor::apply ( node );
+    _ident.erase ( 0, 2 );
+}
+
+inline void NodeDumper::apply ( AttrSet& node )
+{
+    stringstream ss;
+    _ident.insert ( 0, "  " );
+    _dump << _ident << "AttrSet: renderorder=" << node.getRenderOrder() << endl;
+    if ( node.getFgColor() )
+        _dump << " bordercolor=" << node.getFgColor()->toString(); 
+    if ( node.getBgColor() )
+        _dump << " fillcolor=" << node.getBgColor()->toString();
 
     ChildVisitor::apply ( node );
     _ident.erase ( 0, 2 );

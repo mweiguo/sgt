@@ -396,7 +396,7 @@ int tcl_dump_node (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj*
     try
     {
         if ( objc != 3 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "mesh_unload nodeid filename" );
+            Tcl_WrongNumArgs ( interp, 0, objv, "dump_node nodeid filename" );
             return TCL_ERROR;
         }
 

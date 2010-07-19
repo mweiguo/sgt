@@ -2,18 +2,9 @@
 
 #include "loadmesh.h"
 
-#ifndef _USE_XERCES3_
 #include <xml_xerceshelper.h>
-#else// _USE_XERCES3_
-// #include <xercesc/parsers/XercesDOMParser.hpp>
-// #include <xercesc/dom/DOM.hpp>
-// #include <xercesc/sax/HandlerBase.hpp>
-// #include <xercesc/util/XMLString.hpp>
-// #include <xercesc/util/PlatformUtils.hpp>
-using namespace xercesc;
-#endif// _USE_XERCES3_
+
 #include <algorithm>
-#include <iostream>
 #include <time.h>
 
 #include "scenemgr.h"
@@ -25,7 +16,6 @@ using namespace xercesc;
 #include "qDebug"
 #include "attrset.h"
 
-using namespace std;
 UnloadNode::UnloadNode ( SGNode* sgnode )
 {
     sgnode->setParentNode ( NULL );
@@ -36,7 +26,6 @@ UnloadNode::UnloadNode ( SGNode* sgnode )
     LayerMgr::getInst().clear();
 }
 
-#ifndef _USE_XERCES3_
 LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManagement )// : _opt(opt)
 {
     int clo = clock();
@@ -409,148 +398,6 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         traverseNode ( tagMesh, meshnode );
     }
 }
-
-#else// _USE_XERCES3_
-
-LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManagement )// : _opt(opt)
-{
-    try
-    {
-	int clo = clock();
-	XercesDOMParser parser;
-	parser.setValidationScheme(XercesDOMParser::Val_Always);
-
-	parser.parse ( fileName );
-
-	DOMDocument* doc = parser.getDocument();
-	DOMElement* element = doc->getDocumentElement();
-
-
-	qDebug ( "parseFile TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
-
-	clo = clock();
-	traverseNode ( element, 0 );
-	qDebug ( "traverseNode TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
-
-	// expand array node
-	if ( needExpand )
-	{
-	    clo = clock();
-	    int ii = 0;
-	    for ( vector<ArrayNode*>::iterator pp=_arraynodes.begin(); pp!=_arraynodes.end(); ++pp )
-	    {
-		ArrayNode* node = *pp;
-		SGNode* parent = node->getParentNode();
-		node->setParentNode ( NULL );
-		ArrayExpander expander ( parent );
-		expander ( *(*pp) );
-		copy ( expander.kdbegin(), expander.kdend(), back_inserter(_kdtreenodes) );
-	    }
-	    qDebug ( "%d array expander TAKE %d clock, %f (s)", ii, clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
-	}
-
-	if ( needSceneManagement )
-	{
-	    clo = clock();
-	    // if exists kdtree, build it
-	    for ( vector<KdTreeNode*>::iterator pp=_kdtreenodes.begin(); pp!=_kdtreenodes.end(); ++pp )
-	    {
-		(*pp)->buildKdTree ();
-	    }
-	    qDebug ( "build kdtree TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
-	}
-
-	_root->updateBBox();
-    }
-    catch (const XMLException& toCatch) 
-    {
-	char* message = XMLString::transcode(toCatch.getMessage());
-	cout << "Exception message is: \n"
-	     << message << "\n";
-	XMLString::release(&message);
-    }
-    catch (const DOMException& toCatch) {
-	char* message = XMLString::transcode(toCatch.msg);
-	cout << "Exception message is: \n"
-	     << message << "\n";
-	XMLString::release(&message);
-    }
-    catch (...) {
-	cout << "Unexpected Exception \n" ;
-    }
-}
-
-void LoadMesh::traverseNode ( DOMElement* element, SGNode* parent )
-{
-    typedef vector<DOMElement*> DOMElements;
-
-    for ( DOMElement* p=element->getFirstElementChild();
-	  p!=element->getLastElementChild();
-	  p=p->getNextElementSibling() )
-    {
-	string tagName ( XMLString::transcode( p->getTagName () ));
-	if ( tagName == "font" ) {
-	    FontNode* fontnode = new FontNode();
-	    parent->addChild ( fontnode );
-	    if ( p->hasAttribute ( XMLString::transcode("def") ) )
-	    {
-		string def ( XMLString::transcode ( p->getAttribute ( XMLString::transcode("def") ) ) );
-		_defines[def] = fontnode;
-	    }
-	    if ( p->hasAttribute ( XMLString::transcode("family" ) ) )
-		fontnode->family ( string ( XMLString::transcode ( p->getAttribute ( XMLString::transcode("family") ) ) ));
-	    if ( p->hasAttribute ( XMLString::transcode("size" ) ) )
-	    {
-		string strsz ( XMLString::transcode ( p->getAttribute ( XMLString::transcode("size") ) ) );
-		stringstream ss ( strsz );
-		int sz;
-		ss >> sz;
-		fontnode->size ( sz );
-	    }
-	    if ( p->hasAttribute ( XMLString::transcode("style") ) )
-	    {
-		string style (XMLString::transcode(p->getAttribute ( XMLString::transcode("style") )));
-		int istyle = 1;
-		if ( style == "bold" )
-		    istyle = 2;
-		else if ( style == "italic" )
-		    istyle = 3;
-		else if ( style == "bolditalic" )
-		    istyle = 4;
-		//font_style ( id, istyle );
-	    }
-	    traverseNode ( p, fontnode );
-	} else if ( tagName == "layer" ) {
-	    LayerNode* layer = new LayerNode();
-	    parent->addChild ( layer );
-
-	    if ( p->hasAttribute ( XMLString::transcode("isVisible") ) ) {
-		string tmp ( XMLString::transcode( p->getAttribute ( XMLString::transcode("isVisible") )) );
-		if ( tmp == "1" ) layer->setVisible ( true );
-		else if ( tmp == "0" ) layer->setVisible ( false );
-	    }
-	    if ( p->hasAttribute ( XMLString::transcode("name") ) )
-		layer->name ( XMLString::transcode( p->getAttribute ( XMLString::transcode("name") ) ));
-	    if ( p->hasAttribute ( XMLString::transcode("color") ) )
-		layer->setColor ( GColor(XMLString::transcode(p->getAttribute ( XMLString::transcode("color") ))) );
- 
-	    traverseNode ( p, layer );
-	} else if ( tagName == "pickablegroup" ) {
-	} else if ( tagName == "lod" ) {
-	} else if ( tagName == "kdtree" ) {
-	} else if ( tagName == "transform" ) {
-	} else if ( tagName == "array" ) {
-	} else if ( tagName == "rect" ) {
-	} else if ( tagName == "text" ) {
-	} else if ( tagName == "group" ) {
-	} else if ( tagName == "switch" ) {
-	} else if ( tagName == "line" ) {
-	} else if ( tagName == "mesh" ) {
-	} 
-    }
-
-}
-#endif// _USE_XERCES3_
 
 void LoadMesh::getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt )
 {

@@ -10,7 +10,7 @@
 #include "arrayexpander.h"
 #include "volumepicker.h"
 #include "nodedumper.h"
-//#include "colorchanger.h"
+#include "colorchanger.h"
 #include "colornode.h"
 #include "attrset.h"
 
@@ -268,6 +268,11 @@ int attrset_create ( int layerid )
     throw std::invalid_argument ( ss.str().c_str() );
 }
 
+int attrset_create_byrenderorder ( int renderorder )
+{
+    return NodeMgr::getInst().addNode<AttrSet> (renderorder);
+}
+
 void attrset_fgcolor ( int id, int colorid )
 {
     AttrSet* node = NodeMgr::getInst().getNodePtr<AttrSet>( id );
@@ -295,8 +300,9 @@ void set_attrset ( int nodeid, int attrsetid )
     DrawableNode* node = NodeMgr::getInst().getNodePtr<DrawableNode>( nodeid );
     if ( node )
     {
-        AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( nodeid );
-        node->setAttrSet ( attrsetNode );
+        AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
+        if ( attrsetNode )
+            node->setAttrSet ( attrsetNode );
     }
 }
 
@@ -752,9 +758,11 @@ int pick ( float x, float y, float z, int camid, int* data )
     return renderlist.size();
 }
 
-int pick_volume ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data )
+int pick_volume ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
 {
-    BBox box ( vec3f(minx, miny, minz), vec3f(maxx, maxy, maxz) );
+    BBox box;
+    box.init ( vec3f(x1, y1, z1) );
+    box.expandby ( vec3f(x2, y2, z2) );
     RenderList renderlist;
     VolumePicker<back_insert_iterator<RenderList> > picker ( box, camid, back_inserter(renderlist) );
     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);

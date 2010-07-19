@@ -27,6 +27,9 @@ public:
     bool isVisible () { return _bRender; }
     void setAttrSet ( AttrSet* pAttrSet ) 
     { 
+        if ( _pAttrSet == pAttrSet )
+            return;
+
         if ( _pAttrSet )
             _pAttrSet->decRef();
 
