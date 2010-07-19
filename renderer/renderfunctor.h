@@ -148,62 +148,17 @@ inline void QtRenderVisitor::apply ( TextNode& text )
     //_opt->painter->setPen(pen);
 
     const BBox& b = text.getBBox ();
-    //vec2f lb = (_opt->matrix * vec4f(b.min())).xy();
-    //vec2f rt = (_opt->matrix * vec4f(b.max())).xy();
-    //vec2f lb = vec2f(b.min());
-    //vec2f rt = vec2f(b.max());
     
     QRectF rc( b.min().x(), -b.min().y(), b.dimension().w(), b.dimension().h() );
-    //QRectF rc( lb.x(), lb.y(), 200, 100 );
+
     _opt->painter->drawRect ( rc.toRect() );
     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
-//    _opt->painter->drawText ( QPointF(lb.x(), lb.y()), text.text().c_str() );
+
     _opt->painter->setWorldMatrix ( oldm );
 
     for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp )
         (*pp)->accept ( *this );
 
-    //_opt->painter->setPen ( oldpen );
-    //_opt->painter->setFont ( oldfont );
-
-    /* FontNode* fontnode = text.fontnode(); */
-    /* QPen pen ( fontnode->color().c_str() ); */
-    /* QFont font ( fontnode->family().c_str(), fontnode->size(), QFont::Normal, fontnode->italic() ); */
-    /* const QFont oldfont = _opt->painter->font(); */
-    /* const QPen oldpen = _opt->painter->pen(); */
-
-    /* _opt->painter->setFont ( font ); */
-    /* _opt->painter->setPen(pen); */
-
-    /* //// now get the bounding box */
-    /* //QRectF b ( 0, 0, width, height ); */
-    /* QFontMetricsF m( _opt->painter->font() ); */
-    /* QSizeF sz = m.size ( Qt::TextWordWrap, text.text().c_str() ); */
-    /* QRectF b ( text.anchorPoint().x(), text.anchorPoint().y(), sz.width(), sz.height () ); */
-    /* //////////////////////////////// */
-    /* // end calculate bounding rect ///// */
-    /* //////////////////////////////// */
-
-    /* if ( text.isAnchorHCenter () ) */
-    /*     b.translate ( -b.width()/2, 0 ); */
-    /* else if ( text.isAnchorRight () ) */
-    /*     b.translate ( -b.width(), 0 ); */
-
-    /* if ( text.isAnchorVCenter () ) */
-    /*     b.translate ( 0, b.height() / 2 ); */
-    /* else if ( text.isAnchorTop () ) */
-    /*     b.translate ( 0, b.height() ); */
-
-    /* _opt->painter->drawText ( b, text.alignFlag() | Qt::TextWordWrap | Qt::TextDontClip, text.text().c_str() ); */
-
-    /* // if ( _showBoundingBox ) */
-    /* // 	painter->drawRect ( b ); */
-
-    /* for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp ) */
-    /*     (*pp)->accept ( *this ); */
-
-    /* _opt->painter->setPen ( oldpen ); */
-    /* _opt->painter->setFont ( oldfont ); */
 }
 
 inline void QtRenderVisitor::apply ( LineNodef& line )
