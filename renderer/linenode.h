@@ -7,7 +7,7 @@
 #include <vec4.h>
 #include <mat4.h>
 #include <line.h>
-#include "fbcolor.h"
+//#include "fbcolor.h"
 
 template < class T >
 class AGEF_EXPORT LineNode : public DrawableNode, public Line<T>
@@ -34,21 +34,21 @@ public:
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     ~LineNode () {}
 
-    void setUseLayerColor ( bool b ) { _color.setUseLayerFgColor(b); };
-    bool isUseLayerColor () const { return _color.isUseLayerFgColor(); }
-    void useLayerColor ()
-    {
-        ParentFinder<LayerNode> finder ( this );
-        if ( finder.target() )
-            _color.useLayerFgColor(finder.target()); 
-    }
-    void setLineColor ( GColor color )
-    {
-        _color.setFgColor(color);
-    }
-    GColor getLineColor () { return _color.getFgColor(); }
-private:
-    FgBgColorComponent _color;
+//    void setUseLayerColor ( bool b ) { _color.setUseLayerFgColor(b); };
+//    bool isUseLayerColor () const { return _color.isUseLayerFgColor(); }
+//    void useLayerColor ()
+//    {
+//        ParentFinder<LayerNode> finder ( this );
+//        if ( finder.target() )
+//            _color.useLayerFgColor(finder.target()); 
+//    }
+//    void setLineColor ( GColor color )
+//    {
+//        _color.setFgColor(color);
+//    }
+//    GColor getLineColor () { return _color.getFgColor(); }
+//private:
+//    FgBgColorComponent _color;
 };
 
 typedef LineNode<double>  LineNoded;

@@ -25,6 +25,7 @@ public:
     //virtual bool getLayerColor ( unsigned int& color );
     void setVisible ( bool isVisible ) { _bRender = isVisible; }
     bool isVisible () { return _bRender; }
+
     void setAttrSet ( AttrSet* pAttrSet ) 
     { 
         if ( _pAttrSet == pAttrSet )
@@ -38,6 +39,7 @@ public:
             pAttrSet->incRef(); 
     }
     AttrSet* getAttrSet () { return _pAttrSet; }
+
 protected:
     bool _bRender;
     AttrSet* _pAttrSet;

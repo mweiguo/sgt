@@ -22,10 +22,11 @@ public:
     {
         QFont font ( fontnode.family().c_str(), fontnode.size(), QFont::Normal, fontnode.italic() );
         QFontMetricsF m ( font );
-        QSizeF sz = m.size ( Qt::TextWordWrap, content.c_str() );
+        QRectF rc = m.boundingRect ( QRectF(0,0,100,100), Qt::AlignCenter, content.c_str() );
+        //QSizeF sz = m.size ( Qt::TextWordWrap, content.c_str() );
         BBox b;
         b.init ( vec3f(0.f, 0.f, 0.f) );
-        b.expandby ( vec3f(sz.width(), sz.height(), 0.f) );
+        b.expandby ( vec3f(rc.width(), rc.height(), 0.f) );
         return b;
     }
 };

@@ -49,6 +49,9 @@ public:
     void isItalic ( bool isItalic ) { _style &= ITALIC; }
     bool italic () const { return (_style & ITALIC); }
 
+    void defName (const string& defName) { _defName = defName; }
+    const string& defName () const { return _defName; }
+
     //// set color
     //void color ( const string& color );
     //const string& color () { return _color; }
@@ -58,6 +61,7 @@ private:
     int _weight;
     // NORMAL, ITALIC, UNDERSTRIKE
     int _style;
+    string _defName;
     ////
     //string _color;
 };

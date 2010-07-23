@@ -53,8 +53,8 @@ inline void NodeDumper::apply ( LayerNode& node )
     _ident.insert ( 0, "  " );
     _dump << _ident << "LayerNode: name=" << node.name() << " visible=" << node.isVisible() <<
         " bbox.min=(" << node.getBBox().min().x() << ", " << node.getBBox().min().y() << ", " << node.getBBox().min().z() << 
-        ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ") layercolor=" <<
-        node.getColor().toString() << endl;
+        ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ") layerfgcolor=" <<
+        node.getFgColor().toString() << ") layerbgcolor=" << node.getBgColor().toString() << endl;
 
     ChildVisitor::apply ( node );
     _ident.erase ( 0, 2 );
@@ -189,7 +189,7 @@ inline void NodeDumper::apply ( TextNode& node )
     _dump << _ident << "TextNode string=" << node.text() <<
         " bbox.min=(" << node.getBBox().min().x() << ", " << node.getBBox().min().y() << ", " << node.getBBox().min().z() << 
         ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ") textcolor=" <<
-        node.getTextColor().toString() << endl;
+        node.getAttrSet()->getFgColor()->toString() << endl;
 
     ChildVisitor::apply ( node );
     _ident.erase ( 0, 2 );

@@ -81,6 +81,7 @@ LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManage
 void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent )
 {
     typedef vector<XERCES_CPP_NAMESPACE::DOMElement*> DOMElements;
+    static string bygroupstr = "bygroup";
 
     DOMElements tagFonts = XercesHelper::getChildElementsByTagName ( pnode, "font" );
     for ( DOMElements::iterator pp=tagFonts.begin(); pp!=tagFonts.end(); ++pp ) {
@@ -92,6 +93,7 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         {
             string def = (const char*)XercesHelper::getAttribute ( tagFont, "def" );
             _defines[def] = fontnode;
+            fontnode->defName ( def );
         }
         if ( XercesHelper::hasAttribute ( tagFont, "family" ) )
             fontnode->family ( (const char*)XercesHelper::getAttribute ( tagFont, "family" ) );
@@ -126,8 +128,10 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         }
         if ( XercesHelper::hasAttribute ( tagLayer, "name" ) )
             layer->name ( (char*)XercesHelper::getAttribute ( tagLayer, "name" ) );
-        if ( XercesHelper::hasAttribute ( tagLayer, "color" ) )
-            layer->setColor ( GColor((char*)XercesHelper::getAttribute ( tagLayer, "color" )) );
+        if ( XercesHelper::hasAttribute ( tagLayer, "fgcolor" ) )
+            layer->setFgColor ( GColor((char*)XercesHelper::getAttribute ( tagLayer, "fgcolor" )) );
+        if ( XercesHelper::hasAttribute ( tagLayer, "bgcolor" ) )
+            layer->setBgColor ( GColor((char*)XercesHelper::getAttribute ( tagLayer, "bgcolor" )) );
  
         traverseNode ( tagLayer, layer );
     }
@@ -245,24 +249,22 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         GColor *fgcolor, *bgcolor;
         ParentFinder<LayerNode> finder( rect );
 
-        if ( XercesHelper::hasAttribute ( tagRect, "fillcolor" ) )
+        if ( XercesHelper::hasAttribute ( tagRect, "bgcolor" ) )
         {
-            string fillcolor = (const char*)(XercesHelper::getAttribute( tagRect, "fillcolor" ));
-            string bygroupstr = "bygroup";
+            string fillcolor = (const char*)(XercesHelper::getAttribute( tagRect, "bgcolor" ));
             if ( bygroupstr == fillcolor )
             {
-                bgcolor = finder.target()->getColorPtr();
+                bgcolor = finder.target()->getBgColorPtr();
             }
             else
                 bgcolor = new GColor(fillcolor);
         }
-        if ( XercesHelper::hasAttribute ( tagRect, "bordercolor" ) )
+        if ( XercesHelper::hasAttribute ( tagRect, "fgcolor" ) )
         {
-            string bordercolor = (const char*)(XercesHelper::getAttribute( tagRect, "bordercolor" ));
-            string bygroupstr = "bygroup";
+            string bordercolor = (const char*)(XercesHelper::getAttribute( tagRect, "fgcolor" ));
             if ( bygroupstr == bordercolor )
             {
-                fgcolor = finder.target()->getColorPtr();
+                fgcolor = finder.target()->getFgColorPtr();
             }
             else
                 fgcolor = new GColor(bordercolor);
@@ -296,7 +298,6 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
                 set->setBgColor ( bgcolor );
             rect->setAttrSet ( set );
         }
-            
 
         traverseNode ( tagRect, rect );
     }
@@ -313,7 +314,15 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
             // get reference & call text_font ( id, fontid );
             map<string,SGNode*>::iterator pp = _defines.find (def);
             if ( pp != _defines.end() )
+            {
                 textnode->fontnode ( static_cast<FontNode*>(pp->second) );
+
+                ParentFinder<LayerNode> finder( textnode );
+                int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
+                AttrSet* set = new AttrSet ( renderOrder );
+                set->setFont ( textnode->fontnode() );
+                textnode->setAttrSet ( set );
+            }
             else
             {
                 // log error & skip this text node
@@ -326,8 +335,22 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
             textnode->anchorValue ( atoi((const char*)XercesHelper::getAttribute ( tagText, "anchor" )));
         if ( XercesHelper::hasAttribute ( tagText, "justify" ) )
             textnode->setAlignFlag ( atoi((const char*)XercesHelper::getAttribute ( tagText, "justify" )));
-        if ( XercesHelper::hasAttribute ( tagText, "string" ) )
-            textnode->text ( (const char*)XercesHelper::getAttribute ( tagText, "string" ));
+        textnode->text ( (const char*)XercesHelper::getTextContent (tagText) );
+        //if ( XercesHelper::hasAttribute ( tagText, "string" ) )
+        //    textnode->text ( (const char*)XercesHelper::getAttribute ( tagText, "string" ));
+        if ( XercesHelper::hasAttribute ( tagText, "fgcolor" ) )
+        {
+            GColor *fgcolor;
+            ParentFinder<LayerNode> finder( textnode );
+            string fgcolorStr = (const char*)(XercesHelper::getAttribute( tagText, "fgcolor" ));
+            if ( bygroupstr == fgcolorStr )
+                fgcolor = finder.target()->getFgColorPtr();
+            else
+                fgcolor = new GColor(fgcolorStr);
+            AttrSet* set = textnode->getAttrSet ();
+            set->setFgColor ( fgcolor );
+        }
+        
 
         traverseNode ( tagText, textnode );
     }

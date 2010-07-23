@@ -203,19 +203,19 @@ void TextNode::fontnode( FontNode* p )
     _fontnode = p; 
 }
 
-void TextNode::useLayerColor ()
-{
-    ParentFinder<LayerNode> finder ( this );
-    if ( finder.target() )
-        _color.useLayerFgColor(finder.target()); 
-}
-void TextNode::setTextColor ( GColor color )
-{
-    _color.setFgColor(color);
-}
-
-GColor TextNode::getTextColor ()
-{ 
-    return _color.getFgColor(); 
-}
-
+//void TextNode::useLayerColor ()
+//{
+//    ParentFinder<LayerNode> finder ( this );
+//    if ( finder.target() )
+//        _color.useLayerFgColor(finder.target()); 
+//}
+//void TextNode::setTextColor ( GColor color )
+//{
+//    _color.setFgColor(color);
+//}
+//
+//GColor TextNode::getTextColor ()
+//{ 
+//    return _color.getFgColor(); 
+//}
+//

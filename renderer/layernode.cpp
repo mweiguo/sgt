@@ -1,11 +1,11 @@
 #include "layernode.h"
 
-LayerNode::LayerNode ( const string& name) : GroupNode(name), _color(0)
+LayerNode::LayerNode ( const string& name) : GroupNode(name), _fgcolor(0), _bgcolor(0)
 {
     LayerMgr::getInst().append ( this );
 }
 
-LayerNode::LayerNode ( const LayerNode& rhs ) : GroupNode ( rhs ), _color(rhs._color)
+LayerNode::LayerNode ( const LayerNode& rhs ) : GroupNode ( rhs ), _fgcolor(rhs._fgcolor), _bgcolor(rhs._bgcolor)
 {
     LayerMgr::getInst().append ( this );
 }

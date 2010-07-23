@@ -15,14 +15,18 @@ public:
     LayerNode ( const LayerNode& rhs );
     virtual ~LayerNode ();
 
-    void setColor ( GColor color ) { _color = color; }
-    GColor getColor () { return _color; }
-    GColor* getColorPtr () { return &_color; }
+    void setFgColor ( GColor color ) { _fgcolor = color; }
+    GColor getFgColor () { return _fgcolor; }
+    GColor* getFgColorPtr () { return &_fgcolor; }
+
+    void setBgColor ( GColor color ) { _bgcolor = color; }
+    GColor getBgColor () { return _bgcolor; }
+    GColor* getBgColorPtr () { return &_bgcolor; }
     //LODNode* lod() { return dynamic_cast<LODNode*>(*begin()); }
     virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 private:
-    GColor _color;
+    GColor _fgcolor, _bgcolor;
 };
 
 class LayerMgr

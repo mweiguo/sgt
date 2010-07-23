@@ -10,7 +10,7 @@
 #include "arrayexpander.h"
 #include "volumepicker.h"
 #include "nodedumper.h"
-#include "colorchanger.h"
+//#include "colorchanger.h"
 #include "colornode.h"
 #include "attrset.h"
 

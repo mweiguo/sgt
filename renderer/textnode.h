@@ -14,7 +14,7 @@
 //
 //using namespace std;
 #include <vec4.h>
-#include "fbcolor.h"
+//#include "fbcolor.h"
 
 class AGEF_EXPORT TextNode : public DrawableNode
 {
@@ -75,9 +75,9 @@ public:
 
     virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
-    void useLayerColor ();
-    void setTextColor ( GColor color );
-    GColor getTextColor ();
+    //void useLayerColor ();
+    //void setTextColor ( GColor color );
+    //GColor getTextColor ();
 
 private:
     string _text;
@@ -86,8 +86,8 @@ private:
     FontNode* _fontnode;
 
     vec3f _dimension;
-private:
-    FgBgColorComponent _color;
+//private:
+//    FgBgColorComponent _color;
 };
 
 //typedef NodeMgr<TextNode>        TextNodeMgr;

@@ -21,6 +21,7 @@ public:
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( TextNode& node );
 private:
     stringstream _xmlContent;
 };
@@ -44,7 +45,7 @@ inline SaveMesh::SaveMesh( const string& filename, SGNode* node )
 inline void SaveMesh::apply ( LayerNode& node )
 {
     _xmlContent << "<layer name='" << node.name() << "' isVisible='" << (node.isVisible() ? 1 : 0) 
-        << "' color='" << node.getColor().toString() <<"'>";
+        << "' fgcolor='" << node.getFgColor().toString() <<"' bgcolor='" << node.getBgColor().toString() << "'>";
     ChildVisitor::apply ( node );
     _xmlContent << "</layer>";
 }
@@ -154,5 +155,13 @@ inline void SaveMesh::apply ( LineNodef& node )
     ChildVisitor::apply ( node );
     _xmlContent << "</line>";
 }
+
+inline void SaveMesh::apply ( TextNode& node )
+{
+    _xmlContent << "<text font='" << node.fontnode()->defName() << "' string='" << node.text() << "' anchor='" << node.anchorValue() << "'>";
+    ChildVisitor::apply ( node );
+    _xmlContent << "</text>";
+}
+
 #endif
 

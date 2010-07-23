@@ -52,14 +52,15 @@ proc flyToDelta { x y z scale } {
     camera_scale $camid $currentScale
     update $vpid
 
-    set threshold 0.01
+    set translateThreshold 0.001
+    set scaleThreshold 0.0000001
     set currentX [expr $currentX + $deltaX]
     set currentY [expr $currentY + $deltaY]
     set currentZ [expr $currentZ + $deltaZ]
     set currentScale [expr $currentScale + $deltaScale]
 #    puts "currentX=$currentX currentY=$currentY currentZ=$currentZ currentScale=$currentScale"
-    set rst [expr abs($currentX-$x)<$threshold && abs($currentY-$y)<$threshold && abs($currentZ-$z)<$threshold && abs($currentScale-$scale)<$threshold ]
-    puts $rst
+    set rst [expr abs($currentX-$x)<$translateThreshold && abs($currentY-$y)<$translateThreshold && abs($currentZ-$z)<$translateThreshold && abs($currentScale-$scale)<$scaleThreshold ]
+#    puts $rst
     if { $rst==1  } {
 	set currentX $x
 	set currentY $y
