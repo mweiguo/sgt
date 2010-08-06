@@ -63,6 +63,7 @@ public:
     }
 
     // virtual functions
+    // this matrix is transform matrix from it's parents
     virtual void updateBBox( const mat4f& mat=mat4f() )
     {
         _bb.init();

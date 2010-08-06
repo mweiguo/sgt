@@ -15,12 +15,14 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
-    virtual void apply ( LineNodef& /*node*/ );
+    virtual void apply ( LineNodef& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
 };
 
 

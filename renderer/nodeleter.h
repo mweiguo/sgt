@@ -14,7 +14,7 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( LineNodef& /*node*/ );
     void operator() ( SGNode* node );
 };

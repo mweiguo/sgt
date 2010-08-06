@@ -328,18 +328,18 @@ int tcl_update ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* c
 
 
 // local mesh load, treat mesh as a single object
-int tcl_mesh_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_scene_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
         if ( objc != 2 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "mesh_load file" );
+            Tcl_WrongNumArgs ( interp, 0, objv, "scene_load file" );
             return TCL_ERROR;
         }
 
         int len;
         const char* file = Tcl_GetStringFromObj ( objv[1], &len );
-        int id = mesh_load ( file );
+        int id = scene_load ( file );
         Tcl_Obj* rstobj = Tcl_NewIntObj(id);
         Tcl_SetObjResult ( interp, rstobj );
         return TCL_OK;
@@ -350,19 +350,19 @@ int tcl_mesh_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj
     }
 }
 
-int tcl_mesh_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_scene_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
         if ( objc != 3 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "mesh_save file meshid" );
+            Tcl_WrongNumArgs ( interp, 0, objv, "scene_save file meshid" );
             return TCL_ERROR;
         }
 
         int len, id;
         const char* file = Tcl_GetStringFromObj ( objv[1], &len );
         Tcl_GetIntFromObj ( interp, objv[2], &id );
-        mesh_save ( file, id );
+        scene_save ( file, id );
         return TCL_OK;
     } catch ( std::exception& e ) {
         //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
@@ -892,16 +892,16 @@ int tcl_unset_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 }
 
 // mesh
-int tcl_mesh_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_scene_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
         if ( objc != 1 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "mesh_create" );
+            Tcl_WrongNumArgs ( interp, 0, objv, "scene_create" );
             return TCL_ERROR;
         }
 
-        int id = mesh_create ();
+        int id = scene_create ();
         Tcl_Obj* rstobj = Tcl_NewIntObj(id);
         Tcl_SetObjResult ( interp, rstobj );
         return TCL_OK;
@@ -1722,8 +1722,8 @@ void register_tclcmds ( Tcl_Interp* interp )
     Tcl_CreateObjCommand ( interp, "viewport_delete",       tcl_viewport_delete         ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "update",                tcl_update                  ,0 ,0 );
 
-    Tcl_CreateObjCommand ( interp, "mesh_load",             tcl_mesh_load               ,0 ,0 );
-    Tcl_CreateObjCommand ( interp, "mesh_save",             tcl_mesh_save               ,0 ,0 );
+    Tcl_CreateObjCommand ( interp, "scene_load",             tcl_scene_load               ,0 ,0 );
+    Tcl_CreateObjCommand ( interp, "scene_save",             tcl_scene_save               ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "mesh_unload",           tcl_mesh_unload             ,0 ,0 );
 
     Tcl_CreateObjCommand ( interp, "dump_node",             tcl_dump_node               ,0 ,0 );
@@ -1750,7 +1750,7 @@ void register_tclcmds ( Tcl_Interp* interp )
     Tcl_CreateObjCommand ( interp, "set_attrset",           tcl_set_attrset             ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "unset_attrset",         tcl_unset_attrset           ,0 ,0 );
 
-    Tcl_CreateObjCommand ( interp, "mesh_create",           tcl_mesh_create             ,0 ,0 );
+    Tcl_CreateObjCommand ( interp, "scene_create",           tcl_scene_create             ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "layer_create",          tcl_layer_create            ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "layer_name",            tcl_layer_name              ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "layer_visible",         tcl_layer_visible           ,0 ,0 );

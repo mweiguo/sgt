@@ -4,7 +4,7 @@
 //#include "drawablenode.h"
 //#include "fontnode.h"
 //#include "layernode.h"
-//#include "meshnode.h"
+//#include "SceneNode.h"
 //#include "kdtreenode.h"
 //#include <string>
 //#include <fontmetric.h>

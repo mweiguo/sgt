@@ -34,10 +34,13 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
+
     T* target () { return _target; }
 
 private:
@@ -108,9 +111,9 @@ void ParentFinder<T>::apply ( KdTreeNode& node )
 }
 
 template < class T >
-void ParentFinder<T>::apply ( MeshNode& node )
+void ParentFinder<T>::apply ( SceneNode& node )
 {
-    if ( false == IsSameType<T, MeshNode>::Result::value ) {
+    if ( false == IsSameType<T, SceneNode>::Result::value ) {
         ParentVisitor::apply ( node );
     } else 
         _target = dynamic_cast<T*>(&node);
@@ -134,11 +137,28 @@ void ParentFinder<T>::apply ( TextNode& node )
         _target = dynamic_cast<T*>(&node);
 }
 
-#include "linenode.h"
 template < class T >
 void ParentFinder<T>::apply ( LineNodef& node )
 {
     if ( false == IsSameType<T, LineNodef>::Result::value ) {
+        ParentVisitor::apply ( node );
+    } else 
+        _target = dynamic_cast<T*>(&node);
+}
+
+template < class T >
+void ParentFinder<T>::apply ( MeshNode3f& node )
+{
+    if ( false == IsSameType<T, MeshNode3f>::Result::value ) {
+        ParentVisitor::apply ( node );
+    } else 
+        _target = dynamic_cast<T*>(&node);
+}
+
+template < class T >
+void ParentFinder<T>::apply ( MeshLineNode& node )
+{
+    if ( false == IsSameType<T, MeshLineNode>::Result::value ) {
         ParentVisitor::apply ( node );
     } else 
         _target = dynamic_cast<T*>(&node);

@@ -19,7 +19,7 @@
 #include <map>
 using namespace std;
 class SGNode;
-class MeshNode;
+class SceneNode;
 class ArrayNode;
 
 namespace xercesc_2_7
@@ -27,16 +27,16 @@ namespace xercesc_2_7
     class DOMElement;
 }
 
-class AGEF_EXPORT LoadMesh 
+class AGEF_EXPORT LoadScene 
 {
 public:
-    LoadMesh ( const char* fileName, bool needExpand=false, bool needSceneManagement=false );
-    MeshNode* root () { return _root; }
+    LoadScene ( const char* fileName, bool needExpand=false, bool needSceneManagement=false );
+    SGNode* root () { return _root; }
 private:
     void traverseNode ( xercesc_2_7::DOMElement* pnode, SGNode* data );
     void getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt );
 private:
-    MeshNode* _root;
+    SGNode* _root;
     vector<ArrayNode*> _arraynodes;  // only save top arraynode
     vector<KdTreeNode*> _kdtreenodes;  // only save top kdtreenode
     map<string,SGNode*> _defines;

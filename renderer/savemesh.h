@@ -17,11 +17,13 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
     virtual void apply ( TextNode& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
 private:
     stringstream _xmlContent;
 };
@@ -128,11 +130,20 @@ inline void SaveMesh::apply ( KdTreeNode& node )
     _xmlContent << "</kdtree>";
 }
 
-inline void SaveMesh::apply ( MeshNode& node )
+inline void SaveMesh::apply ( SceneNode& node )
 {
-    _xmlContent << "<mesh>";
+    stringstream ts, ss;
+    mat4f& tm = node.getMatrix();
+    ts << tm.dx() << ' ' << tm.dy() << ' ' << tm.dz();
+    mat4f& sm = node.getMatrix();
+    ss << sm.sx() << ' ' << sm.sy() << ' ' << sm.sz();
+
+    _xmlContent << "<scene isVisible=\"" << (node.isVisible() ? 1 : 0) << "\" translate=\"" << ts.str() << "\" scale=\"" << ss.str() << "\">";
     ChildVisitor::apply ( node );
-    _xmlContent << "</mesh>";
+    _xmlContent << "</scene>";
+    //_xmlContent << "<mesh>";
+    //ChildVisitor::apply ( node );
+    //_xmlContent << "</mesh>";
 }
 
 inline void SaveMesh::apply ( GroupNode& node )
@@ -162,6 +173,33 @@ inline void SaveMesh::apply ( TextNode& node )
     ChildVisitor::apply ( node );
     _xmlContent << "</text>";
 }
+
+inline void SaveMesh::apply ( MeshNode3f& node )
+{
+    stringstream ss;
+    MeshNode3f::coorditerator pp, end=node.coordend();
+    for ( pp=node.coordbegin(); pp!=end; ++pp )
+        ss << pp->x() << " " << pp->y() << " " << pp->z() << " ";
+    
+    _xmlContent << "<mesh coords='" << ss.str() << "'>";
+    ChildVisitor::apply ( node );
+    _xmlContent << "</mesh>";
+}
+
+inline void SaveMesh::apply ( MeshLineNode& node )
+{
+    stringstream ss;
+    MeshLineNode::pntiterator pp, end=node.pntend();
+    for ( pp=node.pntbegin(); pp!=end; ++pp )
+        ss << *pp << " ";
+
+    _xmlContent << "<meshline type='" << node.type() << "'>";
+    _xmlContent << ss.str();
+    ChildVisitor::apply ( node );
+    _xmlContent << "</meshline>";
+}
+
+
 
 #endif
 

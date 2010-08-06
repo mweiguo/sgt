@@ -236,6 +236,53 @@ void update_bbox ( int id )
         node->updateBBox();
 }
 
+// mesh
+int mesh_create ()
+{
+    return NodeMgr::getInst().addNode<MeshNode3f> ();
+}
+
+void mesh_coords ( int id, float* coords3d, int elementN )
+{
+    MeshNode3f* node = NodeMgr::getInst().getNodePtr<MeshNode3f>( id );
+    if ( node )
+        node->setCoords ( (vec3f*)coords3d, elementN );
+}
+
+void mesh_subcoords ( int id, int* indexes, int elementN, float* coords3d )
+{
+    MeshNode3f* node = NodeMgr::getInst().getNodePtr<MeshNode3f>( id );
+    if ( node )
+        node->setSubCoords ( indexes, elementN, (vec3f*)coords3d );
+}
+
+// mesh line
+int meshline_create ()
+{
+    return NodeMgr::getInst().addNode<MeshLineNode> ();
+}
+
+void meshline_type ( int id, int type )
+{
+    MeshLineNode* node = NodeMgr::getInst().getNodePtr<MeshLineNode>( id );
+    if ( node )
+        node->type ( type );
+}
+
+void meshline_data ( int id, int* data, int elementN )
+{
+    MeshLineNode* node = NodeMgr::getInst().getNodePtr<MeshLineNode>( id );
+    if ( node )
+        node->setData ( data, elementN );
+}
+
+void meshline_subdata ( int id, int* indexes, int elementN, int* data )
+{
+    MeshLineNode* node = NodeMgr::getInst().getNodePtr<MeshLineNode>( id );
+    if ( node )
+        node->setData ( indexes, elementN, data );
+}
+
 int color_create ( unsigned int color )
 {
     return NodeMgr::getInst().addNode<ColorNode> (color);
@@ -361,9 +408,9 @@ int attrset_refcnt ( int nodeid )
 //}
 
 // mesh
-int mesh_create ()
+int scene_create ()
 {
-    return NodeMgr::getInst().addNode<MeshNode> ();
+    return NodeMgr::getInst().addNode<SceneNode> ();
 }
 
 // layer
@@ -700,11 +747,11 @@ void font_style ( int id, int style )
 // root
 //   |-transform
 //        |- mesh
-int mesh_load ( const char* file )
+int scene_load ( const char* file )
 {
     // load mesh
     NodeMgr::getInst();
-    LoadMesh loadmesh ( file, true, true );
+    LoadScene loadmesh ( file, true, true );
     int seed = SeedGenerator::getInst().seed();
     NodeMgr::getInst()[seed] = loadmesh.root();
     //add_child ( 0, seed );
@@ -713,7 +760,7 @@ int mesh_load ( const char* file )
     //return 0;
 }
 
-void mesh_save ( const char* file, int meshid )
+void scene_save ( const char* file, int meshid )
 {
     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(meshid);
     if ( node )
@@ -731,13 +778,13 @@ void unload_node ( int id )
     }
 }
 
-void mesh_translate ( int id, float tx, float ty, float tz )
+void scene_translate ( int id, float tx, float ty, float tz )
 {
     // get transform node
     transform_translate3f ( id, tx, ty, tz );
 }
 
-void mesh_scale ( int id, float scale )
+void scene_scale ( int id, float scale )
 {
     transform_scale ( id, scale, scale, scale );
 }
@@ -799,24 +846,45 @@ void get_bbox ( int id, float* min, float* max )
     }
 }
 
-void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord )
+void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid )
 {
     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
     if ( node ) 
     {
-        vec4f rst = node->camera()->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
-        rst.xyz().xyz ( sceneCoord );
+        CameraOrtho* cameraNode;
+        if ( -1 == camid )
+        {
+            cameraNode = node->camera();
+        }
+        else
+        {
+            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+        }
+
+        if ( cameraNode )
+        {
+            vec4f rst = cameraNode->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
+            rst.xyz().xyz ( sceneCoord );
+        }
     }
 }
 
-void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord )
+void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid )
 {
     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
     if ( node ) 
     {
-        vec4f rst = node->vpmatrix() * node->camera()->mvmatrix() * vec4f ( vec3f(sceneCoord) );
-//        vec4f rst = node->camera()->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
-        rst.xyz().xyz ( viewportCoord );
+        CameraOrtho* cameraNode;
+        if ( -1 == camid )
+            cameraNode = node->camera();
+        else
+            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+
+        if ( cameraNode )
+        {
+            vec4f rst = node->vpmatrix() * cameraNode->mvmatrix() * vec4f ( vec3f(sceneCoord) );
+            rst.xyz().xyz ( viewportCoord );
+        }
     }
 }
 

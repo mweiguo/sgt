@@ -34,8 +34,8 @@
 /*********************************/
 /************** IO ***************/
 /*********************************/
-// mesh_load file
-// mesh_save file meshid
+// scene_load file
+// scene_save file meshid
 // mesh_unload meshid
 
 /*********************************/
@@ -77,7 +77,7 @@
 // set_attrset      id  attrsetid
 // unset_attrset    id
 
-// mesh_create
+// scene_create
 
 // layer_create name
 // layer_name id name
@@ -151,8 +151,8 @@ int tcl_viewport_delete ( ClientData clientData, Tcl_Interp* interp, int objc, T
 int tcl_update ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // local mesh load, treat mesh as a single object
-int tcl_mesh_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
-int tcl_mesh_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
+int tcl_scene_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
+int tcl_scene_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 int tcl_mesh_unload (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // diagnose
@@ -188,7 +188,7 @@ int tcl_set_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 int tcl_unset_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // mesh
-int tcl_mesh_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
+int tcl_scene_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 int tcl_mesh_delete ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // layer

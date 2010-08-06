@@ -1,7 +1,7 @@
 #include "sgl_includes.h"
 #include "nodes.h"
 #include "parentvisitor.h"
-#include "meshnode.h"
+#include "SceneNode.h"
 
 
 void ParentVisitor::apply ( SGNode& node )
@@ -60,7 +60,7 @@ void ParentVisitor::apply ( KdTreeNode& node )
         parent->accept ( *this );
 }
 
-void ParentVisitor::apply ( MeshNode& node )
+void ParentVisitor::apply ( SceneNode& node )
 {
     SGNode* parent = node.getParentNode();
     if ( parent )
@@ -96,6 +96,20 @@ void ParentVisitor::apply ( SwitchNode& node )
 }
 
 void ParentVisitor::apply ( LineNodef& node )
+{
+    SGNode* parent = node.getParentNode();
+    if ( parent )
+        parent->accept ( *this );
+}
+
+void ParentVisitor::apply ( MeshNode3f& node )
+{
+    SGNode* parent = node.getParentNode();
+    if ( parent )
+        parent->accept ( *this );
+}
+
+void ParentVisitor::apply ( MeshLineNode& node )
 {
     SGNode* parent = node.getParentNode();
     if ( parent )

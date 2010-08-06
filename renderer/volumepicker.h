@@ -20,12 +20,16 @@ public:
     virtual void apply ( KdTreeNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( SceneNode& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
     void operator () ( SGNode& node ) { node.accept ( *this ); }
 private:
     BBox _bbox;
     Output _output;
     int _camid;
     mat4f _curmat;
+    vector<MeshNode3f*> _meshnodeStack;
 };
 
 template <class Output>
@@ -34,6 +38,18 @@ void VolumePicker<Output>::apply ( LayerNode& node )
     if ( node.isVisible () )
     {
         ChildVisitor::apply ( node );
+    }
+}
+
+template <class Output>
+void VolumePicker<Output>::apply ( SceneNode& node )
+{
+    if ( node.isVisible () )
+    {
+        const mat4f& m = node.getMatrix(), oldmat = _curmat;
+        _curmat = m * _curmat;
+        ChildVisitor::apply ( node );
+        _curmat = oldmat;
     }
 }
 
@@ -141,38 +157,51 @@ void VolumePicker<Output>::apply ( LineNodef& node )
                 linenode->setPoints ( p1.x(), p1.y(), p2.x(), p2.y() );
                 *_output++ = linenode;
             }
-            ////  b   c
-            ////
-            ////  a   d
-            //vec3f a ( _bbox.min().x(), _bbox.min().y(), 0.f );
-            //vec3f b ( _bbox.min().x(), _bbox.max().y(), 0.f );
-            //vec3f c ( _bbox.max().x(), _bbox.max().y(), 0.f );
-            //vec3f d ( _bbox.max().x(), _bbox.min().y(), 0.f );
+        }
+    }
+    ChildVisitor::apply ( node );
+}
 
-            //vec3f ap1xap2 = (p1-a).cross ( p2-a );
-            //vec3f bp1xbp2 = (p1-b).cross ( p2-b );
-            //vec3f cp1xcp2 = (p1-c).cross ( p2-c );
-            //vec3f dp1xdp2 = (p1-d).cross ( p2-d );
+template <class Output>
+void VolumePicker<Output>::apply ( MeshNode3f& node )
+{
+    if ( node.isVisible () )
+    {
+        const BBox box = node.getBBox();
+        if ( is_intersect ( box, _bbox ) )
+        {
+            vec2f pos = (_curmat * vec4f (0,0,0,1)).xy();
 
-            //if ( (ap1xap2.normal() + bp1xbp2.normal()).mod() != 0 ) {
-            //    if ( (ap1xap2.normal() + cp1xcp2.normal()).mod() != 0 ) {
-            //        if ( (ap1xap2.normal() + dp1xdp2.normal()).mod() != 0 ) {
-            //            ChildVisitor::apply ( node );
-            //            return;
-            //        }
-            //    }
-            //}
+            MeshNode3f* meshnode = new MeshNode3f ( node );
+            MeshNode3f::coorditerator pp, end = meshnode->coordend();
+            int idx = 0;
+            for ( pp=meshnode->coordbegin(); pp!=end; ++pp, idx++ )
+            {
+                vec3f& pnt = node[idx];
+                vec3f newpos ( pos.x()+pnt.x(), pos.y()+pnt.y(), 0.f );
+                node.setCoords ( idx, newpos );
+            }
 
-            ////BBox box;
-            ////box.init ( vec3f(pos.x()+node.x1(), pos.y()+node.y1(), 0) );
-            ////box.expandby ( vec3f(pos.x()+node.x2(), pos.y()+node.y2(), 0 ) );
+            // this stack will be checked in it's children visitation, if stack is not empty, then child node will be picked
+            _meshnodeStack.push_back ( meshnode );
+        }
+    }
+    ChildVisitor::apply ( node );
+}
 
-            ////if ( box.isIntersect ( _bbox ) )
-            ////{
-            ////}
-            //LineNodef* linenode = new LineNodef ( node );
-            //linenode->setPoints ( p1.x(), p1.y(), p2.x(), p2.y() );
-            //*_output++ = linenode;
+template <class Output>
+void VolumePicker<Output>::apply ( MeshLineNode& node )
+{
+    if ( !_meshnodeStack.empty() )
+    {
+        if ( node.isVisible () )
+        {
+            const BBox box = node.getBBox();
+            if ( is_intersect ( box, _bbox ) )
+            {
+                MeshLineNode* meshlinenode = new MeshLineNode ( node );
+                *_output++ = meshlinenode;
+            }
         }
     }
     ChildVisitor::apply ( node );

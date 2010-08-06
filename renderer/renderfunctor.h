@@ -11,6 +11,7 @@
 #include "vec4.h"
 #include "gcolor.h"
 #include "linenode.h"
+#include "nodes.h"
 #include "agef_global.h"
 
 struct AGEF_EXPORT RenderOption
@@ -95,6 +96,7 @@ public:
     virtual void apply ( RectangleNodef& rect );
     virtual void apply ( TextNode& text );
     virtual void apply ( LineNodef& /*node*/ );
+    virtual void apply ( MeshLineNode& node );
     //virtual void apply ( FontNode& font );
 private:
     RenderOption* _opt;
@@ -245,4 +247,53 @@ inline void QtRenderVisitor::apply ( LineNodef& line )
         (*pp)->accept ( *this );
 }
 
+inline void QtRenderVisitor::apply ( MeshLineNode& line )
+{
+    ParentFinder<MeshNode3f> finder ( &line );
+    MeshNode3f mesh = *(finder.target());
+
+    MeshLineNode::pntiterator pp, end=line.pntend();
+    switch ( line.type() )
+    {
+    case MeshLineNode::LINETYPE_LINES:
+        if ( (line.pntsize() % 2) == 0 )
+        {
+            for ( pp=line.pntbegin(); pp!=end; ++pp )
+            {
+                vec3f& p1 = mesh[*pp];
+                vec3f& p2 = mesh[*(++pp)];
+
+                _opt->painter->drawLine ( p1.x(), p1.y(), p2.x(), p2.y() );
+            }
+        }
+        break;
+    case MeshLineNode::LINETYPE_LINE_STRIP:
+        {
+            QVector<QPointF> tmp;
+            for ( pp=line.pntbegin(); pp!=end; ++pp )
+            {
+                vec3f& pnt = mesh[*pp];
+                tmp.push_back ( QPointF(pnt.x(), pnt.y()) );
+            }
+
+            _opt->painter->drawLines ( tmp );
+        }
+        break;
+    case MeshLineNode::LINETYPE_LINE_LOOP:
+        QVector<QPointF> tmp;
+        for ( pp=line.pntbegin(); pp!=end; ++pp )
+        {
+            vec3f& pnt = mesh[*pp];
+            tmp.push_back ( QPointF(pnt.x(), pnt.y()) );
+        }
+        if ( !tmp.empty() )
+            tmp.push_back (tmp[0]);
+
+        _opt->painter->drawLines ( tmp );
+        break;
+    }
+
+    for ( SGNode::iterator pp=line.begin(); pp!=line.end(); ++pp )
+        (*pp)->accept ( *this );
+}
 #endif

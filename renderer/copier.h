@@ -15,7 +15,7 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( LineNodef& node );
@@ -131,9 +131,9 @@ inline void Copier::apply ( KdTreeNode& node )
     _currparent = old;
 }
 
-inline void Copier::apply ( MeshNode& node )
+inline void Copier::apply ( SceneNode& node )
 {
-    MeshNode* p = new MeshNode ( node );
+    SceneNode* p = new SceneNode ( node );
     p->setParentNode ( NULL );
     p->removeAllChild ();
     _currparent->addChild ( p );

@@ -15,6 +15,8 @@
 #include "linenode.h"
 #include "qDebug"
 #include "attrset.h"
+#include "scenenode.h"
+#include "nodes.h"
 
 UnloadNode::UnloadNode ( SGNode* sgnode )
 {
@@ -26,7 +28,7 @@ UnloadNode::UnloadNode ( SGNode* sgnode )
     LayerMgr::getInst().clear();
 }
 
-LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManagement )// : _opt(opt)
+LoadScene::LoadScene ( const char* fileName, bool needExpand, bool needSceneManagement )// : _opt(opt)
 {
     int clo = clock();
     XercesParser parser;
@@ -41,7 +43,8 @@ LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManage
     qDebug ( "parseFile TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
 
     clo = clock();
-    traverseNode ( root, 0 );
+    _root = new SGNode();
+    traverseNode ( root, _root );
     qDebug ( "traverseNode TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
 
     // expand array node
@@ -78,7 +81,7 @@ LoadMesh::LoadMesh ( const char* fileName, bool needExpand, bool needSceneManage
     //qDebug ( "%s", dumper.dumpstring().c_str() );
 }
 
-void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent )
+void LoadScene::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent )
 {
     typedef vector<XERCES_CPP_NAMESPACE::DOMElement*> DOMElements;
     static string bygroupstr = "bygroup";
@@ -249,55 +252,27 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         GColor *fgcolor, *bgcolor;
         ParentFinder<LayerNode> finder( rect );
 
+        bgcolor = finder.target()->getBgColorPtr();
         if ( XercesHelper::hasAttribute ( tagRect, "bgcolor" ) )
         {
             string fillcolor = (const char*)(XercesHelper::getAttribute( tagRect, "bgcolor" ));
-            if ( bygroupstr == fillcolor )
-            {
-                bgcolor = finder.target()->getBgColorPtr();
-            }
-            else
+            if ( bygroupstr != fillcolor )
                 bgcolor = new GColor(fillcolor);
         }
+
+        fgcolor = finder.target()->getFgColorPtr();
         if ( XercesHelper::hasAttribute ( tagRect, "fgcolor" ) )
         {
             string bordercolor = (const char*)(XercesHelper::getAttribute( tagRect, "fgcolor" ));
-            if ( bygroupstr == bordercolor )
-            {
-                fgcolor = finder.target()->getFgColorPtr();
-            }
-            else
+            if ( bygroupstr != bordercolor )
                 fgcolor = new GColor(bordercolor);
         }
-        //if ( XercesHelper::hasAttribute ( tagRect, "fillcolor" ) )
-        //{
-        //    string fillcolor = (const char*)(XercesHelper::getAttribute( tagRect, "fillcolor" ));
-        //    string bygroupstr = "bygroup";
-        //    if ( bygroupstr == fillcolor )
-        //        rect->useLayerFillColor ();
-        //    else
-        //        rect->setFillColor ( GColor(fillcolor) );
-        //}
-        //if ( XercesHelper::hasAttribute ( tagRect, "bordercolor" ) )
-        //{
-        //    string bordercolor = (const char*)(XercesHelper::getAttribute( tagRect, "bordercolor" ));
-        //    string bygroupstr = "bygroup";
-        //    if ( bygroupstr == bordercolor )
-        //        rect->useLayerBorderColor ();
-        //    else
-        //        rect->setBorderColor ( GColor(bordercolor) );
-        //}
 
-        if ( NULL!=fgcolor || NULL!=bgcolor )
-        {
-            int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
-            AttrSet* set = new AttrSet ( renderOrder );
-            if ( fgcolor )
-                set->setFgColor ( fgcolor );
-            if ( bgcolor )
-                set->setBgColor ( bgcolor );
-            rect->setAttrSet ( set );
-        }
+        int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
+        AttrSet* set = new AttrSet ( renderOrder );
+        set->setFgColor ( fgcolor );
+        set->setBgColor ( bgcolor );
+        rect->setAttrSet ( set );
 
         traverseNode ( tagRect, rect );
     }
@@ -338,19 +313,16 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         textnode->text ( (const char*)XercesHelper::getTextContent (tagText) );
         //if ( XercesHelper::hasAttribute ( tagText, "string" ) )
         //    textnode->text ( (const char*)XercesHelper::getAttribute ( tagText, "string" ));
+        ParentFinder<LayerNode> finder( textnode );
+        GColor *fgcolor = finder.target()->getFgColorPtr();
         if ( XercesHelper::hasAttribute ( tagText, "fgcolor" ) )
         {
-            GColor *fgcolor;
-            ParentFinder<LayerNode> finder( textnode );
             string fgcolorStr = (const char*)(XercesHelper::getAttribute( tagText, "fgcolor" ));
-            if ( bygroupstr == fgcolorStr )
-                fgcolor = finder.target()->getFgColorPtr();
-            else
+            if ( bygroupstr != fgcolorStr )
                 fgcolor = new GColor(fgcolorStr);
-            AttrSet* set = textnode->getAttrSet ();
-            set->setFgColor ( fgcolor );
         }
-        
+        AttrSet* set = textnode->getAttrSet ();
+        set->setFgColor ( fgcolor );
 
         traverseNode ( tagText, textnode );
     }
@@ -402,27 +374,99 @@ void LoadMesh::traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* p
         ParentFinder<LayerNode> finder(linenode);
         int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
         AttrSet* pAttrSet = new AttrSet(renderOrder);
-        pAttrSet->setFgColor ( new GColor("#000000FF") );
+        GColor *fgcolor = finder.target()->getFgColorPtr();
+        pAttrSet->setFgColor ( fgcolor );
         linenode->setAttrSet ( pAttrSet );
 
         traverseNode ( tagLine, linenode );
     }
 
+    DOMElements tagScenes = XercesHelper::getChildElementsByTagName ( pnode, "scene" );
+    for ( DOMElements::iterator pp=tagScenes.begin(); pp!=tagScenes.end(); ++pp ) {
+        DOMElement* tagScene  = static_cast<DOMElement*>(*pp);
+        SceneNode* sceneNode = new SceneNode();
+
+        parent->addChild ( sceneNode );
+
+        if ( XercesHelper::hasAttribute ( tagScene, "isVisible" ) ) {
+            string tmp = (char*)XercesHelper::getAttribute ( tagScene, "isVisible" );
+            if ( tmp == "1" ) sceneNode->setVisible ( true );
+            else if ( tmp == "0" ) sceneNode->setVisible ( false );
+        }
+
+        if ( XercesHelper::hasAttribute ( tagScene, "translate" ) )
+            sceneNode->setTranslate ( (char*)XercesHelper::getAttribute ( tagScene, "translate" ) );
+
+        if ( XercesHelper::hasAttribute ( tagScene, "scale" ) )
+            sceneNode->setScale ( (char*)XercesHelper::getAttribute ( tagScene, "scale" ) );
+
+        traverseNode ( tagScene, sceneNode );
+    }
+
     DOMElements tagMeshes = XercesHelper::getChildElementsByTagName ( pnode, "mesh" );
     for ( DOMElements::iterator pp=tagMeshes.begin(); pp!=tagMeshes.end(); ++pp ) {
         DOMElement* tagMesh  = static_cast<DOMElement*>(*pp);
-        MeshNode* meshnode = new MeshNode();
+        MeshNode3f* meshnode = new MeshNode3f();
+        parent->addChild ( meshnode );
 
-        if ( parent == NULL )
-            _root = meshnode;
-        else
-             parent->addChild ( meshnode );
+        if ( XercesHelper::hasAttribute ( tagMesh, "coords" ) )
+        {
+            istringstream iss((char*)XercesHelper::getAttribute ( tagMesh, "coords" ));
+            vector<string> tokens;
+            copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+            vector<vec3f> tmp;
+            for ( int i=0; i<tokens.size(); i+=3 )
+            {
+                tmp.push_back ( 
+                    vec3f(
+                        atof ( tokens[i].c_str() ), 
+                        atof ( tokens[i+1].c_str() ),
+                        atof ( tokens[i+2].c_str() )
+                    )
+                );
+            }
+            meshnode->setCoords ( &(tmp[0]), tmp.size() );
+        }
 
         traverseNode ( tagMesh, meshnode );
     }
+
+    DOMElements tagMeshelines = XercesHelper::getChildElementsByTagName ( pnode, "meshline" );
+    for ( DOMElements::iterator pp=tagMeshelines.begin(); pp!=tagMeshelines.end(); ++pp ) {
+        DOMElement* tagMeshline  = static_cast<DOMElement*>(*pp);
+        MeshLineNode* meshlinenode = new MeshLineNode();
+        parent->addChild ( meshlinenode );
+
+        if ( XercesHelper::hasAttribute ( tagMeshline, "type" ) )
+        {
+            int t = atoi ((char*)XercesHelper::getAttribute ( tagMeshline, "type" ));
+            meshlinenode->type ( t );
+        }
+
+        // set index data
+        istringstream iss((const char*)XercesHelper::getTextContent (tagMeshline));
+        vector<string> tokens;
+        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
+        vector<int> tmp;
+        for ( int i=0; i<tokens.size(); i++ )
+        {
+            tmp.push_back ( atoi ( tokens[i].c_str() ) );
+        }
+        meshlinenode->setData ( &(tmp[0]), tmp.size() );
+
+        // set attrset
+        ParentFinder<LayerNode> finder(meshlinenode);
+        int renderOrder = LayerMgr::getInst().indexof ( finder.target() );
+        AttrSet* set = new AttrSet ( renderOrder );
+        GColor *fgcolor = finder.target()->getFgColorPtr();
+        set->setFgColor ( fgcolor );
+        meshlinenode->setAttrSet ( set );
+
+        traverseNode ( tagMeshline, meshlinenode );
+    }
 }
 
-void LoadMesh::getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt )
+void LoadScene::getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt )
 {
     // init
     s1 = s2 = s3 = s4 = s5 = 0;

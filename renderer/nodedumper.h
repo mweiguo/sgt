@@ -17,13 +17,15 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
     virtual void apply ( AttrSet& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
     void operator() ( SGNode* node )
     {
         _dump.str("");
@@ -157,11 +159,11 @@ inline void NodeDumper::apply ( KdTreeNode& node )
     _ident.erase ( 0, 2 );
 }
 
-inline void NodeDumper::apply ( MeshNode& node )
+inline void NodeDumper::apply ( SceneNode& node )
 {
     stringstream ss;
     _ident.insert ( 0, "  " );
-    _dump << _ident << "MeshNode " <<
+    _dump << _ident << "SceneNode " <<
         "bbox.min=(" << node.getBBox().min().x() << ", " << node.getBBox().min().y() << ", " << node.getBBox().min().z() << 
         ") bbox.max=(" << node.getBBox().max().x() << ", " << node.getBBox().max().y() << ", " << node.getBBox().max().z() << ")" << endl;
 
@@ -252,6 +254,37 @@ inline void NodeDumper::apply ( AttrSet& node )
         _dump << " bordercolor=" << node.getFgColor()->toString(); 
     if ( node.getBgColor() )
         _dump << " fillcolor=" << node.getBgColor()->toString();
+
+    ChildVisitor::apply ( node );
+    _ident.erase ( 0, 2 );
+}
+
+inline void NodeDumper::apply ( MeshNode3f& node )
+{
+    stringstream ss1;
+    MeshNode3f::coorditerator pp, end=node.coordend();
+    for ( pp=node.coordbegin(); pp!=end; ++pp )
+        ss1 << pp->x() << " " << pp->y() << " " << pp->z() << " ";
+
+    stringstream ss;
+    _ident.insert ( 0, "  " );
+    _dump << _ident << "<mesh coords='" << ss1.str() << "'>";
+
+
+    ChildVisitor::apply ( node );
+    _ident.erase ( 0, 2 );
+}
+
+inline void NodeDumper::apply ( MeshLineNode& node )
+{
+    stringstream ss1;
+    MeshLineNode::pntiterator pp, end=node.pntend();
+    for ( pp=node.pntbegin(); pp!=end; ++pp )
+        ss1 << *pp << " ";
+
+    stringstream ss;
+    _ident.insert ( 0, "  " );
+    _dump << _ident << "<meshline type='" << node.type() << "'>" << ss1.str() << "</meshline>";
 
     ChildVisitor::apply ( node );
     _ident.erase ( 0, 2 );

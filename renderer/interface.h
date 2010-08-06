@@ -47,12 +47,12 @@ extern "C"
     /*********************************/
     /************** IO ***************/
     /*********************************/
-    // local mesh load, treat mesh as a single object
-    int AGEF_EXPORT mesh_load ( const char* file );
-    void AGEF_EXPORT mesh_save ( const char* file, int meshid );
+    // local scene load
+    int AGEF_EXPORT scene_load ( const char* file );
+    void AGEF_EXPORT scene_save ( const char* file, int sceneid );
     void AGEF_EXPORT unload_node (int id);
-    void AGEF_EXPORT mesh_translate ( int id, float tx, float ty, float tz );
-    void AGEF_EXPORT mesh_scale ( int id, float scale );
+    void AGEF_EXPORT scene_translate ( int id, float tx, float ty, float tz );
+    void AGEF_EXPORT scene_scale ( int id, float scale );
 
     /*********************************/
     /*********** diagnose ************/
@@ -63,8 +63,8 @@ extern "C"
     /************ QUERY **************/
     /*********************************/
     void AGEF_EXPORT get_bbox ( int id, float* min, float* max );
-    void AGEF_EXPORT get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord );
-    void AGEF_EXPORT get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord );
+    void AGEF_EXPORT get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid=-1/*default value means use camid attached viewport */ );
+    void AGEF_EXPORT get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid=-1/*default value means use camid attached viewport */ );
 
     /*********************************/
     /************* PICK **************/
@@ -78,7 +78,7 @@ extern "C"
     /*********************************/
     /********** build nodes **********/
     /*********************************/
-    // remote mesh load, C/S architecture, client should maintain node structure
+    // remote scene load, C/S architecture, client should maintain node structure
     void AGEF_EXPORT add_child ( int parent, int child );
     void AGEF_EXPORT remove_child ( int preant, int child );
     void AGEF_EXPORT clear_child ( int id );
@@ -87,6 +87,17 @@ extern "C"
     void AGEF_EXPORT set_userdata ( int id, void* data );
     void AGEF_EXPORT get_userdata ( int id, void** data );
     void AGEF_EXPORT update_bbox ( int id );
+
+    // mesh
+    int AGEF_EXPORT mesh_create ();
+    void AGEF_EXPORT mesh_coords ( int id, float* coords3d, int elementN );
+    void AGEF_EXPORT mesh_subcoords ( int id, int* indexes, int elementN, float* coords3d );
+
+    // mesh line
+    int AGEF_EXPORT meshline_create ();
+    void AGEF_EXPORT meshline_type ( int id, int type );
+    void AGEF_EXPORT meshline_data ( int id, int* data, int elementN );
+    void AGEF_EXPORT meshline_subdata ( int id, int* indexes, int elementN, int* data );
 
     // colors
     int AGEF_EXPORT color_create ( unsigned int color );
@@ -110,8 +121,8 @@ extern "C"
     //void AGEF_EXPORT set_bgcolori ( int id, unsigned int color );
     //void AGEF_EXPORT set_bordercolors ( int id, const char* color, bool isByGroup );
     //void AGEF_EXPORT set_fillcolors ( int id, const char* color, bool isByGroup );
-    // mesh
-    int AGEF_EXPORT mesh_create ();
+    // scene
+    int AGEF_EXPORT scene_create ();
     // layer
     int AGEF_EXPORT layer_create ( const char* name="" );
     void AGEF_EXPORT layer_name ( int id, const char* name );

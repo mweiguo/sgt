@@ -61,7 +61,7 @@ void Nodeleter::apply ( KdTreeNode& node )
     delete &node;
 }
 
-void Nodeleter::apply ( MeshNode& node )
+void Nodeleter::apply ( SceneNode& node )
 {
     for ( SGNode::const_iterator pp=node.begin(); pp!=node.end(); ++pp )
         (*pp)->accept ( *this );

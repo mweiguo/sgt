@@ -5,7 +5,7 @@
 #include "sgl_includes.h"
 //#include "pickablegroup.h"
 //#include "kdtreenode.h"
-//#include "meshnode.h"
+//#include "SceneNode.h"
 //#include "fontnode.h"
 //#include "textnode.h"
 //#include "linenode.h"
@@ -23,13 +23,15 @@ public:
     virtual void apply ( LODNode& node );
     virtual void apply ( PickableGroup& node );
     virtual void apply ( KdTreeNode& node );
-    virtual void apply ( MeshNode& node );
+    virtual void apply ( SceneNode& node );
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( GroupNode& node );
     virtual void apply ( SwitchNode& node );
     virtual void apply ( LineNodef& node );
     virtual void apply ( AttrSet& node );
+    virtual void apply ( MeshNode3f& node );
+    virtual void apply ( MeshLineNode& node );
 };
 
 
@@ -81,7 +83,7 @@ inline void ChildVisitor::apply ( KdTreeNode& node )
         (*pp)->accept ( *this );
 }
 
-inline void ChildVisitor::apply ( MeshNode& node )
+inline void ChildVisitor::apply ( SceneNode& node )
 {
     for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
         (*pp)->accept ( *this );
@@ -118,6 +120,18 @@ inline void ChildVisitor::apply ( LineNodef& node )
 }
 
 inline void ChildVisitor::apply ( AttrSet& node )
+{
+    for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
+        (*pp)->accept ( *this );
+}
+
+inline void ChildVisitor::apply ( MeshNode3f& node )
+{
+    for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
+        (*pp)->accept ( *this );
+}
+
+inline void ChildVisitor::apply ( MeshLineNode& node )
 {
     for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
         (*pp)->accept ( *this );

@@ -12,9 +12,12 @@
 #include "cameraortho.h"
 #include "viewport.h"
 #include "pickablegroup.h"
-#include "meshnode.h"
+#include "SceneNode.h"
 #include "fontnode.h"
 #include "textnode.h"
+#include "linenode.h"
 #include "kdtreenode.h"
+#include "meshnode.h"
+#include "meshlinenode.h"
 
 #endif
