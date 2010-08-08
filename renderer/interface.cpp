@@ -188,15 +188,16 @@ void clear_child ( int id )
 
 void node_delete ( int id )
 {
-    NodeMgr::iterator pp = NodeMgr::getInst().find(id);
-    if ( pp != NodeMgr::getInst().end() )
-    {
-        SGNode* node = pp->second;
-        node->removeAllChild ();
-        node->setParentNode ( NULL );
-        delete node;
-        NodeMgr::getInst().erase ( id );
-    }
+    NodeMgr::getInst().deleteNode ( id );
+//     NodeMgr::iterator pp = NodeMgr::getInst().find(id);
+//     if ( pp != NodeMgr::getInst().end() )
+//     {
+//         SGNode* node = pp->second;
+//         node->removeAllChild ();
+//         node->setParentNode ( NULL );
+//         delete node;
+//         NodeMgr::getInst().erase ( id );
+//     }
 }
 
 void node_visible ( int id, bool isVisible )
