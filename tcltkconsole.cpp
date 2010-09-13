@@ -2,7 +2,7 @@
 #include <locale.h>
 #include <stdexcept>
 
-#include "interface.h"
+#include "sgr_interface.h"
 
 void WishPanic( CONST char *format, ...)
 {

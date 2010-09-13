@@ -19,11 +19,12 @@ namespace SGR
         BBox boundingbox ()
         {
             BBox bb;
-            if ( empty() )
+            if ( std::list<T>::empty() )
                 return bb;
 
-            bb.init ( front() );
-            for ( list< T >::iterator pp=begin(); pp!=end(); ++pp )
+            bb.init ( std::list<T>::front() );
+	    typename std::list<T>::iterator pp;
+            for ( pp=std::list<T>::begin(); pp!=std::list<T>::end(); ++pp )
                 bb.expandby ( *pp );
 
             return bb;
