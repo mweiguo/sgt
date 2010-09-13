@@ -2,7 +2,9 @@
 
 #include "sgr_loadscene.h"
 
+#ifndef _USE_XERCES3_
 #include <xml_xerceshelper.h>
+#endif// _USE_XERCES3_
 
 #include <algorithm>
 #include <time.h>
@@ -22,6 +24,63 @@
 namespace SGR
 {
 
+
+#ifdef _USE_XERCES3_
+    class ChWrapper
+    {
+    public:
+        ChWrapper ( const XMLCh* data )
+        {
+            _data = XMLString::transcode ( data );
+        }
+        operator char*() const
+        {
+            return _data;
+        }
+        ~ChWrapper()
+        {
+            XMLString::release ( &_data );
+        }
+    private:
+        char* _data;
+    };
+
+    class XMLChWrapper
+    {
+    public:
+        XMLChWrapper ( const char* data )
+        {
+            _data = XMLString::transcode ( data );
+        }
+        operator XMLCh*() const
+        {
+            return _data;
+        }
+        ~XMLChWrapper ()
+        {
+            XMLString::release ( &_data );
+        }
+    private:
+        XMLCh* _data;       
+    };
+
+    class XercesHelper
+    {
+    public:
+        static bool hasAttribute ( DOMElement* p, const char* attr )
+        {
+            XMLChWrapper xercesCh (attr);
+            return p->hasAttribute ( (XMLCh*)xercesCh );
+        }
+        static string getAttribute ( DOMElement* p, const char* attr )
+        {
+            XMLChWrapper xercesCh (attr);
+            ChWrapper nativeCh ( p->getAttribute ( (XMLCh*)xercesCh ) );
+            return string((char*)nativeCh);
+        }
+    };
+#endif //_USE_XERCES3_
+
     UnloadNode::UnloadNode ( SGNode* sgnode )
     {
         sgnode->setParentNode ( NULL );
@@ -39,8 +98,14 @@ namespace SGR
             _baseId = SeedGenerator::getInst().maxseed ();
 
         int clo = clock();
+#ifndef _USE_XERCES3_
         XercesParser parser;
         ::XERCES_CPP_NAMESPACE::DOMDocument* doc = parser.parseFile ( fileName, false);
+#else   //_USE_XERCES3_
+        XercesDOMParser parser;
+        parser.parse ( fileName );
+        DOMDocument* doc = parser.getDocument();
+#endif  //_USE_XERCES3_
         if(doc == NULL)     
             throw logic_error("Fail to load Shape Template");
 

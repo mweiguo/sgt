@@ -8,6 +8,7 @@
 #include "sgr_mat4.h"
 #include "sgr_vec2.h"
 #include "sgr_vec4.h"
+#include "sgr_linenode.h"
 
 #include <vector>
 #include <string>

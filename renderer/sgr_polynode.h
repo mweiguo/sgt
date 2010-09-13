@@ -14,7 +14,7 @@ public:
     typedef typename Polyline<T>::iterator pointiterator;
     
     PolyNode () {}
-    PolyNode ( const PolyNode<T>& rhs ) : PolylineNode ( rhs ) {} 
+    PolyNode ( const PolyNode<T>& rhs ) : PolylineNode<T> ( rhs ) {} 
     virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 

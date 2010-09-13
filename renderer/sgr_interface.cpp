@@ -15,7 +15,7 @@
 #include "sgr_attrset.h"
 #include "sgr_polylinenode.h"
 #include "sgr_meshpointnode.h"
-#include "sgr_tools.h"
+//#include "sgr_tools.h"
 #include "sgr_nodetransformer.h"
 
 #include <fstream>

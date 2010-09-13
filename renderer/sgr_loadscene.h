@@ -12,6 +12,20 @@
 //#include "sgr_parentfinder.h"
 //#include "sgr_nodeleter.h"
 //#include "sgr_nodedumper.h"
+#ifdef _USE_XERCES3_
+#include <xercesc/parsers/XercesDOMParser.hpp>
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/PlatformUtils.hpp>
+using namespace xercesc;
+#else // _USE_XERCES3_
+namespace xercesc_2_7
+{
+    class DOMElement;
+}
+#endif // _USE_XERCES3_
+
 #include "sgr_kdtreenode.h"
 
 /* #include "sgr_kdtree.h" */
@@ -38,9 +52,9 @@ namespace SGR
         ~LoadScene ();
         SGNode* root () { return _root; }
     private:
-        void traverseNode ( xercesc_2_7::DOMElement* pnode, SGNode* data );
-        void setDrawableNodeAttributes ( xercesc_2_7::DOMElement* tagNode, DrawableNode* node );
-        void setSGNodeAttributes ( xercesc_2_7::DOMElement* tagNode, SGNode* node );
+        void traverseNode ( xercesc::DOMElement* pnode, SGNode* data );
+        void setDrawableNodeAttributes ( xercesc::DOMElement* tagNode, DrawableNode* node );
+        void setSGNodeAttributes ( xercesc::DOMElement* tagNode, SGNode* node );
         void getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt );
     private:
         SGNode* _root;
