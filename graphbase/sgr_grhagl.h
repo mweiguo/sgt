@@ -16,7 +16,7 @@ namespace SGR
     bool SGR_DLL is_contain ( const BBox& lhs, const vec3f& rhs );
 
     bool SGR_DLL is_separate ( const BBox& lhs, const BBox& rhs );
-    bool SGR_DLL is_separate ( const BBox& lhs, const vec3f& rhs );
+    //bool SGR_DLL is_separate ( const BBox& lhs, const vec3f& rhs );
 
     // reference;  http://zh.wikipedia.org/zh-cn/%E5%90%91%E9%87%8F%E7%A7%AF#.E7.9F.A9.E9.98.B5.E5.BD.A2.E5.BC.8F
     template < class T >

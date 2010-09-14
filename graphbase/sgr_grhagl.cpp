@@ -172,14 +172,18 @@ namespace SGR
 
     bool is_separate ( const BBox& lhs, const BBox& rhs )
     {
-        if ( lhs.minvec() > rhs.maxvec() || lhs.maxvec() < rhs.minvec() )
+        if ( lhs.maxvec().x() < rhs.minvec().x() || 
+            lhs.minvec().x() > rhs.maxvec().x() || 
+            lhs.minvec().y() > rhs.maxvec().y() || 
+            lhs.maxvec().y() < rhs.minvec().y())
             return true;
+        
         return false;
     }
 
-    bool is_separate ( const BBox& lhs, const vec3f& rhs )
-    {
-    }
+    //bool is_separate ( const BBox& lhs, const vec3f& rhs )
+    //{
+    //}
 
 #define KDT_RECTANGLE 1
 
