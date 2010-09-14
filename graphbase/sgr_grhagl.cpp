@@ -160,6 +160,27 @@ namespace SGR
         return false;
     }
 
+    bool is_contain ( const BBox& lhs, const vec3f& rhs )
+    {
+        if ( rhs.x() >= lhs.minvec().x() && 
+            rhs.y() >= lhs.minvec().y() &&
+            rhs.x() <= lhs.maxvec().x() &&
+            rhs.y() <= lhs.maxvec().y() )
+            return true;
+        return false; 
+    }
+
+    bool is_separate ( const BBox& lhs, const BBox& rhs )
+    {
+        if ( lhs.minvec() > rhs.maxvec() || lhs.maxvec() < rhs.minvec() )
+            return true;
+        return false;
+    }
+
+    bool is_separate ( const BBox& lhs, const vec3f& rhs )
+    {
+    }
+
 #define KDT_RECTANGLE 1
 
     template <class T>

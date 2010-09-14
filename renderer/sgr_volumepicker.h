@@ -268,15 +268,16 @@ void VolumePicker<Output>::apply ( MeshLineNode& node )
             const BBox box = node.getBBox();
             if ( is_intersect ( box, _bbox ) || is_contain ( _bbox, box ) || is_contain ( box, _bbox ) )
             {
+                MeshNode3f* meshnode = _meshnodeStack.back();
                 // change meshnode's coord
                 for ( MeshLineNode::pntiterator pp=node.pntbegin(); pp!=node.pntend(); ++pp )
                 {
                     vec3f pos = (_curmat * vec4f (0,0,0,1)).xyz();
-                    MeshNode3f* meshnode = _meshnodeStack.back();
                     (*meshnode)[*pp] += pos;
                 }
 
                 MeshLineNode* meshlinenode = new MeshLineNode ( node );
+                meshlinenode->setParentNode ( meshnode );
                 *_output++ = meshlinenode;
 
                 // add to picked list

@@ -132,6 +132,19 @@ namespace SGR
     void NodeTransformer::apply ( MeshLineNode& node )
     {
         transformBBox ( node );
+
+        // change mesh coord
+        ParentFinder<MeshNode3f> finder(&node);
+        if ( finder.target() )
+        {
+            MeshNode3f& meshnode = *(finder.target());
+            for ( MeshLineNode::pntiterator pp=node.pntbegin(); pp!=node.pntend(); ++pp )
+            {
+                vec4f newpos = _mat * vec4f (meshnode[*pp]);
+                meshnode[*pp] = newpos.xyz();
+            }
+        }
+
         ChildVisitor::apply ( node );
     }
     void NodeTransformer::apply ( PolylineNode2Df& node )
@@ -179,6 +192,18 @@ namespace SGR
     void NodeTransformer::apply ( MeshPointNode& node )
     {
         transformBBox ( node );
+
+        // change mesh coord
+        ParentFinder<MeshNode3f> finder(&node);
+        if ( finder.target() )
+        {
+            MeshNode3f& meshnode = *(finder.target());
+            vec4f newpos = _mat * vec4f ( meshnode[node.coordIdx()] );
+            meshnode[node.coordIdx()] = newpos.xyz();
+
+        }
+
+
         ChildVisitor::apply ( node );
     }
     void NodeTransformer::transformBBox ( SGNode& node )

@@ -11,6 +11,9 @@ LayerNode::LayerNode ( const string& name) : GroupNode(name), _fgcolor(0x0ffffff
 {
     LayerMgr::getInst().append ( this );
     _fontnode = new FontNode ();
+    if ( _attrset )
+        _attrset->setFont ( _fontnode );
+
 }
 
 LayerNode::LayerNode ( const LayerNode& rhs ) : GroupNode ( rhs ), _fgcolor(rhs._fgcolor), _bgcolor(rhs._bgcolor), 
@@ -19,6 +22,19 @@ LayerNode::LayerNode ( const LayerNode& rhs ) : GroupNode ( rhs ), _fgcolor(rhs.
     LayerMgr::getInst().append ( this );
 }
 
+void LayerNode::setFgColor ( GColor color )
+{
+    _fgcolor = color; 
+    if ( _attrset )
+        _attrset->setFgColor ( &_fgcolor );
+}
+
+void LayerNode::setBgColor ( GColor color )
+{
+    _bgcolor = color; 
+    if ( _attrset )
+        _attrset->setBgColor ( &_bgcolor );
+}
 
 LayerNode::~LayerNode ()
 {
@@ -29,7 +45,12 @@ void LayerNode::setRenderOrder ( int order )
 {
     _renderOrder = order; 
     if ( NULL == _attrset )
+    {
         _attrset = new AttrSet (order);
+        _attrset->setFont ( _fontnode );
+        _attrset->setBgColor ( &_bgcolor );
+        _attrset->setFgColor ( &_fgcolor );
+    } 
     else
         _attrset->setRenderOrder ( order );
 }

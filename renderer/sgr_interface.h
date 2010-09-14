@@ -122,6 +122,8 @@ extern "C"
     // when function return. data store pick ids, returning result is the size of ids
     int SGR_DLL pick ( float x, float y, float z, int camid, int* data );
     int SGR_DLL pick_volume ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
+    int SGR_DLL box_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
+    int SGR_DLL cross_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
 
     /*********************************/
     /********** build nodes **********/

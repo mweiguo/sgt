@@ -23,7 +23,6 @@ public:
         {
             MeshNode3f& meshnode = *finder.target();
             
-
             float delta = _pointSize/2.f;
             vec4f min = vec4f ( meshnode[_idx].xyz() - delta );
             vec4f max = vec4f ( meshnode[_idx].xyz() + delta );

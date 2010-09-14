@@ -51,7 +51,7 @@ public:
         ParentFinder<MeshNode3f> finder(this);
         if ( finder.target() )
         {
-            _bb.init();
+            _bb.setInvalid();
             MeshNode3f* meshnode = finder.target();
             pntiterator pp, e = pntend();
             for ( pp=pntbegin(); pp!=e; ++pp )

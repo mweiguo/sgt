@@ -25,7 +25,7 @@ public:
     const vec3f& maxvec() const { return _max; }
     vec3f& minvec() { return _min; }
     vec3f& maxvec() { return _max; }
-    void init ( const vec3f& v=vec3f() ) { _min = v; _max=v; }
+    void init ( const vec3f& v ) { _min = v; _max=v; }
     // other operations
     vec3f center () const { return ( _min + _max ) / 2.f; }
     void translate ( const vec3f& delta )
@@ -95,6 +95,11 @@ public:
     bool isValidBBox () const
     {
         return (_min <= _max);
+    }
+    void setInvalid ()
+    {
+        _max = vec3f();
+        _min = _max+1;
     }
 private:
     vec3f _min, _max;

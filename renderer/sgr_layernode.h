@@ -17,11 +17,11 @@ public:
     LayerNode ( const LayerNode& rhs );
     virtual ~LayerNode ();
 
-    void setFgColor ( GColor color ) { _fgcolor = color; }
+    void setFgColor ( GColor color );
     GColor getFgColor () { return _fgcolor; }
     GColor* getFgColorPtr () { return &_fgcolor; }
 
-    void setBgColor ( GColor color ) { _bgcolor = color; }
+    void setBgColor ( GColor color );
     GColor getBgColor () { return _bgcolor; }
     GColor* getBgColorPtr () { return &_bgcolor; }
 

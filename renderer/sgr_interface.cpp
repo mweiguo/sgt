@@ -17,6 +17,8 @@
 #include "sgr_meshpointnode.h"
 //#include "sgr_tools.h"
 #include "sgr_nodetransformer.h"
+#include "sgr_boxpicker.h"
+#include "sgr_crosspicker.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -1114,6 +1116,46 @@ int pick_volume ( float x1, float y1, float z1, float x2, float y2, float z2, in
     }
     return picker.pickedNodes().size();
 
+}
+
+int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
+{
+    BBox box;
+    box.init ( vec3f(x1, y1, z1) );
+    box.expandby ( vec3f(x2, y2, z2) );
+
+    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+
+    BoxPicker picker ( box, camid );
+    picker.doAction ( *node );
+
+    int* pData = data;
+    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+    {
+        *pData++ = (*pp)->getID();
+    }
+    return picker.pickedNodes().size();
+}
+
+int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
+{
+    BBox box;
+    box.init ( vec3f(x1, y1, z1) );
+    box.expandby ( vec3f(x2, y2, z2) );
+
+    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+
+    CrossPicker picker ( box, camid );
+    picker.doAction ( *node );
+
+    int* pData = data;
+    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+    {
+        *pData++ = (*pp)->getID();
+    }
+    return picker.pickedNodes().size();
 }
 
 void dump_node ( int id, const char* filename )

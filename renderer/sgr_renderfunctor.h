@@ -110,48 +110,13 @@ private:
 
 inline void QtRenderVisitor::apply ( RectangleNodef& rect )
 {
-    //vec2f lb = (_opt->matrix * vec4f(rect.lb())).xy();
-    //vec2f rt = (_opt->matrix * vec4f(rect.rt())).xy();
-    vec2f lb = vec2f(rect.lb());
-    vec2f rt = vec2f(rect.rt());
-    //GColor color = rect.getBorderColor();  
-    //QPen pen ( QColor(color.r(),color.g(),color.b(),color.a()) );
+    QRectF rc ( rect.lb().x(), rect.lb().y(), rect.w(), rect.h() );
 
-    //color = rect.getFillColor();  
-    //QBrush brush ( QColor(color.r(),color.g(),color.b(),color.a()) );
-
-    //QPen oldpen = _opt->painter->pen();
-    //QBrush oldbrush = _opt->painter->brush();
-
-    //_opt->painter->setPen ( pen );
-    //_opt->painter->setBrush ( brush );
-
-    _opt->painter->drawRect ( lb.x(), lb.y(), rt.x()-lb.x(), rt.y()-lb.y() );
-    //_opt->painter->fillRect ( lb.x(), lb.y(), rt.x()-lb.x(), rt.y()-lb.y(), QColor (color>>24, (color&0x00FF0000)>>16, (color&0x0000FF00)>>8, color&0x000000FF) );
-
-    //_opt->painter->setPen ( oldpen );
-    //_opt->painter->setBrush ( oldbrush );
+    _opt->painter->drawRect ( rc );
 
     for ( SGNode::iterator pp=rect.begin(); pp!=rect.end(); ++pp )
         (*pp)->accept ( *this );
 }
-
-//inline void QtRenderVisitor::apply ( FontNode& node )
-//{
-//    QPen pen ( node.color().c_str() );
-//    QFont font ( node.family().c_str(), node.size(), QFont::Normal, node.italic() );
-//    const QFont oldfont = _opt->painter->font();
-//    const QPen oldpen = _opt->painter->pen();
-//
-//    _opt->painter->setFont ( font );
-//    _opt->painter->setPen(pen);
-//
-//    for ( SGNode::iterator pp=node.begin(); pp!=node.end(); ++pp )
-//        (*pp)->accept ( *this );
-//
-//    _opt->painter->setPen ( oldpen );
-//    _opt->painter->setFont ( oldfont );
-//}
 
 inline void QtRenderVisitor::apply ( TextNode& text )
 {
@@ -166,70 +131,15 @@ inline void QtRenderVisitor::apply ( TextNode& text )
     QMatrix oldm = _opt->painter->matrix();
     QMatrix newm = tm * m * oldm;
     _opt->painter->setWorldMatrix ( newm );
-
-    //FontNode* fontnode = text.fontnode();
-    ////QPen pen ( fontnode->color().c_str() );
-    //QFont font ( fontnode->family().c_str(), fontnode->size(), QFont::Normal, fontnode->italic() );
-    //const QFont oldfont = _opt->painter->font();
-    //const QPen oldpen = _opt->painter->pen();
-    //_opt->painter->setFont ( font );
-    ////_opt->painter->setPen(pen);
-
-    //vec2f lb = (_opt->matrix * vec4f(b.min())).xy();
-    //vec2f rt = (_opt->matrix * vec4f(b.max())).xy();
-    //vec2f lb = vec2f(b.min());
-    //vec2f rt = vec2f(b.max());
     
     QRectF rc( b.minvec().x(), b.minvec().y(), b.dimension().w(), b.dimension().h() );
     //QRectF rc( lb.x(), lb.y(), 200, 100 );
-    _opt->painter->drawRect ( rc.toRect() );
+    _opt->painter->drawRect ( rc );
     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
     _opt->painter->setWorldMatrix ( oldm );
 
     for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp )
         (*pp)->accept ( *this );
-
-    //_opt->painter->setPen ( oldpen );
-    //_opt->painter->setFont ( oldfont );
-
-    /* FontNode* fontnode = text.fontnode(); */
-    /* QPen pen ( fontnode->color().c_str() ); */
-    /* QFont font ( fontnode->family().c_str(), fontnode->size(), QFont::Normal, fontnode->italic() ); */
-    /* const QFont oldfont = _opt->painter->font(); */
-    /* const QPen oldpen = _opt->painter->pen(); */
-
-    /* _opt->painter->setFont ( font ); */
-    /* _opt->painter->setPen(pen); */
-
-    /* //// now get the bounding box */
-    /* //QRectF b ( 0, 0, width, height ); */
-    /* QFontMetricsF m( _opt->painter->font() ); */
-    /* QSizeF sz = m.size ( Qt::TextWordWrap, text.text().c_str() ); */
-    /* QRectF b ( text.anchorPoint().x(), text.anchorPoint().y(), sz.width(), sz.height () ); */
-    /* //////////////////////////////// */
-    /* // end calculate bounding rect ///// */
-    /* //////////////////////////////// */
-
-    /* if ( text.isAnchorHCenter () ) */
-    /*     b.translate ( -b.width()/2, 0 ); */
-    /* else if ( text.isAnchorRight () ) */
-    /*     b.translate ( -b.width(), 0 ); */
-
-    /* if ( text.isAnchorVCenter () ) */
-    /*     b.translate ( 0, b.height() / 2 ); */
-    /* else if ( text.isAnchorTop () ) */
-    /*     b.translate ( 0, b.height() ); */
-
-    /* _opt->painter->drawText ( b, text.alignFlag() | Qt::TextWordWrap | Qt::TextDontClip, text.text().c_str() ); */
-
-    /* // if ( _showBoundingBox ) */
-    /* // 	painter->drawRect ( b ); */
-
-    /* for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp ) */
-    /*     (*pp)->accept ( *this ); */
-
-    /* _opt->painter->setPen ( oldpen ); */
-    /* _opt->painter->setFont ( oldfont ); */
 }
 
 inline void QtRenderVisitor::apply ( LineNodef& line )
@@ -244,7 +154,8 @@ inline void QtRenderVisitor::apply ( LineNodef& line )
 
 inline void QtRenderVisitor::apply ( PointNode& pnt )
 {
-    _opt->painter->drawPoint ( pnt.x(), pnt.y() );
+    QPointF p ( pnt.x(), pnt.y() );
+    _opt->painter->drawPoint ( p );
 
     for ( SGNode::iterator pp=pnt.begin(); pp!=pnt.end(); ++pp )
         (*pp)->accept ( *this );
@@ -293,7 +204,7 @@ inline void QtRenderVisitor::apply ( PolyNode2Df& line )
 inline void QtRenderVisitor::apply ( MeshLineNode& line )
 {
     ParentFinder<MeshNode3f> finder ( &line );
-    MeshNode3f mesh = *(finder.target());
+    MeshNode3f& mesh = *(finder.target());
 
     MeshLineNode::pntiterator pp, end=line.pntend();
     switch ( line.type() )
@@ -305,8 +216,11 @@ inline void QtRenderVisitor::apply ( MeshLineNode& line )
             {
                 vec3f& p1 = mesh[*pp];
                 vec3f& p2 = mesh[*(++pp)];
+                
+                QPointF tp1 ( p1.x(), p1.y() );
+                QPointF tp2 ( p2.x(), p2.y() );
 
-                _opt->painter->drawLine ( p1.x(), p1.y(), p2.x(), p2.y() );
+                _opt->painter->drawLine ( tp1, tp2 );
             }
         }
         break;
@@ -346,9 +260,14 @@ inline void QtRenderVisitor::apply ( MeshPointNode& pnt )
     ParentFinder<MeshNode3f> finder ( &pnt );
     if ( finder.target() )
     {
-        MeshNode3f mesh = *(finder.target());
-        const vec3f& p = mesh[ pnt.coordIdx() ];
-        _opt->painter->drawPoint ( p.x(), p.y() );
+        //MeshNode3f mesh = *(finder.target());
+        //const vec3f& p = mesh[ pnt.coordIdx() ];
+        //QPointF point ( p.x(), p.y() );
+        //_opt->painter->drawPoint ( point );
+        const BBox& box = pnt.getBBox();
+        //float delta = 0.02;
+        QRectF rc ( box.minvec().x(), box.minvec().y(), box.dimension().w(), box.dimension().h() );
+        _opt->painter->drawRect ( rc );
     }
 
     for ( SGNode::iterator pp=pnt.begin(); pp!=pnt.end(); ++pp )

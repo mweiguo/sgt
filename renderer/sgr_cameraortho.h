@@ -47,6 +47,7 @@ private:
     mat4f _mvmatrix, _inversemvmatrix;
     vec3f _translate;
     float _scale;
+    short _precision; // 小数点后保留几位小数，如果是保留2位，则为100
 
     bool _dirty;
 };
@@ -56,7 +57,8 @@ inline CameraOrtho::CameraOrtho (const string& name) : _name(name)
     _mvmatrix.normalize();
     _inversemvmatrix.normalize();
     _translate.xyz ( 0.f, 0.f, 0.f );
-    _scale = 1.f;
+    _precision = 1;
+    _scale = _precision;
     dirty ( true );
 }
 
@@ -76,7 +78,7 @@ inline void CameraOrtho::zoom ( float scale )
     //smat = mat4f::scale_matrix ( scale, scale, scale );
     //_inversemvmatrix = _inversemvmatrix * smat;
 
-    if ( scale != 1.f )
+    if ( scale != _precision )
         dirty ( true );
 }
 

@@ -65,7 +65,7 @@ public:
     void setMatrix ( const mat4f& rhs ) { _mat = rhs; }
     virtual void updateBBox( const mat4f& mat=mat4f() )
     {
-        _bb.init();
+        _bb.setInvalid();
         mat4f m = mat * _mat;
         for ( iterator pp=begin(); pp!=end(); ++pp )
         {
