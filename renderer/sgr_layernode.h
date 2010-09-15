@@ -34,7 +34,7 @@ public:
 
     virtual void addChild ( SGNode* pNode );
     virtual void removeChild ( SGNode* pNode );
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 private:
     GColor _fgcolor, _bgcolor;

@@ -68,7 +68,7 @@ public:
     template < class Input >
     void assigndelimiters ( Input begin, Input end ) { levelDelimiters.assign ( begin, end); }
     //void buildsom ();
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~LODNode () {}
     diterator dbegin() { return levelDelimiters.begin(); }

@@ -53,7 +53,9 @@ private:
 
 void BoxPicker::apply ( LayerNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         ChildVisitor::apply ( node );
     }
@@ -62,7 +64,9 @@ void BoxPicker::apply ( LayerNode& node )
 
 void BoxPicker::apply ( SceneNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         const mat4f& m = node.getMatrix(), oldmat = _curmat;
         _curmat = m * _curmat;
@@ -85,7 +89,9 @@ void BoxPicker::apply ( RectangleNodef& node )
 
 void BoxPicker::apply ( TransformNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         const mat4f& m = node.getMatrix(), oldmat = _curmat;
         _curmat = m * _curmat;
@@ -97,7 +103,9 @@ void BoxPicker::apply ( TransformNode& node )
 
 void BoxPicker::apply ( LODNode& node )
 {
-    if ( node.isVisible() && is_contain (_bbox, node.getBBox())  )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho>(_camid);
         if ( cam )
@@ -114,7 +122,9 @@ void BoxPicker::apply ( LODNode& node )
 
 void BoxPicker::apply ( PickableGroup& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         // add to picked list
         _pickedNodes.push_back ( &node );
@@ -126,7 +136,9 @@ void BoxPicker::apply ( PickableGroup& node )
 
 void BoxPicker::apply ( KdTreeNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         //node.intersect ( _bbox, _output );
     }
@@ -147,7 +159,9 @@ void BoxPicker::apply ( TextNode& node )
 
 void BoxPicker::apply ( GroupNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         ChildVisitor::apply ( node );
     }
@@ -156,7 +170,9 @@ void BoxPicker::apply ( GroupNode& node )
 
 void BoxPicker::apply ( SwitchNode& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         if ( node.selection() >= 0 && node.selection() < node.size() )
         {
@@ -191,7 +207,9 @@ void BoxPicker::apply ( LineNodef& node )
 
 void BoxPicker::apply ( MeshNode3f& node )
 {
-    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    if ( !node.isVisible () || is_separate (_bbox, node.getBBox()) )
+        return;
+
     {
         // this stack will be checked in it's children visitation, if stack is not empty, then child node will be picked
         _meshnodeStack.push_back ( &node );

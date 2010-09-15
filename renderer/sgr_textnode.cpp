@@ -62,12 +62,16 @@ void TextNode::updateBBox( const mat4f& mat )
         (*pp)->updateBBox();
         _bb = _bb.unionbox ( (*pp)->getBBox() );
     }
+    setBBoxDirty ( false );
 }
 
 void TextNode::text ( const string& content )
 {
     _text = content; 
     _dimension = FontMetric::getInst().getBBox ( *_fontnode, _text ).dimension();
+    setBBoxDirty ( true );
+    setParentBBoxDirty ( true );
+
 }
 
 const string& TextNode::text ()

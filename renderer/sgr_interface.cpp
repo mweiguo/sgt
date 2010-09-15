@@ -424,6 +424,13 @@ void meshpoint_coordidx ( int id, int coordidx )
         node->coordIdx ( coordidx );
 }
 
+void meshpoint_size ( int id, float sz )
+{
+    MeshPointNode* node = NodeMgr::getInst().getNodePtr<MeshPointNode>( id );
+    if ( node )
+        node->pointSize ( sz );
+}
+
 int get_meshpoint_coordindex ( int id )
 {
     MeshPointNode* node = NodeMgr::getInst().getNodePtr<MeshPointNode>( id );

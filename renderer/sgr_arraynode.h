@@ -40,7 +40,7 @@ public:
     float getVOffset ( int i ) const;
     float getHOffset ( int i ) const;
     void getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt ) const;
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~ArrayNode () {}
 private:

@@ -10,7 +10,7 @@ class SGR_DLL PickableGroup : public GroupNode
 public:
     PickableGroup( const string& name="" );
     PickableGroup( const PickableGroup& rhs );
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~PickableGroup () {}
 };

@@ -263,8 +263,8 @@ void CrossPicker::apply ( MeshLineNode& node )
 {
     if ( !_meshnodeStack.empty() )
     {
-        // add to picked list
-        _pickedNodes.push_back ( &node );
+        //// add to picked list
+        //_pickedNodes.push_back ( &node );
 
         // get meshnode
         ParentFinder<MeshNode3f> finder (&node);

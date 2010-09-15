@@ -19,7 +19,7 @@ public:
     DrawableNode( const DrawableNode& rhs );
     virtual ~DrawableNode();
 
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
     //void setColor ( unsigned int color );

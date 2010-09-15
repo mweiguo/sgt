@@ -37,7 +37,7 @@ public:
     const mat4f& inversematrix () const { return _inversemvmatrix; }
     // return value in object-coord
     vec3f position () { return ( _inversemvmatrix * vec4f(0,0,0,0)).xyz(); };
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~CameraOrtho () {}
 protected:

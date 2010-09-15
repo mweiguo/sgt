@@ -31,15 +31,32 @@ public:
             (*pp)->updateBBox();
             _bb = _bb.unionbox ( (*pp)->getBBox() );
         }
+
+        setBBoxDirty ( false );
     }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
     // points interface
-    void addPoint ( const T& t ) { _polyline.push_back ( t ); }
-    void removePoint ( const T& t ) { _polyline.remove ( t ); }
+    void addPoint ( const T& t )
+    {
+        _polyline.push_back ( t ); 
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+    }
+    void removePoint ( const T& t )
+    {
+        _polyline.remove ( t ); 
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+    }
     template <class InputIterator>
-    void assignpoints ( InputIterator first, InputIterator last ) { _polyline.assign ( first, last); }
+    void assignpoints ( InputIterator first, InputIterator last )
+    {
+        _polyline.assign ( first, last); 
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+    }
 
     pointiterator pointbegin() { return _polyline.begin(); }
     pointiterator pointend() { return _polyline.end(); }

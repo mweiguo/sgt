@@ -13,19 +13,19 @@ namespace SGR
 {
 
 template < class T >
-class SGR_DLL RectangleNode : public DrawableNode, public Rectangle<T>
+class SGR_DLL RectangleNode : public DrawableNode//, public Rectangle<T>
 {
 public:
     RectangleNode ( T x=0, T y=0, T w=0, T h=0 )
     {
-        setRect(x,y,w,h); 
+        _rect.setRect(x,y,w,h); 
     }
 
-    RectangleNode ( const RectangleNode& rhs ) : DrawableNode ( rhs ), Rectangle<T>(rhs) {} 
+    RectangleNode ( const RectangleNode& rhs ) : DrawableNode ( rhs ), _rect(rhs._rect) {} 
 
     virtual void updateBBox( const mat4f& mat=mat4f() )
     {
-        _bb = Rectangle<T>::boundingbox();
+        _bb = _rect.boundingbox();
         
         vec4f min = mat * vec4f ( _bb.minvec() );
         vec4f max = mat * vec4f ( _bb.maxvec() );
@@ -36,46 +36,50 @@ public:
             (*pp)->updateBBox();
             _bb = _bb.unionbox ( (*pp)->getBBox() );
         }
+
+        setBBoxDirty ( false );
     }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
-//    void setUseLayerFgColor ( bool b ) { _color.setUseLayerFgColor(b); };
-//    void setUseLayerBgColor ( bool b ) { _color.setUseLayerBgColor(b); }
-//    bool isUseLayerFgColor () const { return _color.isUseLayerFgColor(); }
-//    bool isUseLayerBgColor () const { return _color.isUseLayerBgColor(); }
-//
-//    void useLayerFillColor ()
-//    {
-//        ParentFinder<LayerNode> finder ( this );
-//        if ( finder.target() )
-//            _color.useLayerBgColor ( finder.target() );
-//    }
-//    void setFillColor ( GColor color ) {_color.setBgColor(color); }
-//    GColor getFillColor () const { return _color.getBgColor(); }
-//    void useLayerBorderColor ()
-//    {
-//        ParentFinder<LayerNode> finder ( this );
-//        if ( finder.target() )
-//            _color.useLayerFgColor(finder.target()); 
-//    }
-//    void setBorderColor ( GColor color )
-//    {
-//        _color.setFgColor(color);
-//    }
-//    GColor getBorderColor () { return _color.getFgColor(); }
-////////////////////
-//    void setFgColor (GColor color);
-//    void setBgColor (GColor color);
-//    GColor getFgColor ();
-//    GColor getBgColor ();
-////////////////////
+    inline T x() const { return _rect.x(); }
+    inline T y() const { return _rect.y(); }
+    inline T w() const { return _rect.w(); }
+    inline T h() const { return _rect.h(); }
+    inline void w( T v )
+    {
+        _rect.w ( v );
+        setBBoxDirty ( true ); 
+        setParentBBoxDirty ( true );
+    }
+    inline void h( T v ) 
+    {
+        _rect.h ( v );
+        setBBoxDirty ( true ); 
+        setParentBBoxDirty ( true );
+    }
 
+    void setRect ( T x, T y, T w, T h )
+    {
+        _rect.setRect ( x, y, w, h );
+        setBBoxDirty ( true ); 
+        setParentBBoxDirty ( true );
+    }
 
+    inline vec2<T> lb() const { return _rect.lb(); }
+    inline vec2<T> rt() const { return _rect.rt(); }
+
+    inline void dimention( T w, T h )
+    {
+        _rect.dimention(w, h);
+        setBBoxDirty ( true ); 
+        setParentBBoxDirty ( true );
+    }
+    inline vec2<T> dimention() const { return _rect.dimention(); }
 
     ~RectangleNode () {}
-//private:
-//    FgBgColorComponent _color;
+private:
+    Rectangle<T> _rect;
 };
 
 typedef RectangleNode<double>  RectangleNoded;

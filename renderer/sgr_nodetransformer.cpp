@@ -183,7 +183,7 @@ namespace SGR
 
         if ( _transformNodeStack.empty() )
         {
-            vec4f newpos = _mat * vec4f ( node );
+            vec4f newpos = _mat * vec4f ( node.xyz() );
             node.xyz ( newpos.x(), newpos.y(), newpos.z() );
         }
 
@@ -193,16 +193,8 @@ namespace SGR
     {
         transformBBox ( node );
 
-        // change mesh coord
-        ParentFinder<MeshNode3f> finder(&node);
-        if ( finder.target() )
-        {
-            MeshNode3f& meshnode = *(finder.target());
-            vec4f newpos = _mat * vec4f ( meshnode[node.coordIdx()] );
-            meshnode[node.coordIdx()] = newpos.xyz();
-
-        }
-
+        vec3f coord = node.getCoord();
+        node.setCoord ( (_mat * vec4f ( coord )).xyz() );
 
         ChildVisitor::apply ( node );
     }

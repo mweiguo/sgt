@@ -45,7 +45,7 @@ public:
     void name ( const string& nm ) { _name = nm; }
     const string& name () const { return _name; }
     string name () { return _name; }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~Viewport () {}
 private:

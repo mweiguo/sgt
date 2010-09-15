@@ -14,7 +14,7 @@ public:
     {
 	_groupname = rhs._groupname;
     }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~GroupNode () {}
     void name ( const string& name ) { _groupname=name; }

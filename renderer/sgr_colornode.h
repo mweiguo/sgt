@@ -12,7 +12,7 @@ public:
     ColorNode ( const string& color ) : GColor (color) {}
     ColorNode ( const ColorNode& rhs ) : GColor ( rhs ) {} 
 
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~ColorNode () {}
 };

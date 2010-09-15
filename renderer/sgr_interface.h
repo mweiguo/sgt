@@ -157,6 +157,7 @@ extern "C"
     // mesh point
     void SGR_DLL meshpoint_create ( int id, int coordidx );
     void SGR_DLL meshpoint_coordidx ( int id, int coordidx );
+    void SGR_DLL meshpoint_size ( int id, float sz );
     int SGR_DLL get_meshpoint_coordindex ( int id );
 
     // colors

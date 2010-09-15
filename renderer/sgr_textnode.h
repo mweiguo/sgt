@@ -75,7 +75,7 @@ public:
     FontNode* fontnode();
     void fontnode( FontNode* p );
 
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     //void useLayerColor ();
     //void setTextColor ( GColor color );

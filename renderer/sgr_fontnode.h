@@ -54,7 +54,7 @@ public:
     void defName (const string& defName) { _defName = defName; }
     const string& defName () const { return _defName; }
 
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     //// set color
     //void color ( const string& color );

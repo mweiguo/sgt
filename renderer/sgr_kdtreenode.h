@@ -42,7 +42,7 @@ public:
         collector ( *this );
         BuildSpatialObjectMgr build ( _kdtree, GetBBox<DrawableNode*>() );
     }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~KdTreeNodeT () {}
 private:

@@ -373,7 +373,8 @@ void VolumePicker<Output>::apply ( MeshPointNode& node )
         const BBox box = node.getBBox();
         if ( is_intersect ( box, _bbox ) || is_contain ( _bbox, box ) || is_contain ( box, _bbox ) )
         {
-            // change meshnode's coord
+
+            // change meshnode's coord, do not need update bbox's dirty flag, because this meshpoint will be deleted after render
             vec3f pos = (_curmat * vec4f (0,0,0,1)).xyz();
             MeshNode3f* meshnode = _meshnodeStack.back();
             (*meshnode)[node.coordIdx()] += pos;

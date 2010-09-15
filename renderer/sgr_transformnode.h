@@ -38,8 +38,20 @@ public:
             iss >> floattokens[i];
         }
         setTranslate ( floattokens[0], floattokens[1], floattokens[2]);
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ( true );
     }
-    void setTranslate ( float dx, float dy, float dz ) { _mat.dx ( dx ); _mat.dy(dy); _mat.dz(dz); }
+    void setTranslate ( float dx, float dy, float dz ) 
+    {
+        _mat.dx ( dx );
+        _mat.dy ( dy );
+        _mat.dz ( dz ); 
+
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ( true );
+    }
     void setScale ( const string& str ) 
     {
         float floattokens[3];
@@ -58,11 +70,34 @@ public:
             //             floattokens[i] = atof(pp->c_str() );
         }
         setScale ( floattokens[0], floattokens[1], floattokens[2]);
+
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ( true );
     }
-    void setScale ( float sx, float sy, float sz ) { _mat.sx(sx); _mat.sy(sy); _mat.sz(sz); }
+    void setScale ( float sx, float sy, float sz )
+    {
+        _mat.sx(sx);
+        _mat.sy(sy);
+        _mat.sz(sz); 
+
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ( true );
+    }
     mat4f& getMatrix () { return _mat; }
     const mat4f& getMatrix () const { return _mat; }
-    void setMatrix ( const mat4f& rhs ) { _mat = rhs; }
+    void setMatrix ( const mat4f& rhs )
+    {
+        if ( _mat == rhs )
+            return;
+
+        _mat = rhs; 
+        setBBoxDirty ( true );
+        setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ( true );
+
+    }
     virtual void updateBBox( const mat4f& mat=mat4f() )
     {
         _bb.setInvalid();
@@ -72,8 +107,10 @@ public:
             (*pp)->updateBBox(m);
             _bb = _bb.unionbox ( (*pp)->getBBox() );
         }
+    
+        setBBoxDirty ( false );
     }
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~TransformNode () {}
 private:

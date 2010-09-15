@@ -12,7 +12,7 @@ class SGR_DLL SwitchNode : public virtual SGNode
 public:
     SwitchNode () :_selection(-1) {}
     SwitchNode ( const SwitchNode& rhs ) : _selection(rhs._selection) {}
-    virtual void accept ( NodeVisitor& pvisitor ) const { pvisitor.apply ( *this ); }
+    
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~SwitchNode () {}
     void selection ( int idx ) { _selection=idx; }
