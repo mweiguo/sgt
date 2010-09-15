@@ -38,6 +38,23 @@ public:
 
     const mat4& operator*= ( const_reference rhs ) const;
     const mat4& operator= ( const_reference rhs ) const;
+    
+    const bool operator== ( const_reference rhs ) const
+    {
+        if ( this == &rhs )
+            return true;
+
+        for ( int i=0; i<4; i++ )
+        {
+            for ( int j=0; j<4; j++ )
+            {
+                if ( m[i][j] != rhs.m[i][j] )
+                    return false;
+            }
+        }
+
+        return true;
+    }
 
     void dx ( ValueType v ) { m[0][3] = v; }
     void dy ( ValueType v ) { m[1][3] = v; }

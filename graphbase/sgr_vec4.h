@@ -75,7 +75,12 @@ public:
     reference operator = ( const_reference rhs );
     vec4 operator + ( const_reference rhs );
     vec4 operator - ( const_reference rhs ) const;
-    vec4 operator / ( double rhs );
+
+    vec4 operator + ( T rhs ) const;
+    vec4 operator - ( T rhs ) const;
+    vec4 operator * ( T rhs ) const;
+    vec4 operator / ( T rhs ) const;
+
     value_type& operator[] (int idx)       { return _v[idx]; }
     value_type operator[] (int idx) const  { return _v[idx]; }
 public:
@@ -114,10 +119,29 @@ inline typename vec4<T>::self vec4<T>::operator - ( const_reference rhs ) const
 }
 
 template < class T >
-inline typename vec4<T>::self vec4<T>::operator / ( double rhs )
-{ 
+inline vec4<T> vec4<T>::operator + ( T rhs ) const
+{
+    return self ( x()+rhs,  y()+rhs, z()+rhs, w()+rhs ); 
+}
+
+template < class T >
+inline vec4<T> vec4<T>::operator - ( T rhs ) const
+{
+    return self ( x()-rhs,  y()-rhs, z()-rhs, w()-rhs ); 
+}
+
+template < class T >
+inline vec4<T> vec4<T>::operator * ( T rhs ) const
+{
+    return self ( x()*rhs,  y()*rhs, z()*rhs, w()*rhs ); 
+}
+
+template < class T >
+inline vec4<T> vec4<T>::operator / ( T rhs ) const
+{
     return self ( x()/rhs,  y()/rhs, z()/rhs, w()/rhs ); 
 }
+
 
 typedef vec4<float>  vec4f;
 typedef vec4<int>    vec4i;

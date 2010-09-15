@@ -89,7 +89,12 @@ class vec3
     bool operator < ( const_reference rhs ) const;
     bool operator >= ( const_reference rhs ) const;
     bool operator <= ( const_reference rhs ) const;
-    vec3 operator / ( double rhs ) const;
+
+    vec3 operator + ( T rhs ) const;
+    vec3 operator - ( T rhs ) const;
+    vec3 operator * ( T rhs ) const;
+    vec3 operator / ( T rhs ) const;
+
     T& operator[] (int idx)       { return _v[idx]; }
     T operator[] (int idx) const  { return _v[idx]; }
     vec3 cross ( const_reference rhs ) const;
@@ -200,10 +205,29 @@ inline bool vec3<T>::operator <= ( const vec3<T>& rhs ) const
 }
 
 template < class T >
-inline vec3<T> vec3<T>::operator / ( double rhs ) const
-{ 
+inline vec3<T> vec3<T>::operator + ( T rhs ) const
+{
+    return vec3<T> ( (T)(x() + rhs),  (T)(y() + rhs), (T)(z() + rhs) ); 
+}
+
+template < class T >
+inline vec3<T> vec3<T>::operator - ( T rhs ) const
+{
+    return vec3<T> ( (T)(x() - rhs),  (T)(y() - rhs), (T)(z() - rhs) ); 
+}
+
+template < class T >
+inline vec3<T> vec3<T>::operator * ( T rhs ) const
+{
+    return vec3<T> ( (T)(x() * rhs),  (T)(y() * rhs), (T)(z() * rhs) ); 
+}
+
+template < class T >
+inline vec3<T> vec3<T>::operator / ( T rhs ) const
+{
     return vec3<T> ( (T)(x() / rhs),  (T)(y() / rhs), (T)(z() / rhs) ); 
 }
+
 
 template < class T >
 inline vec3<T> vec3<T>::cross ( const vec3<T>& rhs ) const
