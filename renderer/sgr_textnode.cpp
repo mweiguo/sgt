@@ -14,12 +14,12 @@ namespace SGR
 
 TextNode::TextNode ()
 {
-    _fontnode = &FontNode::defaultNode(); 
+    //_fontnode = &FontNode::defaultNode(); 
 }
 
 TextNode::TextNode ( const string& content ) : _text(content) 
 { 
-    _fontnode = &FontNode::defaultNode(); 
+    //_fontnode = &FontNode::defaultNode(); 
 }
 
 TextNode::TextNode ( const TextNode& rhs ) : DrawableNode ( rhs )
@@ -27,7 +27,7 @@ TextNode::TextNode ( const TextNode& rhs ) : DrawableNode ( rhs )
     _text         = rhs._text;
     _anchor       = rhs._anchor;
     _alignFlag    = rhs._alignFlag;
-    _fontnode     = rhs._fontnode;
+    //_fontnode     = rhs._fontnode;
 }
 
 TextNode::~TextNode ()
@@ -36,9 +36,10 @@ TextNode::~TextNode ()
 
 void TextNode::updateBBox( const mat4f& mat )
 {
-    if ( NULL == _fontnode )
+    if ( NULL==getAttrSet() || NULL==getAttrSet()->getFont() )
         return;
 
+    _dimension = FontMetric::getInst().getBBox ( *getAttrSet()->getFont(), _text ).dimension();
     _bb.init ( vec3f(0.f, 0.f, 0.f) );
     _bb.expandby ( _dimension );
 
@@ -68,7 +69,7 @@ void TextNode::updateBBox( const mat4f& mat )
 void TextNode::text ( const string& content )
 {
     _text = content; 
-    _dimension = FontMetric::getInst().getBBox ( *_fontnode, _text ).dimension();
+    //_dimension = FontMetric::getInst().getBBox ( *_fontnode, _text ).dimension();
     setBBoxDirty ( true );
     setParentBBoxDirty ( true );
 
@@ -200,15 +201,15 @@ short TextNode::alignFlag ()
 
 // bounding box display control
 //void showBoundingBox ( bool isShow );
-FontNode* TextNode::fontnode()
-{
-    return _fontnode; 
-}
+//FontNode* TextNode::fontnode()
+//{
+//    return _fontnode; 
+//}
 
-void TextNode::fontnode( FontNode* p ) 
-{ 
-    _fontnode = p; 
-}
+//void TextNode::fontnode( FontNode* p ) 
+//{ 
+//    _fontnode = p; 
+//}
 
 //void TextNode::useLayerColor ()
 //{

@@ -175,7 +175,7 @@ inline void SaveMesh::apply ( SceneNode& node )
 
 inline void SaveMesh::apply ( FontNode& node )
 {
-    _xmlContent << "<font id=\"" << node.getID() << "\" family=\"" << node.family() << "\" size=\"" << node.size() << "\" style=\"" << "normal" << "\" def=\"" << node.defName() << "\" bbox =\"" << 
+    _xmlContent << "<font id=\"" << node.getID() << "\" family=\"" << node.family() << "\" size=\"" << node.pointSize() << "\" style=\"" << "normal" << "\" def=\"" << node.defName() << "\" bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     ChildVisitor::apply ( node );
@@ -211,7 +211,7 @@ inline void SaveMesh::apply ( LineNodef& node )
 
 inline void SaveMesh::apply ( TextNode& node )
 {
-    _xmlContent << "<text id=\"" << node.getID() << "\" font='" << node.fontnode()->defName() << "' anchor='" << node.anchorValue() << "' bbox =\"" << 
+    _xmlContent << "<text id=\"" << node.getID() << "\" font='" << node.getAttrSet()->getFont()->defName() << "' anchor='" << node.anchorValue() << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     _xmlContent << node.text();

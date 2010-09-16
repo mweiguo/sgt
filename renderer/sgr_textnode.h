@@ -72,8 +72,8 @@ public:
 
     // bounding box display control
     //void showBoundingBox ( bool isShow );
-    FontNode* fontnode();
-    void fontnode( FontNode* p );
+    //FontNode* fontnode();
+    //void fontnode( FontNode* p );
 
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
@@ -85,7 +85,7 @@ private:
     string _text;
     short _anchor;
     short _alignFlag;
-    FontNode* _fontnode;
+    //FontNode* _fontnode;
 
     vec3f _dimension;
 //private:

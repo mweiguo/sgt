@@ -41,6 +41,8 @@ namespace SGR
     void OnRemoveNodeFromLayer::apply ( TextNode& node )
     {
         updateNodeAttrSet ( node );
+        node.setBBoxDirty ( true );
+        node.setParentBBoxDirty ( true );
     }
 
     void OnRemoveNodeFromLayer::apply ( LineNodef& node )
@@ -112,6 +114,8 @@ namespace SGR
     void OnAddNodeToLayer::apply ( TextNode& node )
     {
         updateNodeAttrSet ( node );
+        node.setBBoxDirty ( true );
+        node.setParentBBoxDirty ( true );
     }
 
     void OnAddNodeToLayer::apply ( LineNodef& node )

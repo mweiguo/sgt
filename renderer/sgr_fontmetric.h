@@ -22,7 +22,7 @@ public:
     }
     BBox getBBox ( const FontNode& fontnode, const string& content )
     {
-        QFont font ( fontnode.family().c_str(), fontnode.size(), QFont::Normal, fontnode.italic() );
+        QFont font ( fontnode.family().c_str(), fontnode.pointSize(), QFont::Normal, fontnode.italic() );
         QFontMetricsF m ( font );
         QRectF rc = m.boundingRect ( QRectF(0,0,100,100), Qt::AlignCenter, content.c_str() );
         //QSizeF sz = m.size ( Qt::TextWordWrap, content.c_str() );

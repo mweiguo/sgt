@@ -107,12 +107,13 @@ extern "C"
     /************ QUERY **************/
     /*********************************/
     void SGR_DLL get_bbox ( int id, float* min, float* max );
-    void SGR_DLL get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid=-1/*default value means use camid attached viewport */ );
-    void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid=-1/*default value means use camid attached viewport */ );
+    void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/*default value means use camid attached viewport */ );
+    void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/*default value means use camid attached viewport */ );
     int SGR_DLL get_nodetype ( int node );
     int SGR_DLL get_nodeparent ( int node );
     void SGR_DLL get_nodechildren ( int node, int* data );
     int SGR_DLL get_nodechildrenN ( int node );
+    int SGR_DLL get_specnodechildren ( int node, int nodetype, int* data );
 
     /*********************************/
     /************* PICK **************/
@@ -144,6 +145,7 @@ extern "C"
     void SGR_DLL mesh_subcoords ( int meshid, int* indexes, int elementN, float* coords3d );
     int SGR_DLL mesh_appendcoords ( int id, float* coords3d, int elementN );
     int SGR_DLL mesh_appendcoord ( int id, float x, float y, float z );
+    void SGR_DLL get_mesh_coord ( int id, int idx, float& x, float& y, float& z );
 
     // mesh line
     void SGR_DLL meshline_create ( int id );
@@ -188,6 +190,9 @@ extern "C"
     void SGR_DLL layer_create ( int id, const char* name="" );
     void SGR_DLL layer_name ( int id, const char* name );
     void SGR_DLL layer_visible ( int id, bool isVisible );
+    void SGR_DLL layer_fgcolor ( int id, int color );
+    void SGR_DLL layer_bgcolor ( int id, int color );
+    void SGR_DLL layer_font ( int id, const char* family, float size, int style, int weight, const char* name );
     // lod
     void SGR_DLL lod_create ( int id );
     void SGR_DLL lod_delimiters ( int id, const char* delims );
@@ -225,7 +230,7 @@ extern "C"
     // text
     void SGR_DLL text_create ( int id, const char* str= "" );
     void SGR_DLL text_string ( int id, const char* str );
-    void SGR_DLL text_font ( int id, int fontid );
+    //void SGR_DLL text_font ( int id, int fontid );
     //  1     2     3
     //  4     5     6
     //  7     8     9
@@ -235,6 +240,7 @@ extern "C"
     //  7     8     9
     void SGR_DLL text_justify ( int id, int justify );
     // font
+
     void SGR_DLL font_create ( int id );
     void SGR_DLL font_family ( int id, const char* f );
     void SGR_DLL font_size ( int id, float size );
@@ -248,6 +254,7 @@ extern "C"
     void SGR_DLL line_create ( int id );
     void SGR_DLL line_points ( int id, float x1, float y1, float x2, float y2 );
     void SGR_DLL line_point ( int id, float x, float y, bool isFirst );
+    void SGR_DLL get_line_point ( int id, float* xy, bool isFirst );
 
     // polyline
     void SGR_DLL polyline_create ( int id );
@@ -261,5 +268,7 @@ extern "C"
     void SGR_DLL point_create ( int id );
     void SGR_DLL point_coord ( int id, float x, float y );
     void SGR_DLL point_size ( int id, float sz );
+    float SGR_DLL get_point_size ( int id );
+    void SGR_DLL get_point_coord ( int id, float* xyz );
 }
 #endif

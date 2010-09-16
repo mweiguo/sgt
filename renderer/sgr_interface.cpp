@@ -19,6 +19,7 @@
 #include "sgr_nodetransformer.h"
 #include "sgr_boxpicker.h"
 #include "sgr_crosspicker.h"
+#include "sgr_childrenfinder.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -341,6 +342,17 @@ int mesh_appendcoord ( int id, float x, float y, float z )
     return -1;
 }
 
+void get_mesh_coord ( int id, int idx, float& x, float& y, float& z )
+{
+    MeshNode3f* node = NodeMgr::getInst().getNodePtr<MeshNode3f>( id );
+    if ( node )
+    {
+        vec3f pos = (*node)[idx];
+        x = pos.x();
+        y = pos.y();
+        z = pos.z();
+    }
+}
 
 // mesh line
 void meshline_create ( int id )
@@ -624,6 +636,27 @@ void layer_visible ( int id, bool isVisible )
         layer->setVisible ( isVisible );
 }
 
+void layer_fgcolor ( int id, int color )
+{
+    LayerNode* layer = NodeMgr::getInst().getNodePtr<LayerNode> ( id );
+    if ( layer )
+        layer->setFgColor ( GColor(color) );
+}
+
+void layer_bgcolor ( int id, int color )
+{
+    LayerNode* layer = NodeMgr::getInst().getNodePtr<LayerNode> ( id );
+    if ( layer )
+        layer->setBgColor ( GColor(color) );
+}
+
+void layer_font ( int id, const char* family, float size, int style, int weight, const char* name )
+{
+    LayerNode* layer = NodeMgr::getInst().getNodePtr<LayerNode> ( id );
+    if ( layer )
+        layer->setFont (  name, family, size );
+}
+
 // lod
 void lod_create ( int id )
 {
@@ -872,18 +905,18 @@ void text_string ( int id, const char* str )
         node->text ( str );
 }
 
-void text_font ( int id, int fontid )
-{
-    TextNode* node = NodeMgr::getInst().getNodePtr<TextNode> (id);
-    if ( node )
-    {
-        FontNode* fnode = NodeMgr::getInst().getNodePtr<FontNode> (fontid);
-        if ( fnode )
-        {
-            node->fontnode ( fnode );
-        }
-    }
-}
+//void text_font ( int id, int fontid )
+//{
+//    TextNode* node = NodeMgr::getInst().getNodePtr<TextNode> (id);
+//    if ( node )
+//    {
+//        FontNode* fnode = NodeMgr::getInst().getNodePtr<FontNode> (fontid);
+//        if ( fnode )
+//        {
+//            node->fontnode ( fnode );
+//        }
+//    }
+//}
 
 //  1     2     3
 //  4     5     6
@@ -990,7 +1023,7 @@ void font_size ( int id, float sz )
 {
     FontNode* node = NodeMgr::getInst().getNodePtr<FontNode> (id);
     if ( node )
-        node->size ( sz );
+        node->pointSize ( sz );
 }
 
 /*PLAIN = 1, BOLD = 2, ITALIC = 3, BOLDITALIC = 4*/
@@ -1321,6 +1354,74 @@ int get_nodechildrenN ( int nodeid )
     return -1;
 }
 
+template < class T >
+int get_specchildrenid ( SGNode* node, int* data )
+{
+    ChildrenFinder<T> finder(node);
+    for ( list<SGNode*>::iterator pp=finder.results().begin(); pp!=finder.results().end(); ++pp )
+        *(data++) = (*pp)->getID();
+    return finder.results().size();
+}
+
+int get_specnodechildren ( int nodeid, int nodetype, int* data )
+{
+    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>( nodeid );
+    if ( node )
+    {
+        switch ( nodetype )
+        {
+        case NODETYPE_CAMERA:
+            return get_specchildrenid<SGR::CameraOrtho> ( node, data );
+        case NODETYPE_VIEWPORT:
+            return get_specchildrenid<SGR::Viewport> ( node, data );
+        case NODETYPE_MESH:
+            return get_specchildrenid<SGR::MeshNode3f> ( node, data );
+        case NODETYPE_MESHLINE:
+            return get_specchildrenid<SGR::MeshLineNode> ( node, data );
+        case NODETYPE_MESHPOINT:
+            return get_specchildrenid<SGR::MeshPointNode> ( node, data );
+        case NODETYPE_COLOR:
+            return get_specchildrenid<SGR::ColorNode> ( node, data );
+        case NODETYPE_ATTRSET:
+            return get_specchildrenid<SGR::AttrSet> ( node, data );
+        case NODETYPE_SCENE:
+            return get_specchildrenid<SGR::SceneNode> ( node, data );
+        case NODETYPE_LAYER:
+            return get_specchildrenid<SGR::LayerNode> ( node, data );
+        case NODETYPE_LOD:
+            return get_specchildrenid<SGR::LODNode> ( node, data );
+        case NODETYPE_KDTREE:
+            return get_specchildrenid<SGR::KdTreeNode> ( node, data );
+        case NODETYPE_ARRAY:
+            return get_specchildrenid<SGR::ArrayNode> ( node, data );
+        case NODETYPE_RECTANGLE:
+            return get_specchildrenid<SGR::RectangleNodef> ( node, data );
+        case NODETYPE_TRANSFORM:
+            return get_specchildrenid<SGR::TransformNode> ( node, data );
+        case NODETYPE_PICKABLEGROUP:
+            return get_specchildrenid<SGR::PickableGroup> ( node, data );
+        case NODETYPE_SWITCH:
+            return get_specchildrenid<SGR::SwitchNode> ( node, data );
+        case NODETYPE_GROUP:
+            return get_specchildrenid<SGR::GroupNode> ( node, data );
+        case NODETYPE_TEXT:
+            return get_specchildrenid<SGR::TextNode> ( node, data );
+        case NODETYPE_FONT:
+            return get_specchildrenid<SGR::FontNode> ( node, data );
+        case NODETYPE_LINE:
+            return get_specchildrenid<SGR::LineNodef> ( node, data );
+        case NODETYPE_POLYLINE:
+            return get_specchildrenid<SGR::Polyline2Df> ( node, data );
+        case NODETYPE_POLY:
+            return get_specchildrenid<SGR::PolyNode2Df> ( node, data );
+        case NODETYPE_POINT:
+            return get_specchildrenid<SGR::PointNode> ( node, data );
+        default:
+            return 0;
+        }
+    }
+}
+
 void line_create ( int id )
 {
     LineNodef* t = NodeMgr::getInst().addNode<LineNodef> (id);
@@ -1352,6 +1453,25 @@ void line_point ( int id, float x, float y, bool isFirstPoint )
             line->point2 ( x, y );
     }
 }
+
+void get_line_point ( int id, float* xy, bool isFirst )
+{
+    LineNodef* line = NodeMgr::getInst().getNodePtr<LineNodef>(id);
+    if ( line )
+    {
+        if ( isFirst )
+        {
+            xy[0] = line->point1().x ();
+            xy[1] = line->point1().y ();
+        }
+        else
+        {
+            xy[0] = line->point2().x ();
+            xy[1] = line->point2().y ();
+        }
+    }
+}
+
 
 void polyline_create ( int id )
 {
@@ -1421,6 +1541,26 @@ void point_size ( int id, float sz )
     if ( pnt )
     {
         pnt->pointSize ( sz );
+    }
+}
+
+float get_point_size ( int id )
+{
+    PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
+    if ( pnt )
+    {
+        return pnt->pointSize ();
+    }
+}
+
+void SGR_DLL get_point_coord ( int id, float* xyz )
+{
+    PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
+    if ( pnt )
+    {
+        xyz[0] = pnt->x();
+        xyz[1] = pnt->y();
+        xyz[2] = pnt->z();
     }
 }
 

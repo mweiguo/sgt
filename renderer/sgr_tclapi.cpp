@@ -1549,26 +1549,26 @@ int tcl_text_string ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_text_font ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
-{
-    try
-    {
-        if ( objc != 3 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "text_font id fontid" ); 
-            return TCL_ERROR;
-        }
-
-        int id, fontid;
-        Tcl_GetIntFromObj ( interp, objv[1], &id ); 
-        Tcl_GetIntFromObj ( interp, objv[2], &fontid ); 
-        text_font ( id, fontid );
-        return TCL_OK;
-    } catch ( std::exception& e ) {
-        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
-        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
-        return TCL_ERROR;
-    }
-}
+//int tcl_text_font ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+//{
+//    try
+//    {
+//        if ( objc != 3 ) {
+//            Tcl_WrongNumArgs ( interp, 0, objv, "text_font id fontid" ); 
+//            return TCL_ERROR;
+//        }
+//
+//        int id, fontid;
+//        Tcl_GetIntFromObj ( interp, objv[1], &id ); 
+//        Tcl_GetIntFromObj ( interp, objv[2], &fontid ); 
+//        text_font ( id, fontid );
+//        return TCL_OK;
+//    } catch ( std::exception& e ) {
+//        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
+//        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
+//        return TCL_ERROR;
+//    }
+//}
 
 int tcl_text_anchor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
@@ -1591,26 +1591,26 @@ int tcl_text_anchor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_text_justify ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
-{
-    try
-    {
-        if ( objc != 3 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "text_justify id justify" ); 
-            return TCL_ERROR;
-        }
-
-        int id, justify;
-        Tcl_GetIntFromObj ( interp, objv[1], &id ); 
-        Tcl_GetIntFromObj ( interp, objv[2], &justify ); 
-        text_font ( id, justify );
-        return TCL_OK;
-    } catch ( std::exception& e ) {
-        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
-        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
-        return TCL_ERROR;
-    }
-}
+//int tcl_text_justify ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+//{
+//    try
+//    {
+//        if ( objc != 3 ) {
+//            Tcl_WrongNumArgs ( interp, 0, objv, "text_justify id justify" ); 
+//            return TCL_ERROR;
+//        }
+//
+//        int id, justify;
+//        Tcl_GetIntFromObj ( interp, objv[1], &id ); 
+//        Tcl_GetIntFromObj ( interp, objv[2], &justify ); 
+//        text_font ( id, justify );
+//        return TCL_OK;
+//    } catch ( std::exception& e ) {
+//        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
+//        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
+//        return TCL_ERROR;
+//    }
+//}
 
 
 // font
@@ -2009,9 +2009,9 @@ void register_tclcmds ( Tcl_Interp* interp )
     Tcl_CreateObjCommand ( interp, "groupnode_props",       tcl_groupnode_props         ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "text_create",           tcl_text_create             ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "text_string",           tcl_text_string             ,0 ,0 );
-    Tcl_CreateObjCommand ( interp, "text_font",             tcl_text_font               ,0 ,0 );
+    //Tcl_CreateObjCommand ( interp, "text_font",             tcl_text_font               ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "text_anchor",           tcl_text_anchor             ,0 ,0 );
-    Tcl_CreateObjCommand ( interp, "text_justify",          tcl_text_justify            ,0 ,0 );
+    //Tcl_CreateObjCommand ( interp, "text_justify",          tcl_text_justify            ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "font_create",           tcl_font_create             ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "font_family",           tcl_font_family             ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "font_size",             tcl_font_size               ,0 ,0 );

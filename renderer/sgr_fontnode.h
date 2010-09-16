@@ -42,8 +42,8 @@ public:
     void family ( const string& f ) { _family = f; }
     const string& family () const { return _family; }
 
-    void size ( int psize ) { _pointSize = psize; }
-    int size () const { return _pointSize; }
+    void pointSize ( int psize ) { _pointSize = psize; }
+    int pointSize () const { return _pointSize; }
 
     void weight ( int w ) { _weight = w; }
     int weight () { return _weight; }

@@ -294,7 +294,7 @@ void CrossPicker::apply ( PolylineNode2Df& node )
 {
     if ( node.isVisible () )
     {
-        PolylineNode2Df::pointiterator pp=node.pointbegin(), pp1=node.pointend();
+        PolylineNode2Df::pointiterator pp=node.pointbegin(), pp1=node.pointbegin();
         for ( ++pp1; pp1!=node.pointend(); ++pp1 )
         {
             vec2f p1 = (_curmat * vec4f ( *pp )).xy();
@@ -317,7 +317,7 @@ void CrossPicker::apply ( PolyNode2Df& node )
     if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
     {
         bool isPicked = false;
-        PolylineNode2Df::pointiterator pp=node.pointbegin(), pp1=node.pointend();
+        PolylineNode2Df::pointiterator pp=node.pointbegin(), pp1=node.pointbegin();
         for ( ++pp1; pp1!=node.pointend(); ++pp1 )
         {
             vec2f p1 = (_curmat * vec4f ( *pp )).xy();

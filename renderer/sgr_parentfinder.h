@@ -2,24 +2,10 @@
 #define _PARENT_FINDER_H_
 #include "sgr_parentvisitor.h"
 #include "sgr_nodes.h"
+#include "sgr_grhagl.h"
+
 namespace SGR
 {
-
-    struct FalseType { enum { value = false }; };
-    struct TrueType { enum { value = true }; };
-
-    template <typename T1, typename T2>
-    struct IsSameType
-    {
-        typedef FalseType Result;
-    };
-
-    template <typename T>
-    struct IsSameType<T,T>
-    {
-        typedef TrueType Result;
-    };
-
     template < class T >
     class ParentFinder : public ParentVisitor
     {
@@ -178,5 +164,7 @@ namespace SGR
             _target = dynamic_cast<T*>(&node);
         }
     }
+
+
 }
 #endif  // _PARENT_FINDER_H_

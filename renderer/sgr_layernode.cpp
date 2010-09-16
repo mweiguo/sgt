@@ -41,6 +41,13 @@ LayerNode::~LayerNode ()
     LayerMgr::getInst().remove ( this );
 }
 
+void LayerNode::setFont ( const string& name, const string& f, int ps )
+{
+    _fontnode->family ( f );
+    _fontnode->pointSize ( ps );
+    _fontnode->defName ( name );
+}
+
 void LayerNode::setRenderOrder ( int order )
 {
     _renderOrder = order; 

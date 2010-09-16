@@ -1138,7 +1138,7 @@ namespace SGR
         if ( XercesHelper::hasAttribute ( tagElement, "family" ) )
             fontnode->family ( (const char*)XercesHelper::getAttribute ( tagElement, "family" ) );
         if ( XercesHelper::hasAttribute ( tagElement, "size" ) )
-            fontnode->size ( atof((const char*)XercesHelper::getAttribute ( tagElement, "size" )) );
+            fontnode->pointSize ( atof((const char*)XercesHelper::getAttribute ( tagElement, "size" )) );
         if ( XercesHelper::hasAttribute ( tagElement, "style" ) )
         {
             string style = (const char*)XercesHelper::getAttribute ( tagElement, "style" );

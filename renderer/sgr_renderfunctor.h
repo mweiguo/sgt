@@ -61,7 +61,7 @@ public:
         if ( fontnode )
         {
             _isFontValid = true;
-            QFont font ( fontnode->family().c_str(), fontnode->size() );
+            QFont font ( fontnode->family().c_str(), fontnode->pointSize() );
             _oldfont = _opt->painter->font();
             _opt->painter->setFont ( font );
         }
@@ -134,7 +134,7 @@ inline void QtRenderVisitor::apply ( TextNode& text )
     
     QRectF rc( b.minvec().x(), b.minvec().y(), b.dimension().w(), b.dimension().h() );
     //QRectF rc( lb.x(), lb.y(), 200, 100 );
-    _opt->painter->drawRect ( rc );
+    //_opt->painter->drawRect ( rc );
     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
     _opt->painter->setWorldMatrix ( oldm );
 

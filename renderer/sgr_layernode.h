@@ -26,6 +26,7 @@ public:
     GColor* getBgColorPtr () { return &_bgcolor; }
 
     FontNode* getFontNode () { return _fontnode; }
+    void setFont ( const string& name, const string& family="Courier New", int pointSize=12 );
 
     void setRenderOrder ( int order );
     int getRenderOrder () { return _renderOrder; }
