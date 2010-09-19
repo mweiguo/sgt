@@ -113,27 +113,52 @@ void camera_name ( int id, const char* nm )
         cam->name ( nm );
 }
 
-float find_view ( float* min, float* max, float percentOfView, int camid, int vpid )
-{
-    vec3f a ( min ), b(max);
-    BBox bbox ( a, b );
-    //BBox bbox ( vec3f(min), vec3f(max) );
-    vec3f center = bbox.center();
-    float maxDimension = bbox.dimension().max_element();
-    if ( 0 == maxDimension )
-    {
-        stringstream ss;
-        ss << "find_view: min max should be different";
-        throw std::invalid_argument ( ss.str().c_str() );
-    }
-    float scale        = 2 * percentOfView / maxDimension;
-
-    camera_reset ( camid );
-    camera_translate ( camid, center.x(), center.y(), center.z() );
-    camera_scale ( camid, scale );
-//    sgwindow_update ( vpid );
-    return scale;
-}
+//float find_view ( float* min, float* max, float percentOfView, int camid, int vpid )
+//{
+//    vec3f a ( min ), b(max);
+//    BBox bbox ( a, b );
+//    //BBox bbox ( vec3f(min), vec3f(max) );
+//    vec3f center = bbox.center();
+//    float minDimension = bbox.dimension().w() < bbox.dimension().h() ? bbox.dimension().h() : bbox.dimension().w() ;
+//    if ( 0 == minDimension )
+//    {
+//        stringstream ss;
+//        ss << "find_view: min max should be different";
+//        throw std::invalid_argument ( ss.str().c_str() );
+//    }
+//
+//    // calc scale
+//    vec3f demension = bbox.dimension();
+//    Viewport* t = NodeMgr::getInst().getNodePtr<Viewport> (vpid);
+//    if ( NULL != t )
+//    {
+//        float scale;
+//        const vec2i& size = t->viewportSize ();
+//        if ( size.w() > size.h() )
+//        {
+//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+//            scale = scale * size.h() / size.w();
+//        }
+//        else
+//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+//
+//        camera_reset ( camid );
+//        camera_translate ( camid, center.x(), center.y(), center.z() );
+//        camera_scale ( camid, scale );
+//    //    sgwindow_update ( vpid );
+//        return scale;
+//    }
+//    return 1;
+//    
+////    //float scale        = percentOfView / minDimension;
+////    float scale        = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+////
+////    camera_reset ( camid );
+////    camera_translate ( camid, center.x(), center.y(), center.z() );
+////    camera_scale ( camid, scale );
+//////    sgwindow_update ( vpid );
+////    return scale;
+//}
 
 void viewport_create ( int id, const char* nm )
 {
@@ -155,7 +180,7 @@ void viewport_geometry ( int id, int x, int y, int w, int h )
     if ( p )
     {
         p->position ( x, y );
-        p->size ( w, h );
+        p->viewportSize ( w, h );
     }
 }
 

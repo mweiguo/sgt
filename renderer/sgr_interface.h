@@ -67,7 +67,7 @@ extern "C"
     void SGR_DLL camera_scale ( int id, float scale );
     void SGR_DLL camera_reset ( int id );
     void SGR_DLL camera_name ( int id, const char* name );
-    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
+    //float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
 
     /*********************************/
     /****** VIEWPORT MANAGEMENT ******/
@@ -154,7 +154,7 @@ extern "C"
     void SGR_DLL meshline_subdata ( int id, int* indexes, int elementN, int* data );
     void SGR_DLL meshline_appendpoint ( int id, int coordIdx );
     int SGR_DLL meshline_pointsN ( int id );
-    int SGR_DLL get_meshline_coordindexes ( int id, int* coords );
+    int SGR_DLL get_meshline_coordindexes ( int id, int* coordIdxes );
 
     // mesh point
     void SGR_DLL meshpoint_create ( int id, int coordidx );

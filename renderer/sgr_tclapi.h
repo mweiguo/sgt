@@ -148,7 +148,7 @@ int tcl_camera_translate ( ClientData clientData, Tcl_Interp* interp, int objc, 
 int tcl_camera_scale ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 int tcl_camera_reset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 int tcl_camera_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
-int tcl_find_view ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
+//int tcl_find_view ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // viewport management
 int tcl_viewport_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );

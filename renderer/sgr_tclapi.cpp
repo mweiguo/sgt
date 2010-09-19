@@ -113,44 +113,44 @@ int tcl_camera_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_find_view ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
-{
-    try
-    {
-        if ( objc != 10 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "find_view minx miny minz maxx maxy maxz percentOfView camid vpid" );
-            return TCL_ERROR;
-        }
-
-        int camid, vpid;
-        double percentOfView, tmp;
-        float min[3], max[3];
-        Tcl_GetDoubleFromObj ( interp, objv[1], &tmp );
-        min[0] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[2], &tmp );
-        min[1] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[3], &tmp );
-        min[2] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[4], &tmp );
-        max[0] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[5], &tmp );
-        max[1] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[6], &tmp );
-        max[2] = tmp;
-        Tcl_GetDoubleFromObj ( interp, objv[7], &percentOfView );
-        Tcl_GetIntFromObj ( interp, objv[8], &camid ); 
-        Tcl_GetIntFromObj ( interp, objv[9], &vpid ); 
-
-        float scale = find_view ( min, max, percentOfView, camid, vpid );
-        Tcl_Obj* rstobj = Tcl_NewDoubleObj(scale);
-        Tcl_SetObjResult ( interp, rstobj );
-
-        return TCL_OK;
-    } catch ( std::exception& e ) {
-        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
-        return TCL_ERROR;
-    }
-}
+//int tcl_find_view ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+//{
+//    try
+//    {
+//        if ( objc != 10 ) {
+//            Tcl_WrongNumArgs ( interp, 0, objv, "find_view minx miny minz maxx maxy maxz percentOfView camid vpid" );
+//            return TCL_ERROR;
+//        }
+//
+//        int camid, vpid;
+//        double percentOfView, tmp;
+//        float min[3], max[3];
+//        Tcl_GetDoubleFromObj ( interp, objv[1], &tmp );
+//        min[0] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[2], &tmp );
+//        min[1] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[3], &tmp );
+//        min[2] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[4], &tmp );
+//        max[0] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[5], &tmp );
+//        max[1] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[6], &tmp );
+//        max[2] = tmp;
+//        Tcl_GetDoubleFromObj ( interp, objv[7], &percentOfView );
+//        Tcl_GetIntFromObj ( interp, objv[8], &camid ); 
+//        Tcl_GetIntFromObj ( interp, objv[9], &vpid ); 
+//
+//        float scale = find_view ( min, max, percentOfView, camid, vpid );
+//        Tcl_Obj* rstobj = Tcl_NewDoubleObj(scale);
+//        Tcl_SetObjResult ( interp, rstobj );
+//
+//        return TCL_OK;
+//    } catch ( std::exception& e ) {
+//        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
+//        return TCL_ERROR;
+//    }
+//}
 
 
 // viewport management
@@ -1942,7 +1942,7 @@ void register_tclcmds ( Tcl_Interp* interp )
     Tcl_CreateObjCommand ( interp, "camera_scale",          tcl_camera_scale            ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "camera_reset",          tcl_camera_reset            ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "camera_name",           tcl_camera_name             ,0 ,0 );
-    Tcl_CreateObjCommand ( interp, "find_view",             tcl_find_view               ,0 ,0 );
+    //Tcl_CreateObjCommand ( interp, "find_view",             tcl_find_view               ,0 ,0 );
 
     Tcl_CreateObjCommand ( interp, "viewport_create",       tcl_viewport_create         ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "viewport_geometry",     tcl_viewport_geometry       ,0 ,0 );
