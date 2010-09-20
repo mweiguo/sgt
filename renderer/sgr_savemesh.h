@@ -7,6 +7,32 @@
 using namespace std;
 namespace SGR
 {
+class XMLCharEscape
+{
+public:
+    static XMLCharEscape& getInst() 
+    {
+        static XMLCharEscape inst;
+        return inst;
+    }
+    string transcode ( const string& str )
+    {
+        QString rst ( str.c_str() );
+        for ( map < string, QRegExp  >::iterator pp=replaces.begin(); pp!=replaces.end(); ++pp )
+            rst = rst.replace ( pp->second, pp->first.c_str() );
+        return rst.toStdString();
+    }
+private:
+    XMLCharEscape ()
+    {
+        replaces[ "&amp;" ] = QRegExp( "&(?!amp;)" );
+        replaces[ "&quot;" ] = QRegExp( "\"" );
+        replaces[ "&apos;" ] = QRegExp( "\'" );
+        replaces[ "&lt;" ] = QRegExp( "<" );
+        replaces[ "&gt;" ] = QRegExp( ">" );
+    }
+    map < string, QRegExp > replaces;
+};
 
 class SGR_DLL SaveMesh : public ChildVisitor
 {
@@ -53,7 +79,7 @@ inline SaveMesh::SaveMesh( const string& filename, SGNode* node )
 
 inline void SaveMesh::apply ( LayerNode& node )
 {
-    _xmlContent << "<layer id=\"" << node.getID() << "\" name='" << node.name() << "' isVisible='" << (node.isVisible() ? 1 : 0) 
+    _xmlContent << "<layer id=\"" << node.getID() << "\" name='" << XMLCharEscape::getInst().transcode (node.name()) << "' isVisible='" << (node.isVisible() ? 1 : 0) 
         << "' fgcolor='" << node.getFgColor().toString() <<"' bgcolor='" << node.getBgColor().toString() << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
@@ -139,7 +165,7 @@ inline void SaveMesh::apply ( LODNode& node )
 
 inline void SaveMesh::apply ( PickableGroup& node )
 {
-    _xmlContent << "<pickablegroup id=\"" << node.getID() << "\" name='" << node.name() << "' bbox =\"" << 
+    _xmlContent << "<pickablegroup id=\"" << node.getID() << "\" name='" << XMLCharEscape::getInst().transcode (node.name()) << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     ChildVisitor::apply ( node );
@@ -175,7 +201,7 @@ inline void SaveMesh::apply ( SceneNode& node )
 
 inline void SaveMesh::apply ( FontNode& node )
 {
-    _xmlContent << "<font id=\"" << node.getID() << "\" family=\"" << node.family() << "\" size=\"" << node.pointSize() << "\" style=\"" << "normal" << "\" def=\"" << node.defName() << "\" bbox =\"" << 
+    _xmlContent << "<font id=\"" << node.getID() << "\" family=\"" << XMLCharEscape::getInst().transcode (node.family()) << "\" size=\"" << node.pointSize() << "\" style=\"" << "normal" << "\" def=\"" << node.defName() << "\" bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     ChildVisitor::apply ( node );
@@ -184,7 +210,7 @@ inline void SaveMesh::apply ( FontNode& node )
 
 inline void SaveMesh::apply ( GroupNode& node )
 {
-    _xmlContent << "<group id=\"" << node.getID() << "\" isVisible=\"" << (node.isVisible() ? 1 : 0) << "\" name='" << node.name() << "' bbox =\"" << 
+    _xmlContent << "<group id=\"" << node.getID() << "\" isVisible=\"" << (node.isVisible() ? 1 : 0) << "\" name='" << XMLCharEscape::getInst().transcode (node.name()) << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     ChildVisitor::apply ( node );
@@ -214,7 +240,7 @@ inline void SaveMesh::apply ( TextNode& node )
     _xmlContent << "<text id=\"" << node.getID() << "\" font='" << node.getAttrSet()->getFont()->defName() << "' anchor='" << node.anchorValue() << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
-    _xmlContent << node.text();
+    _xmlContent << XMLCharEscape::getInst().transcode (node.text());
     ChildVisitor::apply ( node );
     _xmlContent << "</text>";
 }

@@ -139,6 +139,7 @@ namespace SGR
         clo = clock();
         //_root = new SGNode();
         traverseNode ( root, 0 );
+
         qDebug ( "traverseNode TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
 
         // expand array node
@@ -177,7 +178,9 @@ namespace SGR
                 SeedGenerator::getInst().maxseed ( _baseId + _maxid + 1 );
         }
 
-        _root->updateBBox();
+        for ( list<SGNode*>::iterator pp=begin(); pp!=end(); ++pp )
+            (*pp)->updateBBox();
+        //_root->updateBBox();
         //NodeDumper dumper;
         //dumper ( _root );
         //qDebug ( "%s", dumper.dumpstring().c_str() );
@@ -1098,7 +1101,7 @@ namespace SGR
         SceneNode* sceneNode = NodeMgr::getInst().getNodePtr<SceneNode> (id);
 
         if ( 0 == parent )
-            _scene->_root = sceneNode;
+            _scene->push_back ( sceneNode );
         else
             parent->addChild ( sceneNode );
 
@@ -1124,7 +1127,7 @@ namespace SGR
         FontNode* fontnode = NodeMgr::getInst().getNodePtr<FontNode> (id);
 
         if ( 0 == parent )
-            _scene->_root = fontnode;
+            _scene->push_back ( fontnode );
         else
             parent->addChild ( fontnode );
 
@@ -1162,7 +1165,7 @@ namespace SGR
 
         LayerNode* layer = NodeMgr::getInst().getNodePtr<LayerNode> (id);
         if ( 0 == parent )
-            _scene->_root = layer;
+            _scene->push_back ( layer );
         else
             parent->addChild ( layer );
 
@@ -1186,7 +1189,7 @@ namespace SGR
 
         PickableGroup* pick = NodeMgr::getInst().getNodePtr<PickableGroup> (id);
         if ( 0 == parent )
-            _scene->_root = pick;
+            _scene->push_back ( pick );
         else
             parent->addChild ( pick );
 
@@ -1206,7 +1209,7 @@ namespace SGR
 
         LODNode* lod = NodeMgr::getInst().getNodePtr<LODNode> (id);
         if ( 0 == parent )
-            _scene->_root = lod;
+            _scene->push_back ( lod );
         else
             parent->addChild ( lod );
 
@@ -1227,7 +1230,7 @@ namespace SGR
 
         KdTreeNode* kdtreenode = NodeMgr::getInst().getNodePtr<KdTreeNode> (id);
         if ( 0 == parent )
-            _scene->_root = kdtreenode;
+            _scene->push_back ( kdtreenode );
         else
             parent->addChild ( kdtreenode );
 
@@ -1248,7 +1251,7 @@ namespace SGR
 
         TransformNode* trans = NodeMgr::getInst().getNodePtr<TransformNode> (id);
         if ( 0 == parent )
-            _scene->_root = trans;
+            _scene->push_back ( trans );
         else
             parent->addChild ( trans );
 
@@ -1272,7 +1275,7 @@ namespace SGR
 
         ArrayNode* arraynode = NodeMgr::getInst().getNodePtr<ArrayNode> (id);
         if ( 0 == parent )
-            _scene->_root = arraynode;
+            _scene->push_back ( arraynode );
         else
             parent->addChild ( arraynode );
 
@@ -1318,7 +1321,7 @@ namespace SGR
 
         RectangleNodef* rect = NodeMgr::getInst().getNodePtr<RectangleNodef> (id);
         if ( 0 == parent )
-            _scene->_root = rect;
+            _scene->push_back ( rect );
         else
             parent->addChild ( rect );
         //Rectanglef* rect = new Rectanglef();
@@ -1348,7 +1351,7 @@ namespace SGR
 
         TextNode* textnode = NodeMgr::getInst().getNodePtr<TextNode> (id);
         if ( 0 == parent )
-            _scene->_root = textnode;
+            _scene->push_back ( textnode );
         else
             parent->addChild ( textnode );
 
@@ -1375,7 +1378,7 @@ namespace SGR
 
         GroupNode* groupnode = NodeMgr::getInst().getNodePtr<GroupNode> (id);
         if ( 0 == parent )
-            _scene->_root = groupnode;
+            _scene->push_back ( groupnode );
         else
             parent->addChild ( groupnode );
 
@@ -1395,7 +1398,7 @@ namespace SGR
 
         SwitchNode* switchnode = NodeMgr::getInst().getNodePtr<SwitchNode> (id);
         if ( 0 == parent )
-            _scene->_root = switchnode;
+            _scene->push_back ( switchnode );
         else
             parent->addChild ( switchnode );
 
@@ -1415,7 +1418,7 @@ namespace SGR
 
         LineNodef* linenode = NodeMgr::getInst().getNodePtr<LineNodef> (id);
         if ( 0 == parent )
-            _scene->_root = linenode;
+            _scene->push_back ( linenode );
         else
             parent->addChild ( linenode );
 
@@ -1446,7 +1449,7 @@ namespace SGR
 
         MeshNode3f* meshnode = NodeMgr::getInst().getNodePtr<MeshNode3f> (id);
         if ( 0 == parent )
-            _scene->_root = meshnode;
+            _scene->push_back ( meshnode );
         else
             parent->addChild ( meshnode );
 
@@ -1483,7 +1486,7 @@ namespace SGR
 
         MeshLineNode* meshlinenode = NodeMgr::getInst().getNodePtr<MeshLineNode> (id);
         if ( 0 == parent )
-            _scene->_root = meshlinenode;
+            _scene->push_back ( meshlinenode );
         else
             parent->addChild ( meshlinenode );
 
@@ -1520,7 +1523,7 @@ namespace SGR
 
         PolylineNode2Df* linenode = NodeMgr::getInst().getNodePtr<PolylineNode2Df> (id);
         if ( 0 == parent )
-            _scene->_root = linenode;
+            _scene->push_back ( linenode );
         else
             parent->addChild ( linenode );
 
@@ -1555,7 +1558,7 @@ namespace SGR
 
         PolylineNode2Df* polynode = NodeMgr::getInst().getNodePtr<PolylineNode2Df> (id);
         if ( 0 == parent )
-            _scene->_root = polynode;
+            _scene->push_back ( polynode );
         else
             parent->addChild ( polynode );
 
@@ -1590,7 +1593,7 @@ namespace SGR
 
         PointNode* pointnode = NodeMgr::getInst().getNodePtr<PointNode> (id);
         if ( 0 == parent )
-            _scene->_root = pointnode;
+            _scene->push_back ( pointnode );
         else
             parent->addChild ( pointnode );
 
@@ -1633,7 +1636,7 @@ namespace SGR
         // parent == 0 means this node is top node
         MeshPointNode* pointnode = NodeMgr::getInst().getNodePtr<MeshPointNode> (id);
         if ( 0 == parent )
-            _scene->_root = pointnode;
+            _scene->push_back ( pointnode );
         else
             parent->addChild ( pointnode );
 

@@ -67,7 +67,7 @@ extern "C"
     void SGR_DLL camera_scale ( int id, float scale );
     void SGR_DLL camera_reset ( int id );
     void SGR_DLL camera_name ( int id, const char* name );
-    //float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
+    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
 
     /*********************************/
     /****** VIEWPORT MANAGEMENT ******/
@@ -91,8 +91,8 @@ extern "C"
     /************** IO ***************/
     /*********************************/
     // local scene load
-    int SGR_DLL scene_load ( const char* file );
-    int SGR_DLL node_load ( const char* file );
+    int SGR_DLL scene_load ( const char* file, int* data );
+    int SGR_DLL node_load ( const char* file, int* data );
     void SGR_DLL node_save ( const char* file, int sceneid );
     void SGR_DLL unload_node (int id);
     void SGR_DLL scene_translate ( int id, float tx, float ty, float tz );
@@ -168,13 +168,19 @@ extern "C"
     void SGR_DLL color_rgbai ( int id, unsigned int color );
 
     // attrset
-    void SGR_DLL attrset_create ( int id, int layerid );
+    void SGR_DLL attrset_create ( int id, int layerid=0 );
     void SGR_DLL attrset_create_byrenderorder ( int id, int layerid );
     void SGR_DLL attrset_fgcolor ( int id, int colorid );
     void SGR_DLL attrset_bgcolor ( int id, int colorid );
+    void SGR_DLL attrset_font ( int id, int fontid );
     void SGR_DLL set_attrset ( int nodeid, int attrsetid );
     void SGR_DLL unset_attrset ( int nodeid );
     int SGR_DLL attrset_refcnt ( int nodeid );
+    int SGR_DLL get_attrset ( int attrsetid );
+    unsigned int SGR_DLL get_attrset_fgcolor ( int attrsetid );
+    unsigned int SGR_DLL get_attrset_bgcolor ( int attrsetid );
+    int SGR_DLL get_attrset_font ( int attrsetid );
+
 
 
     //// color access
@@ -241,13 +247,14 @@ extern "C"
     void SGR_DLL text_justify ( int id, int justify );
     // font
 
-    void SGR_DLL font_create ( int id );
+    void SGR_DLL font_create ( int id, const char* desc="" );
     void SGR_DLL font_family ( int id, const char* f );
     void SGR_DLL font_size ( int id, float size );
     /*NORMAL = 1, ITALIC = 3, UNDERSTRIKE = 4*/
     void SGR_DLL font_style ( int id, int style );
     void SGR_DLL font_weight ( int id, int weight );
     void SGR_DLL font_name ( int id, const char* name );
+    void SGR_DLL get_font_desc ( int fontid, char* buffer );
     //void font_color ( int id, const char* color );
 
     // line

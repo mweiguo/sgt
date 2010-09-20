@@ -503,24 +503,24 @@ void color_rgbai ( int id, unsigned int color )
 
 void attrset_create ( int id, int layerid )
 {
-    LayerNode* node = NodeMgr::getInst().getNodePtr<LayerNode>( layerid );
-    if ( node )
-    {
-        int renderOrder = LayerMgr::getInst().indexof(node);
-        AttrSet* t = NodeMgr::getInst().addNode<AttrSet> (id, renderOrder);
-        if ( NULL == t )
-        {
-            stringstream ss;
-            ss << "attrset node create: id is invalid. id: " << id << "layerid: " << layerid;
-            throw invalid_argument ( ss.str() );
-        }
-    }
-    else
+    //LayerNode* node = NodeMgr::getInst().getNodePtr<LayerNode>( layerid );
+    //if ( node )
+    //{
+    //int renderOrder = LayerMgr::getInst().indexof(node);
+    AttrSet* t = NodeMgr::getInst().addNode<AttrSet> (id);
+    if ( NULL == t )
     {
         stringstream ss;
-        ss << "layer node not exist or id " << layerid << " is not a layer";
-        throw std::invalid_argument ( ss.str().c_str() );
+        ss << "attrset node create: id is invalid. id: " << id << "layerid: " << layerid;
+        throw invalid_argument ( ss.str() );
     }
+    //}
+    //else
+    //{
+    //    stringstream ss;
+    //    ss << "layer node not exist or id " << layerid << " is not a layer";
+    //    throw std::invalid_argument ( ss.str().c_str() );
+    //}
 }
 
 void attrset_create_byrenderorder ( int id, int renderorder )
@@ -556,6 +556,17 @@ void attrset_bgcolor ( int id, int colorid )
     }
 }
 
+void attrset_font ( int id, int fontid )
+{
+    AttrSet* node = NodeMgr::getInst().getNodePtr<AttrSet>( id );
+    if ( node )
+    {
+        FontNode* fontnode = NodeMgr::getInst().getNodePtr<FontNode>( fontid );
+        if ( fontnode )
+            node->setFont ( fontnode );
+    }
+}
+
 void set_attrset ( int nodeid, int attrsetid )
 {
     DrawableNode* node = NodeMgr::getInst().getNodePtr<DrawableNode>( nodeid );
@@ -583,6 +594,38 @@ int attrset_refcnt ( int nodeid )
     {
         return attrsetNode->getRefCnt();
     }
+}
+
+int get_attrset ( int nodeid )
+{
+    AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( nodeid );
+    if ( attrsetNode )
+        return attrsetNode->getID();
+    return -1;
+}
+
+unsigned int get_attrset_fgcolor ( int attrsetid )
+{
+    AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
+    if ( attrsetNode )
+        return attrsetNode->getFgColor()->getColor();
+    return -1;
+}
+
+unsigned int get_attrset_bgcolor ( int attrsetid )
+{
+    AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
+    if ( attrsetNode )
+        return attrsetNode->getBgColor()->getColor();
+    return -1;
+}
+
+int get_attrset_font ( int attrsetid )
+{
+    AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
+    if ( attrsetNode )
+        return attrsetNode->getFont()->getID();
+    return -1;
 }
 
 //void set_bordercolori ( int id, unsigned int color, bool isByGroup )
@@ -1026,7 +1069,7 @@ void text_justify ( int id, int justify )
 }
 
 // font
-void font_create ( int id )
+void font_create ( int id, const char* desc )
 {
     FontNode* t = NodeMgr::getInst().addNode<FontNode> (id);
     if ( NULL == t )
@@ -1035,6 +1078,7 @@ void font_create ( int id )
         ss << "font node create: id is invalid. id: " << id;
         throw invalid_argument ( ss.str() );
     }
+    t->setDesc ( desc );
 }
 
 void font_family ( int id, const char* f )
@@ -1065,15 +1109,28 @@ void font_name ( int id, const char* name )
         node->defName ( name );
 }
 
+void get_font_desc ( int fontid, char* buffer )
+{
+    FontNode* node = NodeMgr::getInst().getNodePtr<FontNode> (fontid);
+    if ( node )
+    {
+        string s = node->getDesc();
+        strcpy ( buffer, s.c_str() );
+    }
+}
+
 // root
 //   |-transform
 //        |- mesh
-int scene_load ( const char* file )
+int scene_load ( const char* file, int* data )
 {
     // load mesh
     NodeMgr::getInst();
     LoadScene loadscene ( file, true, true );
-    return loadscene.root()->getID();
+    for ( list<SGNode*>::iterator pp=loadscene.begin(); pp!=loadscene.end(); ++pp )
+        *data++ = (*pp)->getID();
+    return loadscene.size();
+    //return loadscene.root()->getID();
     //int seed = SeedGenerator::getInst().seed();
     //NodeMgr::getInst()[seed] = loadmesh.root();
     //add_child ( 0, seed );
@@ -1082,12 +1139,14 @@ int scene_load ( const char* file )
     //return 0;
 }
 
-int node_load ( const char* file )
+int node_load ( const char* file, int* data )
 {
     // load mesh
     NodeMgr::getInst();
     LoadScene loadscene ( file, true, true, true );
-    return loadscene.root()->getID();
+    for ( list<SGNode*>::iterator pp=loadscene.begin(); pp!=loadscene.end(); ++pp )
+        *data++ = (*pp)->getID();
+    return loadscene.size();
     //int seed = SeedGenerator::getInst().seed();
     //NodeMgr::getInst()[seed] = loadmesh.root();
     //add_child ( 0, seed );

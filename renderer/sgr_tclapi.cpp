@@ -341,9 +341,16 @@ int tcl_scene_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
 
         int len;
         const char* file = Tcl_GetStringFromObj ( objv[1], &len );
-        int id = scene_load ( file );
-        Tcl_Obj* rstobj = Tcl_NewIntObj(id);
-        Tcl_SetObjResult ( interp, rstobj );
+        int nodes[256];
+        int size = scene_load ( file, nodes );
+
+        Tcl_Obj **list = new Tcl_Obj*[size];
+        for ( int i=0; i<size; i++ )
+        {
+            list[i] = Tcl_NewDoubleObj ( nodes[i] );
+        }
+
+        Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
         return TCL_OK;
     } catch ( std::exception& e ) {
         //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );

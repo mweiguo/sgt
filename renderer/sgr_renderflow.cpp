@@ -49,6 +49,20 @@ bool equalAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
 
 Rendering::Rendering ( RenderList& renderlist, RenderOption& opt ) 
 {
+    QtRenderVisitor func ( &opt );
+
+    AttrSet* lastAttrset = NULL;
+    for ( RenderList::iterator pp=renderlist.begin(); pp!=renderlist.end(); ++pp )
+    {
+        if ( (*pp)->getAttrSet() != lastAttrset )
+        {
+            // switch all state in AttrSet
+            QtStateChanger changeState ( &opt, (*pp)->getAttrSet() );
+            lastAttrset = (*pp)->getAttrSet();
+        }
+        (*pp)->accept ( func );
+    }
+/*
     // sort by attrset
     RenderList::iterator aa =renderlist.begin();
     RenderList::iterator bb =renderlist.end();
@@ -84,6 +98,7 @@ Rendering::Rendering ( RenderList& renderlist, RenderOption& opt )
     for ( RenderList::const_iterator pp=renderlist.begin(); pp!=renderlist.end(); ++pp )
         delete *pp;
     renderlist.reset ();
+*/
 }
 
 RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )

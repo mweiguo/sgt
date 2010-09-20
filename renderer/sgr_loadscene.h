@@ -26,16 +26,16 @@ namespace SGR
     class ArrayNode;
     class NodeParser;
 
-    class SGR_DLL LoadScene 
+    class SGR_DLL LoadScene : public list<SGNode*>
     {
     public:
         LoadScene ( const char* fileName, bool needExpand=false, bool needSceneManagement=false, bool useBaseId=false );
         ~LoadScene ();
-        SGNode* root () { return _root; }
+        //SGNode* root () { return _root; }
     private:
         void traverseNode ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* data );
     protected:
-        SGNode* _root;
+        //SGNode* _root;
         vector<ArrayNode*> _arraynodes;  // only save top arraynode
         //    vector<ArrayNode*> _allarraynodes;  // only save top arraynode
         vector<KdTreeNode*> _kdtreenodes;  // only save top kdtreenode

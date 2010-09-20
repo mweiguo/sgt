@@ -70,12 +70,12 @@ public:
 
     ~QtStateChanger ()
     {
-        if ( _isPenValid )
-            _opt->painter->setPen ( _oldpen );
-        if ( _isBrushValid )
-            _opt->painter->setBrush ( _oldbrush );
-        if ( _isFontValid )
-            _opt->painter->setFont ( _oldfont );
+        //if ( _isPenValid )
+        //    _opt->painter->setPen ( _oldpen );
+        //if ( _isBrushValid )
+        //    _opt->painter->setBrush ( _oldbrush );
+        //if ( _isFontValid )
+        //    _opt->painter->setFont ( _oldfont );
     }
 private:
     RenderOption* _opt;

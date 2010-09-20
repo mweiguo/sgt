@@ -54,6 +54,16 @@ public:
     void defName (const string& defName) { _defName = defName; }
     const string& defName () const { return _defName; }
 
+    string getDesc ()
+    {
+        stringstream ss;
+        ss << _family << '|' << _pointSize << "|" << _weight << "|" << _style;
+        return ss.str();
+    }
+    void setDesc ( const string& desc )
+    {
+    }
+
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     //// set color
