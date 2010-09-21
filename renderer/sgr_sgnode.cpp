@@ -28,6 +28,12 @@ namespace SGR
         _addChild ( pNode );
     }
     
+    void SGNode::pushfrontChild ( SGNode* pNode )
+    { 
+        pNode->_setParent ( this );
+        _pushfrontChild ( pNode );
+    }
+    
     void SGNode::removeChild ( SGNode* pNode ) 
     {
         if ( find ( begin(), end(), pNode ) != end() )

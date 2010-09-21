@@ -250,6 +250,15 @@ void add_child ( int parent, int child )
         pp1->second->addChild ( pp2->second );
 }
 
+void SGR_DLL pushfront_child ( int parent, int child )
+{
+    NodeMgr& nv = NodeMgr::getInst();
+    NodeMgr::iterator pp1 = nv.find ( parent );
+    NodeMgr::iterator pp2 = nv.find ( child );
+    if ( pp1!=nv.end() && pp2!=nv.end() )
+        pp1->second->pushfrontChild ( pp2->second );
+}
+
 void remove_child ( int parent, int child )
 {
     NodeMgr& nv = NodeMgr::getInst();

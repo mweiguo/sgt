@@ -131,6 +131,7 @@ extern "C"
     /*********************************/
     // remote scene load, C/S architecture, client should maintain node structure
     void SGR_DLL add_child ( int parent, int child );
+    void SGR_DLL pushfront_child ( int parent, int child );
     void SGR_DLL remove_child ( int preant, int child );
     void SGR_DLL clear_child ( int id );
     void SGR_DLL node_delete ( int id );

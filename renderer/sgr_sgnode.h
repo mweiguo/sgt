@@ -26,6 +26,7 @@ public:
 
     // nodes relation operations
     virtual void addChild ( SGNode* pNode );
+    virtual void pushfrontChild ( SGNode* pNode );
     virtual void removeChild ( SGNode* pNode );
     virtual void removeAllChild ();
     const SGNode* getParentNode () const { return _parent; }
@@ -56,6 +57,7 @@ public:
 private:
     void _removeChild ( SGNode* p ) { remove (p); }
     void _addChild ( SGNode* p ) { push_back (p); }
+    void _pushfrontChild ( SGNode* p ) { push_front (p); }
     void _setParent ( SGNode* p ) { _parent=p; }
 protected:
     SGNode* _parent;
