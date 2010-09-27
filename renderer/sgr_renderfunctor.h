@@ -13,6 +13,8 @@
 #include "sgr_linenode.h"
 #include "sgr_nodes.h"
 #include "sgr_global.h"
+#include "sgr_parentfinder.h"
+
 namespace SGR
 {
 

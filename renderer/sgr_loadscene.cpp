@@ -15,7 +15,7 @@
 #include "sgr_nodeleter.h"
 #include "sgr_nodedumper.h"
 #include "sgr_linenode.h"
-#include "qDebug"
+#include <QDebug>
 #include "sgr_attrset.h"
 #include "sgr_scenenode.h"
 #include "sgr_nodes.h"

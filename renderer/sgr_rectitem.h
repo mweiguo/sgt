@@ -8,7 +8,7 @@
 #include <sgr_mat4.h>
 #include <sgr_rectangle.h>
 //#include "fbcolor.h"
-#include "sgr_parentfinder.h"
+//#include "sgr_parentfinder.h"
 namespace SGR
 {
 

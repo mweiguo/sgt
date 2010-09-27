@@ -7,7 +7,7 @@ class GColor;
 class AttrSet : public SGNode
 {
 public:
-    AttrSet (int renderOrder=0/*this parameter is obsolete */) : _fgColor(0), _bgColor(0), _renderOrder(renderOrder), _font(0), refcnt(1) {}
+    AttrSet (int renderOrder=0/*this parameter is obsolete */) : _fgColor(0), _bgColor(0), _font(0), _renderOrder(renderOrder), refcnt(1) {}
     void incRef () { ++refcnt; }
     void decRef ()
     {

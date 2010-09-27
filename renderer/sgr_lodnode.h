@@ -33,9 +33,6 @@ public:
         if ( (levelDelimiters.size()+1) != size() )
             return NULL;
 
-        if ( levelDelimiters.size() >= 2)
-            int brk = 1;
-
         typedef vector<float> DefLevel;
         DefLevel::iterator pp = upper_bound ( levelDelimiters.begin(), levelDelimiters.end(), v );
         if ( pp != levelDelimiters.end() )

@@ -1,16 +1,16 @@
 #ifndef _GROUP_NODE_H_
 #define _GROUP_NODE_H_
 
-#include "sgr_switchnode.h"
-#include "sgr_nodemgr.h"
+#include "sgr_sgnode.h"
+//#include "sgr_nodemgr.h"
 namespace SGR
 {
 
-class SGR_DLL GroupNode : public SwitchNode
+class SGR_DLL GroupNode : public SGNode
 {
 public:
     GroupNode( const string& name="" ) : _groupname(name) {}
-    GroupNode( const GroupNode& rhs ) : SwitchNode ( rhs )
+    GroupNode( const GroupNode& rhs ) : SGNode ( rhs )
     {
 	_groupname = rhs._groupname;
     }

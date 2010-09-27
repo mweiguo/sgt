@@ -237,7 +237,10 @@ inline void SaveMesh::apply ( LineNodef& node )
 
 inline void SaveMesh::apply ( TextNode& node )
 {
-    _xmlContent << "<text id=\"" << node.getID() << "\" font='" << node.getAttrSet()->getFont()->defName() << "' anchor='" << node.anchorValue() << "' bbox =\"" << 
+    _xmlContent << "<text id=\"" << node.getID() << "\"";
+    if ( NULL != node.getAttrSet() && NULL != node.getAttrSet()->getFont() ) 
+        _xmlContent << " font='" << node.getAttrSet()->getFont()->defName() << "'";
+    _xmlContent << " anchor='" << node.anchorValue() << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     _xmlContent << XMLCharEscape::getInst().transcode (node.text());

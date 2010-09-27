@@ -38,7 +38,7 @@ public:
         setChildrenBBoxDirty ( true );
     }
 
-    void setCoords ( int index, COORDT& coords )
+    void setCoords ( int index, const COORDT& coords )
     {
         _coords[index] = coords;
         setBBoxDirty ( true );

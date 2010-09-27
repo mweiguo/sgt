@@ -10,8 +10,8 @@ namespace SGR
 class SGR_DLL SwitchNode : public virtual SGNode
 {
 public:
-    SwitchNode () :_selection(-1) {}
-    SwitchNode ( const SwitchNode& rhs ) : _selection(rhs._selection) {}
+    SwitchNode () : SGNode(), _selection(-1) {}
+    SwitchNode ( const SwitchNode& rhs ) : SGNode(rhs), _selection(rhs._selection) {}
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~SwitchNode () {}

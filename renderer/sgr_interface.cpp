@@ -1253,42 +1253,115 @@ int pick_volume ( float x1, float y1, float z1, float x2, float y2, float z2, in
 
 int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
 {
-    BBox box;
-    box.init ( vec3f(x1, y1, z1) );
-    box.expandby ( vec3f(x2, y2, z2) );
+    static BoxPicker picker;
+    static float lx1, ly1, lz1, lx2, ly2, lz2;
+    static int lcamid;
 
-    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+    const int ACTION_NONE                  = 0;
+    const int ACTION_GETSIZE               = 1;
+    const int ACTION_GETDATA_AFTER_GETSIZE = 2;
+    const int ACTION_GETDATA               = 3;
 
-    BoxPicker picker ( box, camid );
-    picker.doAction ( *node );
-
-    int* pData = data;
-    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
-    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+    int state = ACTION_NONE;
+    if ( NULL == data )
     {
-        *pData++ = (*pp)->getID();
+        state = ACTION_GETSIZE;
     }
+    else
+    {
+        if ( lx1 == x1 && ly1 == y1 && lz1 == z1 && lx2 == x2 && ly2 == y2 && lz2 == z2 && lcamid == camid )
+            state = ACTION_GETDATA_AFTER_GETSIZE;
+        else
+            state = ACTION_GETDATA;
+    }
+
+    if ( ACTION_GETSIZE == state  )
+    {
+        BBox box;
+        box.init ( vec3f(x1, y1, z1) );
+        box.expandby ( vec3f(x2, y2, z2) );
+        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+        picker.initialize ( box, camid );
+        picker.doAction ( *node );
+        lx1 = x1; ly1 = y1; lz1 = z1; lx2 = x2; ly2 = y2; lz2 = z2; lcamid = camid;
+    }
+
+    if ( ACTION_GETDATA_AFTER_GETSIZE == state || ACTION_GETDATA == state )
+    {
+        int* pData = data;
+        vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+        for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+        {
+            *pData++ = (*pp)->getID();
+        }
+    }
+
     return picker.pickedNodes().size();
+
 }
 
 int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
 {
-    BBox box;
-    box.init ( vec3f(x1, y1, z1) );
-    box.expandby ( vec3f(x2, y2, z2) );
+    static CrossPicker picker;
+    static float lx1, ly1, lz1, lx2, ly2, lz2;
+    static int lcamid;
 
-    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+    const int ACTION_NONE                  = 0;
+    const int ACTION_GETSIZE               = 1;
+    const int ACTION_GETDATA_AFTER_GETSIZE = 2;
+    const int ACTION_GETDATA               = 3;
 
-    CrossPicker picker ( box, camid );
-    picker.doAction ( *node );
-
-    int* pData = data;
-    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
-    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+    int state = ACTION_NONE;
+    if ( NULL == data )
     {
-        *pData++ = (*pp)->getID();
+        state = ACTION_GETSIZE;
     }
+    else
+    {
+        if ( lx1 == x1 && ly1 == y1 && lz1 == z1 && lx2 == x2 && ly2 == y2 && lz2 == z2 && lcamid == camid )
+            state = ACTION_GETDATA_AFTER_GETSIZE;
+        else
+            state = ACTION_GETDATA;
+    }
+
+    if ( ACTION_GETSIZE == state  )
+    {
+        BBox box;
+        box.init ( vec3f(x1, y1, z1) );
+        box.expandby ( vec3f(x2, y2, z2) );
+        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+        picker.initialize ( box, camid );
+        picker.doAction ( *node );
+        lx1 = x1; ly1 = y1; lz1 = z1; lx2 = x2; ly2 = y2; lz2 = z2; lcamid = camid;
+    }
+
+    if ( ACTION_GETDATA_AFTER_GETSIZE == state || ACTION_GETDATA == state )
+    {
+        int* pData = data;
+        vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+        for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+        {
+            *pData++ = (*pp)->getID();
+        }
+    }
+
     return picker.pickedNodes().size();
+    //BBox box;
+    //box.init ( vec3f(x1, y1, z1) );
+    //box.expandby ( vec3f(x2, y2, z2) );
+
+    //SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+
+    //CrossPicker picker ( box, camid );
+    //picker.doAction ( *node );
+
+    //int* pData = data;
+    //vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+    //for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+    //{
+    //    *pData++ = (*pp)->getID();
+    //}
+    //return picker.pickedNodes().size();
 }
 
 void dump_node ( int id, const char* filename )

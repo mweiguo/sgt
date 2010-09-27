@@ -55,11 +55,11 @@ namespace SGR
         virtual void apply ( const LODNode& /*node*/ ) {}
         virtual void apply ( const KdTreeNode& /*node*/ ) {}
         virtual void apply ( const SceneNode& /*node*/ ) {}
-        virtual void apply ( const FontNode& node ) {}
-        virtual void apply ( const TextNode& node ) {}
-        virtual void apply ( const GroupNode& node ) {}
-        virtual void apply ( const SwitchNode& node ) {}
-        virtual void apply ( const LineNodef& node ) {}
+        virtual void apply ( const FontNode& /* node */ ) {}
+        virtual void apply ( const TextNode& /* node */ ) {}
+        virtual void apply ( const GroupNode& /* node */ ) {}
+        virtual void apply ( const SwitchNode& /* node */ ) {}
+        virtual void apply ( const LineNodef& /* node */ ) {}
         virtual void apply ( SGNode& /*node*/ ) {}
         virtual void apply ( LayerNode& /*node*/ ) {}
         virtual void apply ( RectangleNodef& /*node*/ ) {}

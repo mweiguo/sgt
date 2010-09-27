@@ -1,4 +1,5 @@
 #include "sgr_nodetransformer.h"
+#include "sgr_parentfinder.h"
 
 namespace SGR
 {

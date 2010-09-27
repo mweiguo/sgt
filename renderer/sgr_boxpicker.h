@@ -16,8 +16,17 @@ namespace SGR
 class BoxPicker : public ChildVisitor
 {
 public:
+    BoxPicker ()
+    {
+    }
     BoxPicker ( const BBox& box, int camid ) : _bbox(box), _camid(camid)
     {
+        _pickedNodes.clear();
+    }
+    void initialize ( const BBox& box, int camid )
+    {
+        _bbox = box;
+        _camid = camid;
         _pickedNodes.clear();
     }
     virtual void apply ( LayerNode& node );
