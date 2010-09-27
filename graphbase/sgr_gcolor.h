@@ -14,7 +14,7 @@ public:
     GColor ( const string& color ) { _color = ColorConv::string2hex(color); }
     GColor ( const GColor& rhs ) : _color(rhs._color) {}
     void setColor ( unsigned int color ) { _color = color; }
-    void setColor ( int r, int g, int b, int a ) {}
+    void setColor ( int /* r */, int /* g */, int /* b */, int /* a */ ) {}
     void setColor ( const string& color ) { _color = ColorConv::string2hex(color); }
     unsigned int getColor () const { return _color; }
     string toString() const { return ColorConv::hex2string(_color); }
