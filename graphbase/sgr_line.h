@@ -23,8 +23,8 @@ public:
     inline void y1( T v ) { _data[1] = v; }
     inline void x2( T v ) { _data[2] = v; }
     inline void y2( T v ) { _data[3] = v; }
-    inline vec2<T> point1() { return _data.xy(); }
-    inline vec2<T> point2() { return _data.zw(); }
+    inline vec2<T> point1() const { return _data.xy(); }
+    inline vec2<T> point2() const { return _data.zw(); }
     inline void point1( T x, T y ) { _data.xy(x, y); }
     inline void point2( T x, T y ) { _data.zw(x, y); }
     ~Line () {}

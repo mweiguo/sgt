@@ -4,7 +4,7 @@
 #include <sstream>
 using namespace std;
 
-int tcl_camera_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_camera_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -26,7 +26,7 @@ int tcl_camera_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
     }
 }
 
-int tcl_camera_translate ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_camera_translate ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -50,7 +50,7 @@ int tcl_camera_translate ( ClientData clientData, Tcl_Interp* interp, int objc, 
     }
 }
 
-int tcl_camera_scale ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_camera_scale ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -72,7 +72,7 @@ int tcl_camera_scale ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_camera_reset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_camera_reset ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -92,7 +92,7 @@ int tcl_camera_reset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_camera_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_camera_name ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -154,7 +154,7 @@ int tcl_camera_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 
 
 // viewport management
-int tcl_viewport_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_viewport_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -178,7 +178,7 @@ int tcl_viewport_create ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_viewport_geometry ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_viewport_geometry ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -187,13 +187,12 @@ int tcl_viewport_geometry ( ClientData clientData, Tcl_Interp* interp, int objc,
             return TCL_ERROR;
         }
 
-        int id;
+        int id, x, y, w, h;
         Tcl_GetIntFromObj ( interp, objv[1], &id ); 
-        double x, y, w, h;
-        Tcl_GetDoubleFromObj ( interp, objv[2], &x );
-        Tcl_GetDoubleFromObj ( interp, objv[3], &y );
-        Tcl_GetDoubleFromObj ( interp, objv[4], &w );
-        Tcl_GetDoubleFromObj ( interp, objv[5], &h );
+        Tcl_GetIntFromObj ( interp, objv[2], &x );
+        Tcl_GetIntFromObj ( interp, objv[3], &y );
+        Tcl_GetIntFromObj ( interp, objv[4], &w );
+        Tcl_GetIntFromObj ( interp, objv[5], &h );
 
         viewport_geometry ( id, x, y, w, h );
         return TCL_OK;
@@ -204,7 +203,7 @@ int tcl_viewport_geometry ( ClientData clientData, Tcl_Interp* interp, int objc,
     }
 }
 
-int tcl_viewport_attachcamera ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_viewport_attachcamera ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -226,7 +225,7 @@ int tcl_viewport_attachcamera ( ClientData clientData, Tcl_Interp* interp, int o
     }
 }
 
-int tcl_viewport_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_viewport_name ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -247,7 +246,7 @@ int tcl_viewport_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
     }
 }
 
-int tcl_viewport_dirty ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_viewport_dirty ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -330,7 +329,7 @@ int tcl_viewport_dirty ( ClientData clientData, Tcl_Interp* interp, int objc, Tc
 
 
 // local mesh load, treat mesh as a single object
-int tcl_scene_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_scene_load ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -359,7 +358,7 @@ int tcl_scene_load ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_node_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_node_save ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -380,7 +379,7 @@ int tcl_node_save ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj
     }
 }
 
-int tcl_mesh_unload (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_mesh_unload (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -400,7 +399,7 @@ int tcl_mesh_unload (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_dump_node (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_dump_node (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -421,7 +420,7 @@ int tcl_dump_node (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj*
     }
 }
 
-int tcl_get_bbox (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_get_bbox (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -430,7 +429,7 @@ int tcl_get_bbox (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* 
             return TCL_ERROR;
         }
 
-        int id, len;
+        int id;
         Tcl_GetIntFromObj ( interp, objv[1], &id );
         float min[3], max[3];
         get_bbox ( id, min, max );
@@ -452,7 +451,7 @@ int tcl_get_bbox (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* 
     }
 }
 
-int tcl_get_scenepos (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_get_scenepos (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -488,7 +487,7 @@ int tcl_get_scenepos (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_pick (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_pick (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -505,10 +504,6 @@ int tcl_pick (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* cons
         Tcl_GetIntFromObj ( interp, objv[4], &camid );
 
         int data[256];
-        float x = scenecoord[0];
-        float y = scenecoord[1];
-        float z = scenecoord[2];
-        
         int size = pick ( scenecoord[0], scenecoord[1], scenecoord[2], camid, data );
         
         Tcl_Obj *list[256];
@@ -524,7 +519,7 @@ int tcl_pick (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* cons
     }
 }
 
-int tcl_pick_volume (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_pick_volume (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -562,7 +557,7 @@ int tcl_pick_volume (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
 }
 
 // remote mesh load, C/S architecture, client should maintian node structure
-int tcl_add_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_add_child ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -583,7 +578,7 @@ int tcl_add_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj
     }
 }
 
-int tcl_remove_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_remove_child ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -604,7 +599,7 @@ int tcl_remove_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_clear_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_clear_child ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -613,7 +608,7 @@ int tcl_clear_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
             return TCL_ERROR;
         }
 
-        int parent, child;
+        int parent;
         Tcl_GetIntFromObj ( interp, objv[1], &parent );
         clear_child ( parent );
         return TCL_OK;
@@ -625,7 +620,7 @@ int tcl_clear_child ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 }
 
 
-int tcl_node_delete ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_node_delete ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -645,7 +640,7 @@ int tcl_node_delete ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_node_visible ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_node_visible ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -665,7 +660,7 @@ int tcl_node_visible ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_update_bbox ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_update_bbox ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -730,7 +725,7 @@ int tcl_update_bbox ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 //    }
 //}
 //
-int tcl_color_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_color_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -754,7 +749,7 @@ int tcl_color_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_color_rgbas ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_color_rgbas ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -775,7 +770,7 @@ int tcl_color_rgbas ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_color_rgbai ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_color_rgbai ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -796,7 +791,7 @@ int tcl_color_rgbai ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_attrset_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_attrset_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -819,7 +814,7 @@ int tcl_attrset_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tc
     }
 }
 
-int tcl_attrset_fgcolor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_attrset_fgcolor ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -840,7 +835,7 @@ int tcl_attrset_fgcolor ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_attrset_bgcolor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_attrset_bgcolor ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -861,7 +856,7 @@ int tcl_attrset_bgcolor ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_set_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_set_attrset ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -882,7 +877,7 @@ int tcl_set_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_unset_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_unset_attrset ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -903,7 +898,7 @@ int tcl_unset_attrset ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 }
 
 // mesh
-int tcl_scene_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_scene_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -926,7 +921,7 @@ int tcl_scene_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
 }
 
 // layer
-int tcl_layer_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_layer_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -949,7 +944,7 @@ int tcl_layer_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_layer_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_layer_name ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -970,7 +965,7 @@ int tcl_layer_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_layer_visible ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_layer_visible ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -993,7 +988,7 @@ int tcl_layer_visible ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 
 
 // lod
-int tcl_lod_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_lod_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1015,7 +1010,7 @@ int tcl_lod_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_lod_delimiters ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_lod_delimiters ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1038,7 +1033,7 @@ int tcl_lod_delimiters ( ClientData clientData, Tcl_Interp* interp, int objc, Tc
 
 
 // kdtree
-int tcl_kdtree_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_kdtree_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1061,7 +1056,7 @@ int tcl_kdtree_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 }
 
 // array
-int tcl_array_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1083,7 +1078,7 @@ int tcl_array_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_array_rowcnt ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_rowcnt ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1104,7 +1099,7 @@ int tcl_array_rowcnt ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_array_columncnt ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_columncnt ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1125,7 +1120,7 @@ int tcl_array_columncnt ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_array_hlevelcnt ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_hlevelcnt ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1147,7 +1142,7 @@ int tcl_array_hlevelcnt ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_array_vlevelcnt ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_vlevelcnt ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1169,7 +1164,7 @@ int tcl_array_vlevelcnt ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_array_marginx ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_marginx ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1193,7 +1188,7 @@ int tcl_array_marginx ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 }
 
 
-int tcl_array_marginy ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_array_marginy ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1218,7 +1213,7 @@ int tcl_array_marginy ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl
 
 
 // rectangle
-int tcl_rectangle_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_rectangle_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1240,7 +1235,7 @@ int tcl_rectangle_create ( ClientData clientData, Tcl_Interp* interp, int objc, 
     }
 }
 
-int tcl_rectangle_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_rectangle_size ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1265,7 +1260,7 @@ int tcl_rectangle_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tc
 
 
 // transform
-int tcl_transform_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_transform_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1288,7 +1283,7 @@ int tcl_transform_create ( ClientData clientData, Tcl_Interp* interp, int objc, 
     }
 }
 
-int tcl_transform_translate ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_transform_translate ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1312,7 +1307,7 @@ int tcl_transform_translate ( ClientData clientData, Tcl_Interp* interp, int obj
     }
 }
 
-int tcl_transform_scale ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_transform_scale ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1339,7 +1334,7 @@ int tcl_transform_scale ( ClientData clientData, Tcl_Interp* interp, int objc, T
 }
 
 // pickablegroup
-int tcl_pickablegroup_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_pickablegroup_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1361,7 +1356,7 @@ int tcl_pickablegroup_create ( ClientData clientData, Tcl_Interp* interp, int ob
     }
 }
 
-int tcl_pickablegroup_name ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_pickablegroup_name ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1384,7 +1379,7 @@ int tcl_pickablegroup_name ( ClientData clientData, Tcl_Interp* interp, int objc
 
 
 // switchnode
-int tcl_switchnode_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_switchnode_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1406,7 +1401,7 @@ int tcl_switchnode_create ( ClientData clientData, Tcl_Interp* interp, int objc,
     }
 }
 
-int tcl_switchnode_props ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_switchnode_props ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1427,7 +1422,7 @@ int tcl_switchnode_props ( ClientData clientData, Tcl_Interp* interp, int objc, 
     }
 }
 
-int tcl_switchnode_selection ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_switchnode_selection ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1449,7 +1444,7 @@ int tcl_switchnode_selection ( ClientData clientData, Tcl_Interp* interp, int ob
 }
 
 // groupnode
-int tcl_groupnode_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_groupnode_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1483,7 +1478,7 @@ int tcl_groupnode_create ( ClientData clientData, Tcl_Interp* interp, int objc, 
     }
 }
 
-int tcl_groupnode_props ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_groupnode_props ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1506,7 +1501,7 @@ int tcl_groupnode_props ( ClientData clientData, Tcl_Interp* interp, int objc, T
 
 
 // text
-int tcl_text_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_text_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1535,7 +1530,7 @@ int tcl_text_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_text_string ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_text_string ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1577,7 +1572,7 @@ int tcl_text_string ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 //    }
 //}
 
-int tcl_text_anchor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_text_anchor ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1621,7 +1616,7 @@ int tcl_text_anchor ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
 
 
 // font
-int tcl_font_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_font_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1643,7 +1638,7 @@ int tcl_font_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_font_family ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_font_family ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1663,7 +1658,7 @@ int tcl_font_family ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_font_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_font_size ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1672,10 +1667,9 @@ int tcl_font_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj
             return TCL_ERROR;
         }
 
-        int id;
-        double size;
+        int id, size;
         Tcl_GetIntFromObj ( interp, objv[1], &id ); 
-        Tcl_GetDoubleFromObj ( interp, objv[2], &size ); 
+        Tcl_GetIntFromObj ( interp, objv[2], &size ); 
         font_size ( id, size );
         return TCL_OK;
     } catch ( std::exception& e ) {
@@ -1685,7 +1679,7 @@ int tcl_font_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj
 }
 
 /*PLAIN = 1, BOLD = 2, ITALIC = 3, BOLDITALIC = 4*/
-int tcl_font_style ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_font_style ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1705,7 +1699,7 @@ int tcl_font_style ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_line_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_line_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1726,7 +1720,7 @@ int tcl_line_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_line_points ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_line_points ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1750,7 +1744,7 @@ int tcl_line_points ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_line_point ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_line_point ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1774,7 +1768,7 @@ int tcl_line_point ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Ob
     }
 }
 
-int tcl_polyline_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_polyline_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1795,7 +1789,7 @@ int tcl_polyline_create ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_polyline_points ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_polyline_points ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1824,7 +1818,7 @@ int tcl_polyline_points ( ClientData clientData, Tcl_Interp* interp, int objc, T
     }
 }
 
-int tcl_poly_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_poly_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1845,7 +1839,7 @@ int tcl_poly_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_poly_points ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_poly_points ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1874,7 +1868,7 @@ int tcl_poly_points ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_point_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_point_create ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try
     {
@@ -1895,7 +1889,7 @@ int tcl_point_create ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_
     }
 }
 
-int tcl_point_coord ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_point_coord ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {
@@ -1919,7 +1913,7 @@ int tcl_point_coord ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
-int tcl_point_size ( ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+int tcl_point_size ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
     try 
     {

@@ -268,6 +268,13 @@ void remove_child ( int parent, int child )
         pp1->second->removeChild ( pp2->second );
 }
 
+void remove_parent ( int nodeid )
+{
+    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(nodeid);
+    if ( node )
+	node->setParentNode ( 0 );
+}
+
 void clear_child ( int id )
 {
     NodeMgr& nv = NodeMgr::getInst();
@@ -600,9 +607,8 @@ int attrset_refcnt ( int nodeid )
 {
     AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( nodeid );
     if ( attrsetNode )
-    {
         return attrsetNode->getRefCnt();
-    }
+    return -1;
 }
 
 int get_attrset ( int nodeid )
@@ -618,7 +624,7 @@ unsigned int get_attrset_fgcolor ( int attrsetid )
     AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
     if ( attrsetNode )
         return attrsetNode->getFgColor()->getColor();
-    return -1;
+    throw invalid_argument ( "attrsetid is invalid" );
 }
 
 unsigned int get_attrset_bgcolor ( int attrsetid )
@@ -626,7 +632,7 @@ unsigned int get_attrset_bgcolor ( int attrsetid )
     AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( attrsetid );
     if ( attrsetNode )
         return attrsetNode->getBgColor()->getColor();
-    return -1;
+    throw invalid_argument ( "attrsetid is invalid" );
 }
 
 int get_attrset_font ( int attrsetid )
@@ -727,7 +733,7 @@ void layer_bgcolor ( int id, int color )
         layer->setBgColor ( GColor(color) );
 }
 
-void layer_font ( int id, const char* family, float size, int style, int weight, const char* name )
+void layer_font ( int id, const char* family, int size, int /*style*/, int /*weight*/, const char* name )
 {
     LayerNode* layer = NodeMgr::getInst().getNodePtr<LayerNode> ( id );
     if ( layer )
@@ -1097,7 +1103,7 @@ void font_family ( int id, const char* f )
         node->family ( f );
 }
 
-void font_size ( int id, float sz )
+void font_size ( int id, int sz )
 {
     FontNode* node = NodeMgr::getInst().getNodePtr<FontNode> (id);
     if ( node )
@@ -1105,7 +1111,7 @@ void font_size ( int id, float sz )
 }
 
 /*PLAIN = 1, BOLD = 2, ITALIC = 3, BOLDITALIC = 4*/
-void font_style ( int id, int style )
+void font_style ( int /*id*/, int /*style*/ )
 {
     /* FontNode* node = NodeMgr::getInst().getNodePtr<FontNode> (id); */
     /* if ( node ) */
@@ -1586,6 +1592,7 @@ int get_specnodechildren ( int nodeid, int nodetype, int* data )
             return 0;
         }
     }
+    return 0;
 }
 
 void line_create ( int id )
@@ -1717,6 +1724,7 @@ float get_point_size ( int id )
     {
         return pnt->pointSize ();
     }
+    return -1.0f;
 }
 
 void SGR_DLL get_point_coord ( int id, float* xyz )

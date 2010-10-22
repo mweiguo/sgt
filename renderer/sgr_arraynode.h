@@ -71,7 +71,7 @@ inline float ArrayNode::getHOffset ( int i ) const
 }
 
 inline void ArrayNode::getShapeGenParas (int index, int& s0, int& s1, int& s2, int& s3, int& s4, int& s5,
-                                         int level0, int level1, int level2, int level3, int level4, int level5 ) const
+                                         int level0, int level1, int level2, int level3, int level4, int /* level5 */ ) const
 {
     s5 = level4 ? index / level4 : 0;
     s4 = level3 ? index / level3 - s5 : 0;

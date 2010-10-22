@@ -22,30 +22,30 @@ using namespace std;
 namespace SGR
 {
 
-bool lessAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
-{
-    AttrSet *plhs = lhs->getAttrSet();
-    AttrSet *prhs = rhs->getAttrSet();
-    if ( plhs && prhs )
-    {
-        if ( plhs->getRenderOrder() < prhs->getRenderOrder() )
-            return true;
-        else if ( plhs->getRenderOrder() == prhs->getRenderOrder() )
-        {
-            if ( plhs < prhs )
-                return true;
-        }
-    }
-    else
-        return plhs < prhs;
+// bool lessAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
+// {
+//     AttrSet *plhs = lhs->getAttrSet();
+//     AttrSet *prhs = rhs->getAttrSet();
+//     if ( plhs && prhs )
+//     {
+//         if ( plhs->getRenderOrder() < prhs->getRenderOrder() )
+//             return true;
+//         else if ( plhs->getRenderOrder() == prhs->getRenderOrder() )
+//         {
+//             if ( plhs < prhs )
+//                 return true;
+//         }
+//     }
+//     else
+//         return plhs < prhs;
 
-    return false;
-}
+//     return false;
+// }
 
-bool equalAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
-{
-    return lhs->getAttrSet() == rhs->getAttrSet();
-}
+// bool equalAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
+// {
+//     return lhs->getAttrSet() == rhs->getAttrSet();
+// }
 
 Rendering::Rendering ( RenderList& renderlist, RenderOption& opt ) 
 {
@@ -149,6 +149,7 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
 
                 mat4f old = opt.matrix;
                 opt.matrix = vp.vpmatrix() * proj.projmatrix() * cam->mvmatrix();
+                opt.reverse_mvpw = cam->inversematrix() * proj.inversematrix() * vp.inversematrix();
                 //opt.matrix = cam->mvmatrix();
                 //opt.scale = cam->mvmatrix().sx();
                 opt.painter->setMatrix ( QMatrix( opt.matrix.m00(), opt.matrix.m10(), opt.matrix.m01(), opt.matrix.m11(), opt.matrix.dx(), opt.matrix.dy() ) );

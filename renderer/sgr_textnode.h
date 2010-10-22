@@ -14,6 +14,8 @@
 //
 //using namespace std;
 #include <sgr_vec4.h>
+#include <sgr_vec2.h>
+#include "sgr_drawablenode.h"
 //#include "fbcolor.h"
 namespace SGR
 {
@@ -21,6 +23,8 @@ namespace SGR
 class SGR_DLL TextNode : public DrawableNode
 {
 public:
+    static const int TXTSIZEMODE_SCENE;
+    static const int TXTSIZEMODE_SCREEN;
     enum AnchorFlag
     {
         AnchorLEFT    = 1,
@@ -81,13 +85,31 @@ public:
     //void setTextColor ( GColor color );
     //GColor getTextColor ();
 
+    void setSizeMode ( int );
+    int getSizeMode ();
+
+    // the coordinate frame is depend on size mode, if sizemode = screenmode, the coord is in screen frame
+    // if sizemode = scenemode, the coord is in scene frame
+    void setSize ( float x, float y );
+    const vec2f& getSize () const ;
+    void width ( float w );
+    void height ( float h );
+    float width() const;
+    float height() const;
+
+    float renderScale () const;
+    vec2f anchorPos () const;
 private:
     string _text;
     short _anchor;
     short _alignFlag;
     //FontNode* _fontnode;
 
-    vec3f _dimension;
+    vec2f _size;
+    int _sizeMode;
+
+    float _renderScale;
+    vec2f _anchorPos;
 //private:
 //    FgBgColorComponent _color;
 };

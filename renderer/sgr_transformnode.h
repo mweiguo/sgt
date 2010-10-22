@@ -1,7 +1,7 @@
 #ifndef _TRANSFORM_NODE_H_
 #define _TRANSFORM_NODE_H_
 
-#include "sgr_switchnode.h"
+#include "sgr_sgnode.h"
 #include "sgr_mat4.h"
 #include "sgr_nodemgr.h"
 
@@ -14,11 +14,11 @@ using namespace std;
 namespace SGR
 {
 
-class TransformNode : public virtual SwitchNode
+class TransformNode : public SGNode
 {
 public:
     TransformNode () { _mat.normalize(); }
-    TransformNode ( const TransformNode& rhs ) : SwitchNode(rhs)
+    TransformNode ( const TransformNode& rhs ) : SGNode(rhs)
     {
         _mat = rhs._mat;
     }

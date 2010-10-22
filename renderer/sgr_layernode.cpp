@@ -7,33 +7,40 @@ namespace SGR
 {
 
 LayerNode::LayerNode ( const string& name) : GroupNode(name), _fgcolor(0x0ffffffff), _bgcolor(0x000000ff), 
-            _attrset(0), _renderOrder(-1)
+                                           _attrset(0)//, _renderOrder(-1)
 {
     LayerMgr::getInst().append ( this );
     _fontnode = new FontNode ();
-    if ( _attrset )
-        _attrset->setFont ( _fontnode );
+
+    _attrset = new AttrSet (/*order*/);
+    _attrset->setFont ( _fontnode );
+    _attrset->setBgColor ( &_bgcolor );
+    _attrset->setFgColor ( &_fgcolor );
+
+//     if ( _attrset )
+//         _attrset->setFont ( _fontnode );
 
 }
 
 LayerNode::LayerNode ( const LayerNode& rhs ) : GroupNode ( rhs ), _fgcolor(rhs._fgcolor), _bgcolor(rhs._bgcolor), 
-        _attrset(rhs._attrset), _fontnode(rhs._fontnode), _renderOrder(rhs._renderOrder)
+                                              _fontnode(rhs._fontnode)//, _renderOrder(rhs._renderOrder)
 {
+    *_attrset = *(rhs._attrset);
     LayerMgr::getInst().append ( this );
 }
 
 void LayerNode::setFgColor ( GColor color )
 {
     _fgcolor = color; 
-    if ( _attrset )
-        _attrset->setFgColor ( &_fgcolor );
+//     if ( _attrset )
+    _attrset->setFgColor ( &_fgcolor );
 }
 
 void LayerNode::setBgColor ( GColor color )
 {
     _bgcolor = color; 
-    if ( _attrset )
-        _attrset->setBgColor ( &_bgcolor );
+//     if ( _attrset )
+    _attrset->setBgColor ( &_bgcolor );
 }
 
 LayerNode::~LayerNode ()
@@ -48,19 +55,19 @@ void LayerNode::setFont ( const string& name, const string& f, int ps )
     _fontnode->defName ( name );
 }
 
-void LayerNode::setRenderOrder ( int order )
-{
-    _renderOrder = order; 
-    if ( NULL == _attrset )
-    {
-        _attrset = new AttrSet (order);
-        _attrset->setFont ( _fontnode );
-        _attrset->setBgColor ( &_bgcolor );
-        _attrset->setFgColor ( &_fgcolor );
-    } 
-    else
-        _attrset->setRenderOrder ( order );
-}
+// void LayerNode::setRenderOrder ( int order )
+// {
+//     _renderOrder = order; 
+//     if ( NULL == _attrset )
+//     {
+//         _attrset = new AttrSet (order);
+//         _attrset->setFont ( _fontnode );
+//         _attrset->setBgColor ( &_bgcolor );
+//         _attrset->setFgColor ( &_fgcolor );
+//     } 
+//     else
+//         _attrset->setRenderOrder ( order );
+// }
 
 void LayerNode::addChild ( SGNode* pNode )
 {
@@ -84,13 +91,13 @@ void LayerNode::removeChild ( SGNode* pNode )
 void LayerMgr::append ( LayerNode* layer )
 {
     _layers.push_back ( layer ); 
-    layer->setRenderOrder ( _layers.size() -1 );
+    //layer->setRenderOrder ( _layers.size() -1 );
 }
 
 void LayerMgr::remove ( LayerNode* layer )
 {
     _layers.remove ( layer ); 
-    layer->setRenderOrder ( -1 );
+    //layer->setRenderOrder ( -1 );
 }
 
 

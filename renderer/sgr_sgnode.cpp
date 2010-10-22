@@ -2,11 +2,11 @@
 
 namespace SGR
 {
-    SGNode::SGNode() : _parent(0), _isBBoxDirty(true), _userData(0), _isVisible(true) 
+    SGNode::SGNode() : _parent(0), _userData(0), _isBBoxDirty(true), _isVisible(true) 
     {
     }
 
-    SGNode::SGNode( const SGNode& rhs )
+    SGNode::SGNode( const SGNode& rhs ) : list<SGNode*>(rhs)
     {
         copy ( rhs.begin(), rhs.end(), back_inserter(*this) );
         _parent = rhs._parent;

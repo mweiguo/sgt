@@ -74,7 +74,7 @@ class vec3
     void y( T v )           	     { _v[1] = v; }
     void z( T v )           	     { _v[2] = v; }
  public:
-    T mod ();
+    T mod () const;
     const vec3<T>& normal ();
     //bool operator < ( const_reference rhs ) const;
     //bool operator > ( const_reference rhs ) const;
@@ -106,7 +106,7 @@ class vec3
 
 // vec3
 template < class T >
-inline T vec3<T>::mod ()
+inline T vec3<T>::mod () const
 { 
     return sqrt((double)(x()*x() + y()*y() + z()*z()) ); 
 }

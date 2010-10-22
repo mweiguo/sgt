@@ -3,9 +3,29 @@
 #include "sgr_kdtree.h"
 #include "sgr_rectangle.h"
 #include <map>
-
+#include <iostream>
+ 
 namespace SGR
 {
+    bool is_outside ( const vec3f& lhs, const BBox& rhs )
+    {
+        if (lhs.x() < rhs.minvec().x() || 
+            lhs.y() < rhs.minvec().y() ||
+            lhs.x() > rhs.maxvec().x() || 
+            lhs.y() > rhs.maxvec().y() )
+            return false;
+	return true;
+    }
+
+    bool is_outside ( const vec3f& lhs, const Rectanglef& rhs )
+    {
+        if (lhs.x() < rhs.x() || 
+            lhs.y() < rhs.y() ||
+            lhs.x() > (rhs.x() + rhs.w()) || 
+            lhs.y() > (rhs.y() + rhs.h()) )
+            return false;
+	return true;
+    }
 
     // reference, http://give.zju.edu.cn/cad/new/book/2.5.1.htm
     bool is_intersect ( const Linef& lhs, const Linef& rhs )
@@ -142,11 +162,16 @@ namespace SGR
 
     bool is_intersect ( const BBox& lhs, const BBox& rhs )
     {
+//	static int cnt = 0;
         if ( lhs.maxvec().x() < rhs.minvec().x() || 
             lhs.maxvec().y() < rhs.minvec().y() ||
             lhs.minvec().x() > rhs.maxvec().x() || 
             lhs.minvec().y() > rhs.maxvec().y() )
             return false;
+// 	stringstream ss;
+// 	ss << "( " << lhs.minvec().x() << ", " << lhs.minvec().y() << ", " << lhs.maxvec().x() << ", " << lhs.maxvec().y() << " )";
+// 	ss << "    ( " << rhs.minvec().x() << ", " << rhs.minvec().y() << ", " << rhs.maxvec().x() << ", " << rhs.maxvec().y() << " )" << cnt++;
+// 	qDebug ( ss.str().c_str() );
         return true;
     }
 
@@ -170,6 +195,17 @@ namespace SGR
         return false; 
     }
 
+    bool SGR_DLL is_contain ( const Rectanglef& lhs, const vec2f& rhs )
+    {
+        if ( rhs.x() >= lhs.x() && 
+            rhs.y() >= lhs.y() &&
+            rhs.x() <= lhs.x() + lhs.w() &&
+            rhs.y() <= lhs.y() + lhs.h() )
+            return true;
+        return false; 
+    }
+
+
     bool is_separate ( const BBox& lhs, const BBox& rhs )
     {
         if ( lhs.maxvec().x() < rhs.minvec().x() || 
@@ -184,6 +220,85 @@ namespace SGR
     //bool is_separate ( const BBox& lhs, const vec3f& rhs )
     //{
     //}
+    int intersect ( const Linef& lhs, const Rectanglef& rhs, std::list<vec2f>& out )
+    {
+	Linef ltrb[4];
+	ltrb[0] = rhs.leftLine();
+	ltrb[1] = rhs.topLine();
+	ltrb[2] = rhs.rightLine();
+	ltrb[3] = rhs.bottomLine();
+	std::list<vec2f> temp;
+
+	if ( is_contain ( rhs, lhs.point1() ) && is_contain ( rhs, lhs.point2() ) )
+	    return -5;
+
+	for ( int i=0; i<4; i++ )
+	{
+	    vec2f pnt;
+	    int icode = intersect ( lhs, ltrb[i], pnt );
+	    if ( icode == -1 )  // overlap
+	    {
+		return -(i+1);
+	    }
+	    else if ( icode > 0 )
+	    {
+		temp.push_back ( pnt );
+	    }
+	}
+
+	// unique
+	for ( std::list<vec2f>::iterator pp=temp.begin(); pp!=temp.end(); ++pp )
+	{
+	    if ( std::find ( out.begin(), out.end(), *pp ) == out.end() )
+		out.push_back ( *pp );
+	}
+	
+// 	for ( std::list<vec2f>::iterator pp=out.begin(); pp!=out.end(); ++pp )
+// 	    std::cout << "( " << (*pp).x() << ", " << (*pp).y() << " )   ";
+// 	std::cout << std::endl;
+
+	// reorder intersection points
+	if ( 2 == out.size () )
+	{
+	    float dist1 = dist ( lhs.point1(), out.front() );
+	    float dist2 = dist ( lhs.point2(), out.back () );
+	    if ( dist1 > dist2 )
+		out.reverse ();
+	}
+	return out.size();
+    }
+
+    // reference: http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline2d/
+    int intersect ( const Linef& lhs, const Linef& rhs, vec2f& out )
+    {
+	float x1 = lhs.x1(), y1 = lhs.y1();
+	float x2 = lhs.x2(), y2 = lhs.y2();
+	float x3 = rhs.x1(), y3 = rhs.y1();
+	float x4 = rhs.x2(), y4 = rhs.y2();
+
+	float denominator = (y4-y3)*(x2-x1) - (x4-x3)*(y2-y1);
+	float numerator1  = (x4-x3)*(y1-y3) - (y4-y3)*(x1-x3);
+	float numerator2  = (x2-x1)*(y1-y3) - (y2-y1)*(x1-x3);
+
+	if ( 0==denominator && (0==numerator1 || 0==numerator2) )
+	    return -1;
+	else if ( 0==denominator )
+	    return -2;
+	
+	float u1 = numerator1 / denominator;
+	float u2 = numerator2 / denominator;
+	
+	if ( u1<0 || u1>1 || u2<0 || u2>1 )
+	    return 0;
+
+	out = lhs.point1() + (lhs.point2() - lhs.point1()) * u1;
+	return 1;
+    }
+
+    float dist ( const vec2f& lhs, const vec2f& rhs )
+    {
+	return sqrt ( (lhs.x()-rhs.x())*(lhs.x()-rhs.x()) + (lhs.y()-rhs.y())*(lhs.y()-rhs.y()) );
+    }
 
 #define KDT_RECTANGLE 1
 
@@ -246,7 +361,7 @@ namespace SGR
                     delete (*pp);
             }
         }
-        bool intersect ( vec3f mincoord, vec3f maxcoord, void* objptr, int& objN )
+        bool intersect ( vec3f mincoord, vec3f maxcoord, void* objptr, unsigned int& objN )
         {
             if ( KDT_RECTANGLE == _objType )
             {
@@ -261,7 +376,7 @@ namespace SGR
                 );
 
                 Rectanglef* tmp = (Rectanglef*)objptr;
-                for ( int i=0; i<objN; i++, ++tmp )
+                for ( size_t i=0; i<objN; i++, ++tmp )
                     tmp->setRect ( out[i]->x(), out[i]->y(), out[i]->w(), out[i]->h() );
 
                 objN = objN > out.size() ? out.size() : objN;
@@ -299,7 +414,7 @@ namespace SGR
         kdt.clear ();
     }
 
-    bool kdtree_intersect ( int id, float minx, float miny, float minz, float maxx, float maxy, float maxz, void* objptr, int& objN )
+    bool kdtree_intersect ( int id, float minx, float miny, float minz, float maxx, float maxy, float maxz, void* objptr, unsigned int& objN )
     {
         KDTHelper& kdt = kdt_mgr[id];
         return kdt.intersect ( vec3f(minx, miny, minz), vec3f(maxx, maxy, maxz), objptr, objN );

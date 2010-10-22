@@ -23,6 +23,9 @@ public:
     {
         _pickedNodes.clear();
     }
+    virtual ~BoxPicker ()
+    {
+    }
     void initialize ( const BBox& box, int camid )
     {
         _bbox = box;
@@ -183,7 +186,7 @@ void BoxPicker::apply ( SwitchNode& node )
         return;
 
     {
-        if ( node.selection() >= 0 && node.selection() < node.size() )
+        if ( node.selection() >= 0 && (unsigned int)(node.selection()) < node.size() )
         {
             int i=0;
             SGNode::iterator pp = node.begin();

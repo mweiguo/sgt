@@ -38,7 +38,7 @@ public:
 
     const mat4& operator*= ( const_reference rhs ) const;
     const mat4& operator= ( const_reference rhs ) const;
-    
+
     const bool operator== ( const_reference rhs ) const
     {
         if ( this == &rhs )
@@ -88,6 +88,23 @@ public:
     ValueType m31 () const { return m[3][1]; }
     ValueType m32 () const { return m[3][2]; }
     ValueType m33 () const { return m[3][3]; }
+
+    void m00 ( ValueType v ) { m[0][0] = v; }
+    void m01 ( ValueType v ) { m[0][1] = v; }
+    void m02 ( ValueType v ) { m[0][2] = v; }
+    void m03 ( ValueType v ) { m[0][3] = v; }
+    void m10 ( ValueType v ) { m[1][0] = v; }
+    void m11 ( ValueType v ) { m[1][1] = v; }
+    void m12 ( ValueType v ) { m[1][2] = v; }
+    void m13 ( ValueType v ) { m[1][3] = v; }
+    void m20 ( ValueType v ) { m[2][0] = v; }
+    void m21 ( ValueType v ) { m[2][1] = v; }
+    void m22 ( ValueType v ) { m[2][2] = v; }
+    void m23 ( ValueType v ) { m[2][3] = v; }
+    void m30 ( ValueType v ) { m[3][0] = v; }
+    void m31 ( ValueType v ) { m[3][1] = v; }
+    void m32 ( ValueType v ) { m[3][2] = v; }
+    void m33 ( ValueType v ) { m[3][3] = v; }
 
     void normalize () {
         m[0][0] = 1; m[0][1] = 0; m[0][2] = 0; m[0][3] = 0;

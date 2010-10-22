@@ -3,6 +3,8 @@
 
 #include <sgr_bbox.h>
 #include "sgr_global.h"
+#include "sgr_line.h"
+
 namespace SGR
 {
 
@@ -40,6 +42,11 @@ public:
     }
     inline void setUserData ( void* data ) { _userData = data; }
     inline void* getUserData () { return _userData; }
+
+    Linef leftLine()   const { return Linef ( _x,      	_y,        _x,        _y + _h ); }
+    Linef topLine()    const { return Linef ( _x,      	_y + _h,   _x + _w,   _y + _h ); }
+    Linef rightLine()  const { return Linef ( _x + _w, 	_y + _h,   _x + _w,   _y      ); }
+    Linef bottomLine() const { return Linef ( _x,      	_y,        _x + _w,   _y      ); }
 private:
     T _x, _y, _w, _h;
     void* _userData;

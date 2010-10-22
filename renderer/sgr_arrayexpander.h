@@ -12,6 +12,7 @@ class SGR_DLL ArrayExpander : public NodeVisitor
 {
 public:
     ArrayExpander ( SGNode* parent, bool isExport=false );
+    virtual ~ArrayExpander () {}
     virtual void apply ( SGNode& /*node*/ );
     virtual void apply ( LayerNode& /*node*/ );
     virtual void apply ( RectangleNodef& /*node*/ );

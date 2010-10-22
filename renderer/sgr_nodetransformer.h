@@ -11,7 +11,7 @@ class NodeTransformer : public ChildVisitor
 public:
     void translate ( SGNode* node, float tx, float ty, float tz );
     void scale ( SGNode* node, float scale );
-
+    virtual ~NodeTransformer ();
     virtual void apply ( SGNode& node );
     virtual void apply ( LayerNode& node );
     virtual void apply ( RectangleNodef& node );

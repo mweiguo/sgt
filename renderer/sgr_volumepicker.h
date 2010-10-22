@@ -20,6 +20,9 @@ public:
     {
         _pickedNodes.clear();
     }
+    virtual ~VolumePicker ()
+    {
+    }
     virtual void apply ( LayerNode& node );
     virtual void apply ( RectangleNodef& node );
     virtual void apply ( TransformNode& node );
@@ -184,7 +187,7 @@ void VolumePicker<Output>::apply ( SwitchNode& node )
 {
     if ( node.isVisible () )
     {
-        if ( node.selection() >= 0 && node.selection() < node.size() )
+        if ( node.selection() >= 0 && (unsigned int)(node.selection()) < node.size() )
         {
             int i=0;
             SGNode::iterator pp = node.begin();

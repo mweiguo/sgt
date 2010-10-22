@@ -48,6 +48,9 @@ public:
     T operator[] (int idx) const  { return _v[idx]; }
 
     vec2 operator += ( const_reference rhs );
+    vec2 operator * ( T rhs );
+    vec2 operator / ( T rhs );
+    bool operator == ( const_reference rhs );
 
 protected:
     T _v[2];
@@ -115,6 +118,24 @@ inline vec2<T> vec2<T>::operator += ( const vec2<T>& rhs )
 { 
     xy ( x()+rhs.x(), y()+rhs.y() );
     return *this;
+}
+
+template < class T >
+inline vec2<T> vec2<T>::operator * ( T v )
+{ 
+    return vec2 ( _v[0] * v,  _v[1] * v ); 
+}
+
+template < class T >
+inline vec2<T> vec2<T>::operator / ( T v )
+{ 
+    return vec2 ( _v[0] / v,  _v[1] / v ); 
+}
+
+template < class T >
+inline bool vec2<T>::operator == ( const vec2<T>& rhs )
+{
+    return (_v[0] == rhs._v[0]) && (_v[1] == rhs._v[1]);
 }
 
 typedef vec2<float> vec2f;

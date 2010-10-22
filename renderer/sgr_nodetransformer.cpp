@@ -3,6 +3,10 @@
 
 namespace SGR
 {
+    NodeTransformer::~NodeTransformer ()
+    {
+    }
+
     void NodeTransformer::translate ( SGNode* node, float tx, float ty, float tz )
     {
         _transformNodeStack.clear();

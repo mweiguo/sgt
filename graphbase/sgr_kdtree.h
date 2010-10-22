@@ -434,9 +434,9 @@ inline bool KdTree<ObjectType>::intersect ( const BBox& box, Output out, GetBBox
 template<class ObjectType>
 inline string KdTree<ObjectType>::memstatistic ()
 {
-    int nums = size();
-    int objs = size() * sizeof(ObjectType);
-    int heapalloc = size() * sizeof(Rectanglef);
+    int nums = vector<ObjectType>::size();
+    int objs = vector<ObjectType>::size() * sizeof(ObjectType);
+    int heapalloc = vector<ObjectType>::size() * sizeof(Rectanglef);
     int nodes = _nodes.size() * sizeof(KdNode);
     double unit = 1000000.0;
     stringstream ss;
@@ -458,7 +458,7 @@ inline string KdTree<ObjectType>::intersectstatistic ()
     ss << "     bb compare times = " << _bbcompcnt  << endl;
     ss << "     time ellapse = " << (_buildFinishedClock - _buildStartClock)/(1.0*CLOCKS_PER_SEC) << " (s)" << endl;
     ss << "     number of selected items  = " << _selectedCount << endl;
-    ss << "     select rate  = " << _selectedCount/(1.0*size()) << endl;
+    ss << "     select rate  = " << _selectedCount/(1.0*vector<ObjectType>::size()) << endl;
     return ss.str();
 }
 #endif // _USESTATISTIC_

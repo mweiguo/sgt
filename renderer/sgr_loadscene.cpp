@@ -1001,7 +1001,7 @@ namespace SGR
             }
             else
             {
-                AttrSet* set = new AttrSet ( finder.target()->getRenderOrder() );
+                AttrSet* set = new AttrSet ( /*finder.target()->getRenderOrder()*/ );
                 node->setAttrSet ( set );
                 if ( NULL != bgcolor )
                     set->setBgColor ( bgcolor );
@@ -1021,7 +1021,7 @@ namespace SGR
         }
         else
         {
-            AttrSet* set = new AttrSet ( -1 );
+            AttrSet* set = new AttrSet ( /*-1*/ );
             node->setAttrSet ( set );
             if ( NULL != bgcolor )
                 set->setBgColor ( bgcolor );
@@ -1035,7 +1035,7 @@ namespace SGR
 
     }
 
-    void ArrayNodeParser::getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int level0Cnt, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt )
+    void ArrayNodeParser::getShapeGenParas (int index, int& s1, int& s2, int& s3, int& s4, int& s5, int& s6, int /*level0Cnt*/, int level1Cnt, int level2Cnt, int level3Cnt, int level4Cnt, int level5Cnt )
     {
         // init
         s1 = s2 = s3 = s4 = s5 = 0;
@@ -1141,7 +1141,7 @@ namespace SGR
         if ( XercesHelper::hasAttribute ( tagElement, "family" ) )
             fontnode->family ( (const char*)XercesHelper::getAttribute ( tagElement, "family" ) );
         if ( XercesHelper::hasAttribute ( tagElement, "size" ) )
-            fontnode->pointSize ( atof((const char*)XercesHelper::getAttribute ( tagElement, "size" )) );
+            fontnode->pointSize ( atoi((const char*)XercesHelper::getAttribute ( tagElement, "size" )) );
         if ( XercesHelper::hasAttribute ( tagElement, "style" ) )
         {
             string style = (const char*)XercesHelper::getAttribute ( tagElement, "style" );
@@ -1360,6 +1360,17 @@ namespace SGR
             textnode->anchorValue ( atoi((const char*)XercesHelper::getAttribute ( tagElement, "anchor" )));
         if ( XercesHelper::hasAttribute ( tagElement, "justify" ) )
             textnode->setAlignFlag ( atoi((const char*)XercesHelper::getAttribute ( tagElement, "justify" )));
+        if ( XercesHelper::hasAttribute ( tagElement, "sizemode" ) )
+	{
+	     // default is scene mode, so if can not regnice this attribute, we use screen node
+	    string sizemode = (const char*)XercesHelper::getAttribute ( tagElement, "sizemode" );
+	    if ( sizemode == "screenmode" )
+		textnode->setSizeMode ( TextNode::TXTSIZEMODE_SCREEN );
+	}
+        if ( XercesHelper::hasAttribute ( tagElement, "width" ) )
+            textnode->width ( atof((const char*)XercesHelper::getAttribute ( tagElement, "width" )));
+        if ( XercesHelper::hasAttribute ( tagElement, "height" ) )
+            textnode->height ( atof((const char*)XercesHelper::getAttribute ( tagElement, "height" )));
         textnode->text ( (const char*)XercesHelper::getTextContent (tagElement) );
 
         // parse & set sgnode's attributes
@@ -1459,7 +1470,7 @@ namespace SGR
             vector<string> tokens;
             copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
             vector<vec3f> tmp;
-            for ( int i=0; i<tokens.size(); i+=3 )
+            for ( size_t i=0; i<tokens.size(); i+=3 )
             {
                 tmp.push_back ( 
                     vec3f(
@@ -1501,7 +1512,7 @@ namespace SGR
         vector<string> tokens;
         copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
         vector<int> tmp;
-        for ( int i=0; i<tokens.size(); i++ )
+        for ( size_t i=0; i<tokens.size(); i++ )
         {
             tmp.push_back ( atoi ( tokens[i].c_str() ) );
         }

@@ -12,7 +12,7 @@ namespace SGR
 {
 
 template < class T >
-class SGR_DLL LineNode : public DrawableNode//, public Line<T>
+class SGR_DLL LineNode : public DrawableNode
 {
 public:
     LineNode ( T x1=0, T y1=0, T x2=0, T y2=0 ) { setPoints(x1,y1,x2,y2); }

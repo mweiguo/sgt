@@ -25,7 +25,7 @@ public:
         return inst;
     }
     FontNode ( const string& family="Courier New", int pointSize=12, StyleFlag style=FontNode::NORMAL ) : 
-    _family(family), _pointSize(pointSize)
+	_family(family), _pointSize(pointSize), _style(style)
     {
     }
     FontNode ( const FontNode& rhs ) : SGNode(rhs)
@@ -48,7 +48,13 @@ public:
     void weight ( int w ) { _weight = w; }
     int weight () { return _weight; }
 
-    void isItalic ( bool isItalic ) { _style &= ITALIC; }
+    void isItalic ( bool isItalic )
+    {
+	if (isItalic)
+	    _style &= ITALIC; 
+	else
+	    _style &= ~ITALIC; 
+    }
     bool italic () const { return (_style & ITALIC); }
 
     void defName (const string& defName) { _defName = defName; }
@@ -60,7 +66,7 @@ public:
         ss << _family << '|' << _pointSize << "|" << _weight << "|" << _style;
         return ss.str();
     }
-    void setDesc ( const string& desc )
+    void setDesc ( const string& /*desc*/ )
     {
     }
 

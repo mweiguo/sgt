@@ -34,10 +34,11 @@ private:
     map < string, QRegExp > replaces;
 };
 
-class SGR_DLL SaveMesh : public ChildVisitor
+class SaveMesh : public ChildVisitor
 {
 public:
     SaveMesh( const string& filename, SGNode* node );
+    virtual ~SaveMesh ();
     virtual void apply ( LayerNode& node );
     virtual void apply ( RectangleNodef& node );
     virtual void apply ( TransformNode& node );
@@ -237,10 +238,12 @@ inline void SaveMesh::apply ( LineNodef& node )
 
 inline void SaveMesh::apply ( TextNode& node )
 {
-    _xmlContent << "<text id=\"" << node.getID() << "\"";
+    _xmlContent << "<text id=\"" << node.getID() << "\" ";
+    if ( node.getSizeMode() == TextNode::TXTSIZEMODE_SCREEN )
+        _xmlContent << "sizemode=\"screenmode\" ";
     if ( NULL != node.getAttrSet() && NULL != node.getAttrSet()->getFont() ) 
-        _xmlContent << " font='" << node.getAttrSet()->getFont()->defName() << "'";
-    _xmlContent << " anchor='" << node.anchorValue() << "' bbox =\"" << 
+        _xmlContent << "font='" << node.getAttrSet()->getFont()->defName() << "'";
+    _xmlContent << " anchor='" << node.anchorValue()  << "' width='" << node.width() << "' height='" << node.height() << "' bbox =\"" << 
         node.getBBox().minvec().x() << ' ' << node.getBBox().minvec().y() << ' ' << node.getBBox().minvec().z() << " " <<
        node.getBBox().maxvec().x() << ' ' << node.getBBox().maxvec().y() << ' ' << node.getBBox().maxvec().z() << "\">";
     _xmlContent << XMLCharEscape::getInst().transcode (node.text());
@@ -326,6 +329,9 @@ inline void SaveMesh::apply ( MeshPointNode& node )
     _xmlContent << "</meshpoint>";
 }
 
+SaveMesh::~SaveMesh ()
+{
+}
 
 }
 #endif

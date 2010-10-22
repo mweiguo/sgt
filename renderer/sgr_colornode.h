@@ -8,9 +8,9 @@ namespace SGR
 class SGR_DLL ColorNode : public GColor, public SGNode
 {
 public:
-    ColorNode ( unsigned int color=0x000000ff ) : GColor (color) {}
-    ColorNode ( const string& color ) : GColor (color) {}
-    ColorNode ( const ColorNode& rhs ) : GColor ( rhs ) {} 
+    ColorNode ( unsigned int color=0x000000ff ) : GColor (color), SGNode() {}
+    ColorNode ( const string& color ) : GColor (color), SGNode() {}
+    ColorNode ( const ColorNode& rhs ) : GColor (rhs), SGNode(rhs) {} 
 
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }

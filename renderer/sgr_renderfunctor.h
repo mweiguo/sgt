@@ -1,6 +1,6 @@
 #ifndef _QTRENDER_FUNCTOR_H_
 #define _QTRENDER_FUNCTOR_H_
-
+ 
 #include <QPainter>
 
 #include "sgr_rectitem.h"
@@ -14,6 +14,7 @@
 #include "sgr_nodes.h"
 #include "sgr_global.h"
 #include "sgr_parentfinder.h"
+#include "sgr_fontmetric.h"
 
 namespace SGR
 {
@@ -24,7 +25,7 @@ struct SGR_DLL RenderOption
     QPainter* painter;
     //mat4f* mvmatrix;
     // matrix = viewpmapping * model-view
-    mat4f matrix;
+    mat4f matrix, reverse_mvpw;
     float scale;
     RenderOption() : painter(0) {}
 };
@@ -124,20 +125,94 @@ inline void QtRenderVisitor::apply ( TextNode& text )
 {
     const BBox& b = text.getBBox ();
     QMatrix tm;
+    QRectF rc;//( b.minvec().x(), b.minvec().y(), b.dimension().w(), b.dimension().h() );
 //    tm.translate ( 0, -b.dimension().h() );
-    tm.translate ( 0, -(b.minvec().y() + b.maxvec().y()) );
     
     QMatrix m;
     m.reset();
     m.scale ( 1, -1 );
+
     QMatrix oldm = _opt->painter->matrix();
-    QMatrix newm = tm * m * oldm;
+    QMatrix newm;// = tm * m * oldm;
+    if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCREEN )
+    {
+	vec3f screen_size = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
+	vec4f scenesize   = _opt->reverse_mvpw * vec4f(text.getSize());
+	float scale = scenesize.x() / screen_size.x();
+ 	m.scale ( scale, -scale );
+
+	float dx=0, dy=0;
+	if ( text.isAnchorHCenter () )
+	    dx = -scenesize.x()/2.f;
+	else if ( text.isAnchorRight () )
+	    dx = -scenesize.x();
+
+	if ( text.isAnchorVCenter () )
+	    dy = -scenesize.y()/2.f;
+	else if ( text.isAnchorTop () )
+	    dy = -scenesize.y();
+
+	tm.translate ( 0, -(b.minvec().y() + b.maxvec().y()) );
+	stringstream ss;
+	ss << "render text in screen mode";
+	qDebug ( ss.str().c_str() );
+    }
+    else if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCENE )
+    {
+// 	// in this mode, scene size is fixed, and current device-scene coordinate mapping rate is 1:1, so screen unit = scene unit
+ 	vec3f scenesize = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
+ 	float scale = text.renderScale();
+
+	float dx=0, dy=0;
+	if ( text.isAnchorHCenter () )
+	    dx = -text.width()/2.f;
+	else if ( text.isAnchorRight () )
+	    dx = -text.width();
+
+	if ( text.isAnchorVCenter () )
+	    dy = -text.height()/2.f;
+	else if ( text.isAnchorTop () )
+	    dy = -text.height();
+
+	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
+
+ 	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
+//  	vec4f ttt = _opt->matrix * vec4f ( b.minvec().x(), b.minvec().y(), 0, 1 );
+//  	vec4f ttt1 = _opt->matrix * vec4f ( b.minvec().x()+scenesize.x(), b.minvec().y()+scenesize.y(), 0, 1 );
+
+ 	QMatrix mm1, mm2, mm3, mm4, mm5;
+	mm1.translate ( -ttt.x(), -ttt.y() );
+	mm2.scale ( 1, -1 );
+
+	if ( text.isAnchorVCenter () )
+	{
+// 	    vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y()/2.0f, 0, 1 );
+// 	    mm3.translate ( 0, ttt1.y()-ttt.y() );
+	}
+	else if ( text.isAnchorTop () )
+	{
+	}
+	else if ( text.isAnchorBottom () )
+	{
+	    vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 );
+	    mm3.translate ( 0, ttt1.y()-ttt.y() );
+	}
+
+	mm4.scale ( scale, scale );
+	mm5.translate ( ttt.x(), ttt.y() );
+
+
+	newm = oldm * mm1 * mm2 * mm3 * mm4 * mm5;
+    }
+
     _opt->painter->setWorldMatrix ( newm );
     
-    QRectF rc( b.minvec().x(), b.minvec().y(), b.dimension().w(), b.dimension().h() );
     //QRectF rc( lb.x(), lb.y(), 200, 100 );
-    //_opt->painter->drawRect ( rc );
-    _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
+//    QPointF p1(b.minvec().x(), b.minvec().y()), p2(b.maxvec().x(), b.maxvec().y());
+//    QPointF p1(0,0), p2(1,1);
+//    _opt->painter->drawLine ( p1, p2 );
+     _opt->painter->drawRect ( rc );
+     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
     _opt->painter->setWorldMatrix ( oldm );
 
     for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp )
@@ -148,8 +223,11 @@ inline void QtRenderVisitor::apply ( LineNodef& line )
 {
     QPointF p1 ( line.point1().x(), line.point1().y() );
     QPointF p2 ( line.point2().x(), line.point2().y() );
+//     stringstream ss;
+//     ss << "(" << line.point1().x() << ", " << line.point1().y() << ") (" << line.point2().x() << ", " << line.point2().y() << ")";
+//     qDebug ( ss.str().c_str() );
     _opt->painter->drawLine ( p1, p2 );
-
+    
     for ( SGNode::iterator pp=line.begin(); pp!=line.end(); ++pp )
         (*pp)->accept ( *this );
 }
@@ -169,6 +247,7 @@ inline void QtRenderVisitor::apply ( PolylineNode2Df& line )
     {
         QPointF* tmp = new QPointF[line.pointssize()];
         QPointF* b = tmp;
+	
         for ( PolylineNode2Df::pointiterator pp=line.pointbegin(); pp!=line.pointend(); ++pp, ++tmp )
         {
             tmp->setX ( (*pp).x() );
@@ -177,6 +256,7 @@ inline void QtRenderVisitor::apply ( PolylineNode2Df& line )
 
         _opt->painter->drawPolyline ( b, line.pointssize() );
         delete[] b;
+
     }
 
     for ( SGNode::iterator pp=line.begin(); pp!=line.end(); ++pp )

@@ -17,6 +17,9 @@ namespace SGR
                 (*pp)->accept ( *this );
             }
         }
+	virtual ~ChildrenFinder ()
+	{
+	}
         virtual void apply ( SGNode& node )
         {
             if ( true == IsSameType<T, SGNode>::Result::value )

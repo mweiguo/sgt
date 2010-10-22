@@ -133,6 +133,7 @@ extern "C"
     void SGR_DLL add_child ( int parent, int child );
     void SGR_DLL pushfront_child ( int parent, int child );
     void SGR_DLL remove_child ( int preant, int child );
+    void SGR_DLL remove_parent ( int nodeid );
     void SGR_DLL clear_child ( int id );
     void SGR_DLL node_delete ( int id );
     void SGR_DLL node_visible ( int id, bool isVisible );
@@ -199,7 +200,7 @@ extern "C"
     void SGR_DLL layer_visible ( int id, bool isVisible );
     void SGR_DLL layer_fgcolor ( int id, int color );
     void SGR_DLL layer_bgcolor ( int id, int color );
-    void SGR_DLL layer_font ( int id, const char* family, float size, int style, int weight, const char* name );
+    void SGR_DLL layer_font ( int id, const char* family, int size, int style, int weight, const char* name );
     // lod
     void SGR_DLL lod_create ( int id );
     void SGR_DLL lod_delimiters ( int id, const char* delims );
@@ -250,7 +251,7 @@ extern "C"
 
     void SGR_DLL font_create ( int id, const char* desc="" );
     void SGR_DLL font_family ( int id, const char* f );
-    void SGR_DLL font_size ( int id, float size );
+    void SGR_DLL font_size ( int id, int size );
     /*NORMAL = 1, ITALIC = 3, UNDERSTRIKE = 4*/
     void SGR_DLL font_style ( int id, int style );
     void SGR_DLL font_weight ( int id, int weight );

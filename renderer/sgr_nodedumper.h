@@ -8,9 +8,10 @@ using namespace std;
 namespace SGR
 {
 
-class SGR_DLL NodeDumper : public ChildVisitor
+class NodeDumper : public ChildVisitor
 {
 public:
+    virtual ~NodeDumper () {}
     virtual void apply ( SGNode& node );
     virtual void apply ( LayerNode& node );
     virtual void apply ( RectangleNodef& node );

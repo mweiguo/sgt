@@ -28,8 +28,8 @@ public:
     FontNode* getFontNode () { return _fontnode; }
     void setFont ( const string& name, const string& family="Courier New", int pointSize=12 );
 
-    void setRenderOrder ( int order );
-    int getRenderOrder () { return _renderOrder; }
+//     void setRenderOrder ( int order );
+//     int getRenderOrder () { return _renderOrder; }
 
     AttrSet* getAttrSet () { return _attrset; }
 
@@ -41,7 +41,7 @@ private:
     GColor _fgcolor, _bgcolor;
     AttrSet* _attrset;
     FontNode* _fontnode;
-    int _renderOrder;
+//     int _renderOrder;
 };
 
 class LayerMgr
