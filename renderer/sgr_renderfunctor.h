@@ -15,6 +15,7 @@
 #include "sgr_global.h"
 #include "sgr_parentfinder.h"
 #include "sgr_fontmetric.h"
+#include <tinylog.h>
 
 namespace SGR
 {
@@ -123,39 +124,46 @@ inline void QtRenderVisitor::apply ( RectangleNodef& rect )
 
 inline void QtRenderVisitor::apply ( TextNode& text )
 {
-    const BBox& b = text.getBBox ();
-    QMatrix tm;
-    QRectF rc;//( b.minvec().x(), b.minvec().y(), b.dimension().w(), b.dimension().h() );
-//    tm.translate ( 0, -b.dimension().h() );
-    
-    QMatrix m;
-    m.reset();
-    m.scale ( 1, -1 );
-
+    QRectF rc, rc1;
     QMatrix oldm = _opt->painter->matrix();
-    QMatrix newm;// = tm * m * oldm;
+    QMatrix newm;
     if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCREEN )
     {
-	vec3f screen_size = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
-	vec4f scenesize   = _opt->reverse_mvpw * vec4f(text.getSize());
-	float scale = scenesize.x() / screen_size.x();
- 	m.scale ( scale, -scale );
+ 	vec3f screen_size = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
+// 	LOG_INFO ("%s, SCREEN_SIZE, (%f, %f, %f)\n", text.text().c_str(), screen_size.x(), screen_size.y(), screen_size.z() );
+	float calcHeight = text.width() * screen_size.y() / screen_size.x();
+	vec4f p0   = _opt->reverse_mvpw * vec4f(0,0,0,1);
+	vec4f p1   = _opt->reverse_mvpw * vec4f(text.getSize().x(), calcHeight);
+	vec4f scenesize   = p1 - p0;
+ 	float scale = text.getSize().x() / screen_size.x();
+// 	LOG_INFO ("      p0.x=%f, p0.y=%f,   p1.x=%f, p1.y=%f, scale=%f\n", p0.x(), p0.y(), p1.x(), p1.y(), scale );
+// 	float dx=0, dy=0;
+// 	if ( text.isAnchorHCenter () )
+// 	    dx = -scenesize.x()/2.f;
+// 	else if ( text.isAnchorRight () )
+// 	    dx = -scenesize.x();
 
-	float dx=0, dy=0;
-	if ( text.isAnchorHCenter () )
-	    dx = -scenesize.x()/2.f;
-	else if ( text.isAnchorRight () )
-	    dx = -scenesize.x();
+// 	if ( text.isAnchorVCenter () )
+// 	    dy = -calcHeight/2.f;
+// 	else if ( text.isAnchorTop () )
+// 	    dy = -calcHeight;
 
-	if ( text.isAnchorVCenter () )
-	    dy = -scenesize.y()/2.f;
-	else if ( text.isAnchorTop () )
-	    dy = -scenesize.y();
-
-	tm.translate ( 0, -(b.minvec().y() + b.maxvec().y()) );
-	stringstream ss;
-	ss << "render text in screen mode";
-	qDebug ( ss.str().c_str() );
+// 	// calculate rectangle for text
+// 	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
+ 	rc.setRect ( text.anchorPos().x(), text.anchorPos().y(), scenesize.x()/scale, scenesize.y()/scale );
+// 	LOG_INFO ("%s,  x=%f, y=%f, w=%f, h=%f\n", text.text().c_str(), text.anchorPos().x(), text.anchorPos().y(), scenesize.x(), fabs(scenesize.y()) );
+// 	// this point is rect lb point
+//  	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
+  	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x(), text.anchorPos().y(), 0, 1 );
+// 	// reverse and scale it inplace
+ 	vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+scenesize.x(), text.anchorPos().y()+scenesize.y(), 0, 1 );
+  	QMatrix mm1, mm2, mm3, mm4, mm5, mm;
+ 	mm.translate ( ttt.x(), ttt.y() );
+ 	mm.scale ( scale, scale );
+ 	mm.translate ( 0, ttt1.y()-ttt.y() );
+ 	mm.scale ( 1, -1 );
+ 	mm.translate ( -ttt.x(), -ttt.y() );
+	newm = oldm * mm;
     }
     else if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCENE )
     {
@@ -169,50 +177,31 @@ inline void QtRenderVisitor::apply ( TextNode& text )
 	else if ( text.isAnchorRight () )
 	    dx = -text.width();
 
+	float calcHeight = text.width() * scenesize.y() / scenesize.x();
 	if ( text.isAnchorVCenter () )
-	    dy = -text.height()/2.f;
+	    dy = -calcHeight / 2.f;
 	else if ( text.isAnchorTop () )
-	    dy = -text.height();
+	    dy = -calcHeight;
 
+	// calculate rectangle for text
 	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
-
+	// this point is rect lb point
  	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
-//  	vec4f ttt = _opt->matrix * vec4f ( b.minvec().x(), b.minvec().y(), 0, 1 );
-//  	vec4f ttt1 = _opt->matrix * vec4f ( b.minvec().x()+scenesize.x(), b.minvec().y()+scenesize.y(), 0, 1 );
-
- 	QMatrix mm1, mm2, mm3, mm4, mm5;
-	mm1.translate ( -ttt.x(), -ttt.y() );
-	mm2.scale ( 1, -1 );
-
-	if ( text.isAnchorVCenter () )
-	{
-// 	    vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y()/2.0f, 0, 1 );
-// 	    mm3.translate ( 0, ttt1.y()-ttt.y() );
-	}
-	else if ( text.isAnchorTop () )
-	{
-	}
-	else if ( text.isAnchorBottom () )
-	{
-	    vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 );
-	    mm3.translate ( 0, ttt1.y()-ttt.y() );
-	}
-
-	mm4.scale ( scale, scale );
-	mm5.translate ( ttt.x(), ttt.y() );
-
-
-	newm = oldm * mm1 * mm2 * mm3 * mm4 * mm5;
+	// reverse and scale it inplace
+	vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 );
+ 	QMatrix mm1, mm2, mm3, mm4, mm5, mm;
+	mm.translate ( ttt.x(), ttt.y() );
+	mm.scale ( scale, scale );
+	mm.translate ( 0, ttt1.y()-ttt.y() );
+	mm.scale ( 1, -1 );
+	mm.translate ( -ttt.x(), -ttt.y() );
+	newm = oldm * mm;
     }
 
     _opt->painter->setWorldMatrix ( newm );
-    
-    //QRectF rc( lb.x(), lb.y(), 200, 100 );
-//    QPointF p1(b.minvec().x(), b.minvec().y()), p2(b.maxvec().x(), b.maxvec().y());
-//    QPointF p1(0,0), p2(1,1);
-//    _opt->painter->drawLine ( p1, p2 );
-     _opt->painter->drawRect ( rc );
-     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
+    _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
+    _opt->painter->drawRect ( rc );
+    _opt->painter->drawRect ( rc1 );
     _opt->painter->setWorldMatrix ( oldm );
 
     for ( SGNode::iterator pp=text.begin(); pp!=text.end(); ++pp )

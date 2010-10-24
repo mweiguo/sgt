@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "sgr_interface.h"
+//#include "sgr_interface.h"
 #include "sgr_seedgen.h"
 #include "sgr_polylinenode.h"
 
@@ -29,8 +29,9 @@ void ArrayExpander::operator () ( ArrayNode& node )
     //copy ( node.begin(), node.end(), back_inserter(tmpChildren) );
 
     int id = SeedGenerator::getInst().minseed();
-    groupnode_create ( id );
-    GroupNode* group = NodeMgr::getInst().getNodePtr<GroupNode>(id);
+    GroupNode* group = NodeMgr::getInst().addNode<GroupNode>(id);
+//     groupnode_create ( id );
+//     GroupNode* group = NodeMgr::getInst().getNodePtr<GroupNode>(id);
     //GroupNode* group = new GroupNode();
     //if ( _isExport )
     //    NodeMgr::getInst().addNode ( group );
@@ -45,8 +46,9 @@ void ArrayExpander::operator () ( ArrayNode& node )
             float x = node.getHOffset ( k );
             // generate new matrix & use this matrix
             id = SeedGenerator::getInst().minseed();
-            transform_create ( id );
-            TransformNode* trans = NodeMgr::getInst().getNodePtr<TransformNode>(id);
+            TransformNode* trans = NodeMgr::getInst().addNode<TransformNode>(id);
+//             transform_create ( id );
+//             TransformNode* trans = NodeMgr::getInst().getNodePtr<TransformNode>(id);
             //TransformNode* trans = new TransformNode();
             //if ( _isExport )
             //    NodeMgr::getInst().addNode ( trans );

@@ -1,70 +1,52 @@
-#include "sgr_renderflow.h"
+#include "renderflow.h"
 
 #include <string>
 #include <map>
 #include <algorithm>
 
-#include "sgr_projection.h"
-#include "sgr_scenemgr.h"
-#include "sgr_cameraortho.h"
-#include "sgr_viewport.h"
-#include "sgr_mat4.h"
-#include "sgr_renderfunctor.h"
-#include "sgr_kdtree.h"
+#include "scenemgr.h"
+#include "cameraortho.h"
+#include "viewport.h"
+#include "mat4.h"
+#include "renderfunctor.h"
+#include "kdtree.h"
 //#include "nodevisible.h"
-#include "sgr_culling.h"
-#include "sgr_nodemgr.h"
+#include "culling.h"
+#include "nodemgr.h"
 
-#include "sgr_nodedumper.h"
-#include "sgr_global.h"
-
-#include "sgr_renderlist.h"
+#include "nodedumper.h"
+#include "agef_global.h"
+#include "projection.h"
 
 using namespace std; 
-namespace SGR
+
+bool lessAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
 {
+    AttrSet *plhs = lhs->getAttrSet();
+    AttrSet *prhs = rhs->getAttrSet();
+    if ( plhs && prhs )
+    {
+        if ( plhs->getRenderOrder() < prhs->getRenderOrder() )
+            return true;
+        else if ( plhs->getRenderOrder() == prhs->getRenderOrder() )
+        {
+            if ( plhs < prhs )
+                return true;
+        }
+    }
+    else
+        return plhs < prhs;
 
-// bool lessAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
-// {
-//     AttrSet *plhs = lhs->getAttrSet();
-//     AttrSet *prhs = rhs->getAttrSet();
-//     if ( plhs && prhs )
-//     {
-//         if ( plhs->getRenderOrder() < prhs->getRenderOrder() )
-//             return true;
-//         else if ( plhs->getRenderOrder() == prhs->getRenderOrder() )
-//         {
-//             if ( plhs < prhs )
-//                 return true;
-//         }
-//     }
-//     else
-//         return plhs < prhs;
+    return false;
+}
 
-//     return false;
-// }
-
-// bool equalAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
-// {
-//     return lhs->getAttrSet() == rhs->getAttrSet();
-// }
+bool equalAttrSet ( DrawableNode* lhs, DrawableNode* rhs )
+{
+    return lhs->getAttrSet() == rhs->getAttrSet();
+}
 
 Rendering::Rendering ( RenderList& renderlist, RenderOption& opt ) 
 {
-    QtRenderVisitor func ( &opt );
-
-    AttrSet* lastAttrset = NULL;
-    for ( RenderList::iterator pp=renderlist.begin(); pp!=renderlist.end(); ++pp )
-    {
-        if ( (*pp)->getAttrSet() != lastAttrset )
-        {
-            // switch all state in AttrSet
-            QtStateChanger changeState ( &opt, (*pp)->getAttrSet() );
-            lastAttrset = (*pp)->getAttrSet();
-        }
-        (*pp)->accept ( func );
-    }
-/*
     // sort by attrset
     RenderList::iterator aa =renderlist.begin();
     RenderList::iterator bb =renderlist.end();
@@ -100,13 +82,12 @@ Rendering::Rendering ( RenderList& renderlist, RenderOption& opt )
     for ( RenderList::const_iterator pp=renderlist.begin(); pp!=renderlist.end(); ++pp )
         delete *pp;
     renderlist.reset ();
-*/
 }
 
 RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
 {
     CameraOrtho* cam = vp.camera();
-    Projection* proj = vp.projection();
+    Projection& proj = vp.projection();
     int camid = vp.cameraid();
 
     int state = CAMERACHECKING;
@@ -150,8 +131,8 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 renderstart = clock();
 
                 mat4f old = opt.matrix;
-                opt.matrix = vp.vpmatrix() * proj->projmatrix() * cam->mvmatrix();
-                opt.reverse_mvpw = cam->inversematrix() * proj->inversematrix() * vp.inversematrix();
+//		mat4f precisionMatrix = mat4f::scale_matrix ( 100, 100, 100 );
+                opt.matrix = vp.vpmatrix() * proj.projmatrix() * cam->mvmatrix();// * precisionMatrix;
                 //opt.matrix = cam->mvmatrix();
                 //opt.scale = cam->mvmatrix().sx();
                 opt.painter->setMatrix ( QMatrix( opt.matrix.m00(), opt.matrix.m10(), opt.matrix.m01(), opt.matrix.m11(), opt.matrix.dx(), opt.matrix.dy() ) );
@@ -166,6 +147,4 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
         }
 
     }
-}
-
 }

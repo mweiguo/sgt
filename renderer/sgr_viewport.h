@@ -8,7 +8,7 @@
 namespace SGR
 {
 
-class SGR_DLL Viewport : public SGNode
+class Viewport : public SGNode
 {
 public:
     Viewport ( const string& name="default", int x=0, int y=0, int w=400, int h=300 );
@@ -18,9 +18,9 @@ public:
     CameraOrtho* camera() const;
     int cameraid() const;
 
-    void projection ( const Projection& proj );
-    Projection& projection ();
-    const Projection& projection () const;
+    void attachproj ( int projid );
+    Projection* projection () const;
+    int projid() const;
 
     //RnederList& getRenderList ( const string& cameraname );
     bool dirty();
@@ -47,10 +47,8 @@ private:
 
     vec2i _pos, _size;
 
-    int _camid;
+    int _camid, _projid;
     bool _dirty;
-
-    Projection _proj;
 
     // auto gen
     mat4f _vpmatrix, _inversemvmatrix;

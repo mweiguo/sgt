@@ -7,6 +7,7 @@
 //#endif// _USE_XERCES3_
 
 #include <algorithm>
+#include <iostream>
 #include <time.h>
 
 #include "sgr_scenemgr.h"
@@ -21,6 +22,8 @@
 #include "sgr_nodes.h"
 #include "sgr_interface.h"
 #include "sgr_seedgen.h"
+
+#include <tinylog.h>
 namespace SGR
 {
 
@@ -72,12 +75,23 @@ namespace SGR
             XMLChWrapper xercesCh (attr);
             return p->hasAttribute ( (XMLCh*)xercesCh );
         }
-        static string getAttribute ( DOMElement* p, const char* attr )
+        static ChWrapper getAttribute ( DOMElement* p, const char* attr )
         {
             XMLChWrapper xercesCh (attr);
             ChWrapper nativeCh ( p->getAttribute ( (XMLCh*)xercesCh ) );
-            return string((char*)nativeCh);
+            return nativeCh;
         }
+        static ChWrapper getTagName ( DOMElement* p )
+	{
+            ChWrapper nativeCh ( p->getTagName () );
+            return nativeCh;
+	}
+        static ChWrapper getTextContent ( DOMElement* p )
+	{
+            ChWrapper nativeCh ( p->getTextContent () );
+            return nativeCh;
+	}
+
     };
 #endif //_USE_XERCES3_
 
@@ -123,6 +137,7 @@ namespace SGR
         XercesParser parser;
         XERCES_CPP_NAMESPACE::DOMDocument* doc = parser.parseFile ( fileName, false);
 #else   //_USE_XERCES3_
+	XMLPlatformUtils::Initialize();
         XercesDOMParser parser;
         parser.parse ( fileName );
         DOMDocument* doc = parser.getDocument();
@@ -134,13 +149,13 @@ namespace SGR
         if (root == NULL) 
             throw logic_error("invalid Shape Template file:");
         //char* tagName = (char*)XercesHelper::getTagName (root);
-        qDebug ( "parseFile TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
+        LOG_INFO ( "parseFile TAKE %d clock, %f (s)\n", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
 
         clo = clock();
         //_root = new SGNode();
         traverseNode ( root, 0 );
 
-        qDebug ( "traverseNode TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
+        LOG_INFO ( "traverseNode TAKE %d clock, %f (s)\n", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
 
         // expand array node
         if ( needExpand )
@@ -156,7 +171,7 @@ namespace SGR
                 expander ( *(*pp) );
                 copy ( expander.kdbegin(), expander.kdend(), back_inserter(_kdtreenodes) );
             }
-            qDebug ( "%d array expander TAKE %d clock, %f (s)", ii, clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
+            LOG_INFO ( "%d array expander TAKE %d clock, %f (s)\n", ii, clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
         }
 
         if ( needSceneManagement )
@@ -167,7 +182,7 @@ namespace SGR
             {
                 (*pp)->buildKdTree ();
             }
-            qDebug ( "build kdtree TAKE %d clock, %f (s)", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
+            LOG_INFO ( "build kdtree TAKE %d clock, %f (s)\n", clock() - clo,  (1.0*(clock() - clo))/CLOCKS_PER_SEC );
         }
 
         if ( _maxid > SeedGenerator::getInst().maxseed () )
@@ -181,6 +196,10 @@ namespace SGR
         for ( list<SGNode*>::iterator pp=begin(); pp!=end(); ++pp )
             (*pp)->updateBBox();
         //_root->updateBBox();
+#ifdef _USE_XERCES3_
+//	XMLPlatformUtils::Terminate();
+#endif  //_USE_XERCES3_
+
         //NodeDumper dumper;
         //dumper ( _root );
         //qDebug ( "%s", dumper.dumpstring().c_str() );
@@ -1083,7 +1102,12 @@ namespace SGR
     int NodeParser::checkIDAttr ( XERCES_CPP_NAMESPACE::DOMElement* tagElement )
     {
         if ( !XercesHelper::hasAttribute ( tagElement, "id" ) )
-            throw std::invalid_argument ( "scene's attribute id is required, every node should define a unique id" );
+	{
+	    stringstream ss;
+	    ss << (const char*)XercesHelper::getTagName ( tagElement ) << 
+		"'s attribute id is required, every node should define a unique id";
+            throw std::invalid_argument ( ss.str().c_str() );
+	}
         int id = atoi((const char*)XercesHelper::getAttribute ( tagElement, "id" ));
 
         if ( _scene->_baseId )

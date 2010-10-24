@@ -50,19 +50,16 @@ TextNode::~TextNode ()
 
 void TextNode::updateBBox( const mat4f& mat )
 {
+    _anchorPos = mat * vec4f ( 0, 0, 0, 1 );
+
     if ( NULL==getAttrSet() || NULL==getAttrSet()->getFont() )
         return;
-
-    qDebug ("TextNode::updateBBox pass");
 
     if ( TXTSIZEMODE_SCENE == _sizeMode )
     {
 	vec3f scenesize = FontMetric::getInst().getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
 	_renderScale = _size.x() / fabs(scenesize.x());
 //	_anchorPos = mat4f::scale_matrix(1.0f/_renderScale, 1.0f/_renderScale, 1.0f/_renderScale) * mat * vec4f ( 0, 0, 0, 1 );
-	_anchorPos = mat * vec4f ( 0, 0, 0, 1 );
-
-	qDebug ("TextNode::updateBBox scene mode %f", _renderScale);
 //     _size = FontMetric::getInst().getBBox ( *getAttrSet()->getFont(), _text ).dimension();
 	_bb.init ( vec3f(0.f, 0.f, 0.f) );
 	_bb.expandby ( _size );

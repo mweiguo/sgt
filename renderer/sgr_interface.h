@@ -9,6 +9,7 @@
 // [100, 199] :          viewport
 // 200+       :          objects
 #include "sgr_global.h"
+
 extern "C"
 {
     const int NODETYPE_UNKNOWN     	  = 0 ;
@@ -62,12 +63,24 @@ extern "C"
     /*********************************/
     /******* CAMERA MANAGEMENT *******/
     /*********************************/
+    
     void SGR_DLL camera_create ( int id, const char* name );
     void SGR_DLL camera_translate ( int id, float tx, float ty, float tz );
     void SGR_DLL camera_scale ( int id, float scale );
     void SGR_DLL camera_reset ( int id );
     void SGR_DLL camera_name ( int id, const char* name );
-    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
+    void SGR_DLL get_cameramatrix ( int id, float* mat4f );
+    void SGR_DLL get_camerainversematrix ( int id, float* mat4f );
+//    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
+
+    /*********************************/
+    /***** PROJECTION MANAGEMENT *****/
+    /*********************************/
+    void SGR_DLL projection_create ( int id );
+    void SGR_DLL projection_frustum ( int id, float l, float r, float b, float t, float n, float f );
+    void SGR_DLL projection_ortho ( int id, float l, float r, float b, float t, float n, float f );
+    void SGR_DLL get_projectionmatrix ( int id, float* mat4f );
+    void SGR_DLL get_projectioninversematrix ( int id, float* mat4f );
 
     /*********************************/
     /****** VIEWPORT MANAGEMENT ******/
@@ -75,10 +88,14 @@ extern "C"
     void SGR_DLL viewport_create ( int id, const char* name );
     void SGR_DLL viewport_geometry ( int id, int x, int y, int w, int h );
     void SGR_DLL viewport_attachcamera ( int id, int camid );
+    void SGR_DLL viewport_attachprojection ( int id, int projid );
     void SGR_DLL viewport_name ( int id, const char* name );
     void SGR_DLL viewport_dirty ( int id );
     class QPainter;
     void SGR_DLL viewport_update ( int id, QPainter& painter );
+    void SGR_DLL viewport_update2 ( int id );
+    void SGR_DLL get_viewportmatrix ( int id, float* mat4f );
+    void SGR_DLL get_viewportinversematrix ( int id, float* mat4f );
 
     ///*********************************/
     ///************* WINDOW ************/
@@ -91,7 +108,9 @@ extern "C"
     /************** IO ***************/
     /*********************************/
     // local scene load
+    // not use baseid, so every id in the file should be unify
     int SGR_DLL scene_load ( const char* file, int* data );
+    // use baseid
     int SGR_DLL node_load ( const char* file, int* data );
     void SGR_DLL node_save ( const char* file, int sceneid );
     void SGR_DLL unload_node (int id);
@@ -107,8 +126,8 @@ extern "C"
     /************ QUERY **************/
     /*********************************/
     void SGR_DLL get_bbox ( int id, float* min, float* max );
-    void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/*default value means use camid attached viewport */ );
-    void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/*default value means use camid attached viewport */ );
+/*     void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
+/*     void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
     int SGR_DLL get_nodetype ( int node );
     int SGR_DLL get_nodeparent ( int node );
     void SGR_DLL get_nodechildren ( int node, int* data );

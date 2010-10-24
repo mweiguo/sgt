@@ -2,13 +2,15 @@
 #define _KDTREE_NODE_H_
 
 #include <sgr_kdtree.h>
-#include "sgr_nodemgr.h"
+#include "sgr_rendernodecollector.h"
+//#include "sgr_nodemgr.h"
 #include "sgr_groupnode.h"
 
-#include "sgr_drawablenode.h"
-#include "sgr_rendernodecollector.h"
+//#include "sgr_drawablenode.h"
 namespace SGR
 {
+
+    class DrawableNode;
 
 template<class T>
 class GetBBox

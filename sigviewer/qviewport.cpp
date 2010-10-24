@@ -47,163 +47,107 @@ QViewport::QViewport( const char* title, QWidget* parent )
 
 float QViewport::full_view ()
 {
-    try 
-    {
-	float minvec[3], maxvec[3];
-	get_bbox ( 0, minvec, maxvec );
-	_scale = find_view ( SGR::vec3f(minvec), SGR::vec3f(maxvec), 0.6 );
-	update ();
-	return _scale;
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    float minvec[3], maxvec[3];
+    get_bbox ( 0, minvec, maxvec );
+    _scale = find_view ( SGR::vec3f(minvec), SGR::vec3f(maxvec), 0.6 );
+    update ();
+    return _scale;
 }
 
 float QViewport::find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec, float percentOfView )
 {
-    try 
+    // translate
+    SGR::vec3f center = ( minvec + maxvec ) / 2.0f;
+    // scale
+//	float maxdimension = ( maxvec - minvec ).max_element ();
+    QSize wndsize = size();
+    if ( wndsize.width() > wndsize.height() )
     {
-	// translate
-	SGR::vec3f center = ( minvec + maxvec ) / 2.0f;
-	// scale
-	float maxdimension = ( maxvec - minvec ).max_element ();
-	QSize wndsize = size();
-	if ( wndsize.width() > wndsize.height() )
-	{
-	    _scale = percentOfView / ( maxvec - minvec ).y();
+	_scale = percentOfView / ( maxvec - minvec ).y();
 // 	    _scale = (wndsize.width() * percentOfView) / ( maxdimension );
-	}
-	else
-	{
-	    _scale = percentOfView / ( maxvec - minvec ).x();
-// 	    _scale = (wndsize.height() * percentOfView) / ( maxdimension );
-	}
-	camera_reset ( _camid );
-	camera_translate ( _camid, center.x(), center.y(), center.z() );
-	camera_scale ( _camid, _scale );
-	_cameraPos[0] = center.x();
-	_cameraPos[1] = center.y();
-	_cameraPos[2] = center.z();
-	return _scale;
     }
-    catch ( std::exception& ex )
+    else
     {
-	LOG_ERROR (ex.what());
+	_scale = percentOfView / ( maxvec - minvec ).x();
+// 	    _scale = (wndsize.height() * percentOfView) / ( maxdimension );
     }
+    camera_reset ( _camid );
+    camera_translate ( _camid, center.x(), center.y(), center.z() );
+    camera_scale ( _camid, _scale );
+    _cameraPos[0] = center.x();
+    _cameraPos[1] = center.y();
+    _cameraPos[2] = center.z();
+    return _scale;
 }
 
 void QViewport::left ()
 {
-    try
-    {
-	CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
- 	SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
- 	SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
-	SGR::vec2f scenesize = p2 - p1;
-	// calculate move step
-	float delta = fabs(scenesize.x()) / 20.f;
-	_cameraPos[0] -= delta;
-	// camera translate
-	camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
+    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
+    SGR::vec2f scenesize = p2 - p1;
+    // calculate move step
+    float delta = fabs(scenesize.x()) / 20.f;
+    _cameraPos[0] -= delta;
+    // camera translate
+    camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
+    update ();
 }
 
 void QViewport::right ()
 {
-    try
-    {
-	CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
- 	SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
- 	SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
-	SGR::vec2f scenesize = p2 - p1;
-	// calculate move step
-	float delta = fabs(scenesize.x()) / 20.f;
-	_cameraPos[0] += delta;
-	// camera translate
-	camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
+    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
+    SGR::vec2f scenesize = p2 - p1;
+    // calculate move step
+    float delta = fabs(scenesize.x()) / 20.f;
+    _cameraPos[0] += delta;
+    // camera translate
+    camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
+    update ();
 }
 
 void QViewport::up ()
 {
-    try
-    {
-	CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
- 	SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
- 	SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
-	SGR::vec2f scenesize = p2 - p1;
-	// calculate move step
-	float delta = fabs(scenesize.x()) / 20.f;
-	_cameraPos[1] += delta;
-	// camera translate
-	camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
+    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
+    SGR::vec2f scenesize = p2 - p1;
+    // calculate move step
+    float delta = fabs(scenesize.x()) / 20.f;
+    _cameraPos[1] += delta;
+    // camera translate
+    camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
+    update ();
 }
 
 void QViewport::down ()
 {
-    try
-    {
-	CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
- 	SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
- 	SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
-	SGR::vec2f scenesize = p2 - p1;
-	// calculate move step
-	float delta = fabs(scenesize.x()) / 20.f;
-	_cameraPos[1] -= delta;
-	// camera translate
-	camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    CoordQueryTool* ptool = SGVTools::getInst().getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
+    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f(size().width(), size().height()) );
+    SGR::vec2f scenesize = p2 - p1;
+    // calculate move step
+    float delta = fabs(scenesize.x()) / 20.f;
+    _cameraPos[1] -= delta;
+    // camera translate
+    camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
+    update ();
 }
 
 void QViewport::zoomin ()
 {
-    try
-    {
-	_scale *= 1.2;
-	camera_scale ( _camid, _scale );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    _scale *= 1.2;
+    camera_scale ( _camid, _scale );
+    update ();
 }
 
 void QViewport::zoomout ()
 {
-    try
-    {
-	_scale /= 1.2;
-	camera_scale ( _camid, _scale );
-	update ();
-    }
-    catch ( std::exception& ex )
-    {
-	LOG_ERROR (ex.what());
-    }
+    _scale /= 1.2;
+    camera_scale ( _camid, _scale );
+    update ();
 }
 
 void QViewport::resizeEvent ( QResizeEvent* event )
@@ -345,53 +289,67 @@ void QViewport::wheelEvent ( QWheelEvent * event )
 
 void QViewport::keyPressEvent ( QKeyEvent * event )
 {
-    switch ( event->key() )
+    try
     {
-    case Qt::Key_F:
-	full_view ();
-	break;
-    case Qt::Key_Left:
-	left ();
-	break;
-    case Qt::Key_Right:
-	right ();
-	break;
-    case Qt::Key_Up:
-	up ();
-	break;
-    case Qt::Key_Down:
-	down ();
-	break;
-    case Qt::Key_PageDown:
-	zoomin ();
-	break;
-    case Qt::Key_PageUp:
-	zoomout ();
-	break;
-    case Qt::Key_Q:
-    case Qt::Key_Escape:
-    {
-	QApplication::instance()->quit ();
-	break;
+	switch ( event->key() )
+	{
+	case Qt::Key_F:
+	    full_view ();
+	    break;
+	case Qt::Key_Left:
+	    left ();
+	    break;
+	case Qt::Key_Right:
+	    right ();
+	    break;
+	case Qt::Key_Up:
+	    up ();
+	    break;
+	case Qt::Key_Down:
+	    down ();
+	    break;
+	case Qt::Key_PageDown:
+	    zoomin ();
+	    break;
+	case Qt::Key_PageUp:
+	    zoomout ();
+	    break;
+	case Qt::Key_Q:
+	case Qt::Key_Escape:
+	{
+	    QApplication::instance()->quit ();
+	    break;
+	}
+	case Qt::Key_Z:
+	    SGVTools::getInst().selectTool ( SGVTools::ZOOM_TOOL );
+	    LOG_INFO ( "Zoom Tool is Selected\n" );
+	    break;
+	default:
+	    SGVTool* ptool = SGVTools::getInst().currentTool ();
+	    if ( ptool )
+	    {
+		ptool->keydown ( event->key() );
+	    }
+	    else
+	    {
+		QWidget::keyPressEvent ( event );
+	    }
+	}
     }
-    case Qt::Key_Z:
-	SGVTools::getInst().selectTool ( SGVTools::ZOOM_TOOL );
-	LOG_INFO ( "Zoom Tool is Selected\n" );
-	break;
-    default:
-	SGVTool* ptool = SGVTools::getInst().currentTool ();
-	if ( ptool )
-	{
-	    ptool->keydown ( event->key() );
-	}
-	else
-	{
-	    QWidget::keyPressEvent ( event );
-	}
+    catch ( std::exception& ex )
+    {
+	LOG_INFO ( ex.what () );
     }
 }
 
 void QViewport::keyReleaseEvent ( QKeyEvent * event )
 {
-    QWidget::keyReleaseEvent ( event );
+    try
+    {
+	QWidget::keyReleaseEvent ( event );
+    }
+    catch ( std::exception& ex )
+    {
+	LOG_INFO ( ex.what () );
+    }
 }

@@ -8,7 +8,7 @@ using namespace std;
 namespace SGR
 {
 
-class SGR_DLL ArrayExpander : public NodeVisitor
+class /* SGR_DLL */ ArrayExpander : public NodeVisitor
 {
 public:
     ArrayExpander ( SGNode* parent, bool isExport=false );

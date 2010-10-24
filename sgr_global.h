@@ -15,14 +15,14 @@
 
 #include <Qt/qglobal.h>
 
-//#ifdef WIN32
-#ifdef SGR_EXPORT
-# define SGR_DLL Q_DECL_EXPORT
-#else
-# define SGR_DLL Q_DECL_IMPORT
-#endif
-//#else
-//# define SGR_DLL
-//#endif
+/* #ifdef WIN32 */
+/*   #ifdef SGR_EXPORT */
+/*     # define SGR_DLL Q_DECL_EXPORT */
+/*   #else */
+/*     # define SGR_DLL Q_DECL_IMPORT */
+/*   #endif */
+/* #else */
+  # define SGR_DLL
+/* #endif */
 
 #endif // GVF_GLOBAL_H

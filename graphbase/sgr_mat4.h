@@ -24,6 +24,10 @@ public:
         m[2][0] = a20; m[2][1] = a21; m[2][2] = a22; m[2][3] = a23;
         m[3][0] = a30; m[3][1] = a31; m[3][2] = a32; m[3][3] = a33;
     }
+    mat4 ( ValueType* data )
+    {
+	memcpy ( m, data, sizeof(ValueType)*16 );
+    }
     mat4 operator* ( const_reference rhs ) const;
 
     template < class Vec >
@@ -115,10 +119,22 @@ public:
 	// mat4 operator* ( const_reference rhs );
 	// template <class Vec4>
 	// Vec4 operator* ( Vec4::const_reference rhs );
+    void toArray ( ValueType* ptr ) const
+    {
+	memcpy ( ptr, m, sizeof(ValueType)*16 );
+    }
     // x=0, y=1, z=2
     static mat4 translate_matrix ( float x, float y, float z );
     static mat4 rotate_matrix ( float angle, int axis );
     static mat4 scale_matrix ( ValueType sx, ValueType sy, ValueType sz );
+    static mat4 frustum_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f );
+    static mat4 ortho_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f );
+
+    static mat4 translate_inv_matrix ( float x, float y, float z );
+    static mat4 rotate_inv_matrix ( float angle, int axis );
+    static mat4 scale_inv_matrix ( ValueType sx, ValueType sy, ValueType sz );
+    static mat4 frustum_inv_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f );
+    static mat4 ortho_inv_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f );
 private:
     ValueType m[4][4];
 };
@@ -163,6 +179,84 @@ mat4<ValueType> mat4<ValueType>::scale_matrix ( ValueType sx, ValueType sy, Valu
                              0,  0,  sz, 0,
                              0,  0,  0,  1);
 }
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::frustum_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f )
+{
+    return mat4<ValueType> ( (n*2)/(r-l),           0,  (r+l)/(r-l),  0, 
+                             	       0, (n*2)/(t-b),  (t+b)/(t-b),  0, 
+                             	       0,           0,  (f+n)/(n-f),  0,
+                             	       0,           0,           -1,  0);
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::ortho_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f )
+{
+    return mat4<ValueType> ( 2/(r-l),           0,         0, (r+l)/(r-l),
+                                   0,      2/(t-b),        0, (t+b)/(t-b),
+                                   0,           0,   2/(n-f), (f+n)/(f-n),
+			           0,           0,         0,           1);
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::translate_inv_matrix ( float x, float y, float z )
+{
+    return mat4<ValueType> ( 1,  0,  0,  -dx, 
+                             0,  1,  0,  -dy, 
+                             0,  0,  1,  -dz,
+                             0,  0,  0,  1);
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::rotate_inv_matrix ( float angle, int axis )
+{
+    float alpha = -angle * M_PI / 180;
+    switch ( axis ) {
+    case 0:
+        return mat4<ValueType> ( 1, 0,          0,           0,
+                                 0, cos(alpha), -sin(alpha), 0,
+                                 0, sin(alpha), cos(alpha),  0, 
+                                 0, 0,          0,           1 );
+    case 1:
+        return mat4<ValueType> ( cos(alpha),  0, sin(alpha),  0,
+                                 0,           1, 0,           0,
+                                 -sin(alpha), 0, cos(alpha),  0, 
+                                 0,           0, 0,           1 );
+    case 2:
+        return mat4<ValueType> ( cos(alpha),  -sin(alpha), 0, 0,
+                                 sin(alpha),  cos(alpha),  0, 0,
+                                 0,           0,           1, 0, 
+                                 0,           0,           0, 1 );
+    }
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::scale_inv_matrix ( ValueType sx, ValueType sy, ValueType sz )
+{
+    return mat4<ValueType> ( 1/sx,    0,     0,    0, 
+                             0,    1/sy,     0,    0, 
+                             0,       0,  1/sz,    0,
+                             0,       0,     0,    1);
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::frustum_inv_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f )
+{
+    return mat4<ValueType> ( (r-l)/(n*2),           0,    	     0,        (r+l)/(2*n), 
+                                       0, (r-b)/(n*2),    	     0,        (t+b)/(2*n),
+                                       0,           0,    	     0,                 -1,
+                                       0,           0,   (n-f)/(2*f*n),      (n+f)/(2*f*n));
+}
+
+template < class ValueType >
+mat4<ValueType> mat4<ValueType>::ortho_inv_matrix ( ValueType l, ValueType r, ValueType b, ValueType t, ValueType n, ValueType f )
+{
+    return mat4<ValueType> ( (r-l)/2,           0,         0,     (r+l)/2,
+                                   0,     (t-b)/2,         0,     (t+b)/2,
+                                   0,           0,   (n-f)/2,     (f+n)/2,
+			           0,           0,         0,           1);
+}
+
 
 template < class ValueType >
 inline mat4<ValueType> mat4<ValueType>::operator* ( const_reference rhs ) const

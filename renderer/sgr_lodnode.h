@@ -3,7 +3,7 @@
 
 #include "sgr_sgnode.h"
 #include "sgr_kdtree.h"
-#include "sgr_rendernodecollector.h"
+//#include "sgr_rendernodecollector.h"
 #include <vector>
 #include <time.h>
 #include <algorithm>

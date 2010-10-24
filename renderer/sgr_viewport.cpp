@@ -3,7 +3,7 @@
 
 namespace SGR
 {
-    Viewport::Viewport ( const string& name, int x, int y, int w, int h ) : 
+Viewport::Viewport ( const string& name, int x, int y, int w, int h ) : 
 _name(name), _pos(x,y), _size(w,h)
 {
     _dirty = true;
@@ -13,6 +13,7 @@ _name(name), _pos(x,y), _size(w,h)
 Viewport::~Viewport ()
 {
 }
+
 void Viewport::attachcamera ( int camid )
 {
     _camid = camid;
@@ -28,19 +29,19 @@ int Viewport::cameraid() const
     return _camid;
 }
 
-void Viewport::projection ( const Projection& proj )
+void Viewport::attachproj ( int projid )
 {
-    _proj=proj; 
+    _projid = projid;
 }
 
-Projection& Viewport::projection ()
+Projection* Viewport::projection () const
 {
-    return _proj; 
+    return NodeMgr::getInst().getNodePtr<Projection>(_projid);
 }
 
-const Projection& Viewport::projection () const
-{ 
-    return _proj; 
+int Viewport::projid() const
+{
+    return _projid;
 }
 //RnederList& getRenderList ( const string& cameraname );
 

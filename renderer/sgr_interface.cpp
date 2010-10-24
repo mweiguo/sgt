@@ -20,6 +20,8 @@
 #include "sgr_boxpicker.h"
 #include "sgr_crosspicker.h"
 #include "sgr_childrenfinder.h"
+#include "sgr_projection.h"
+#include "sgr_mat4.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -113,6 +115,59 @@ void camera_name ( int id, const char* nm )
         cam->name ( nm );
 }
 
+void get_cameramatrix ( int id, float* mat )
+{
+    CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho> (id);
+    if ( cam )
+	cam->mvmatrix ().toArray ( mat );
+}
+
+void get_camerainversematrix ( int id, float* mat )
+{
+    CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho> (id);
+    if ( cam )
+        cam->inversematrix ().toArray ( mat );
+}
+
+void projection_create ( int id )
+{
+    Projection* t = NodeMgr::getInst().addNode<Projection> (id);
+    if ( NULL == t )
+    {
+        stringstream ss;
+        ss << "projection node create: id is invalid. id:" << id;
+        throw invalid_argument ( ss.str() );
+    }
+}
+
+void projection_frustum ( int id, float l, float r, float b, float t, float n, float f )
+{
+    Projection* proj = NodeMgr::getInst().getNodePtr<Projection> (id);
+    if ( proj )
+	proj->frustum ( l, r, b, t, n, f );
+}
+
+void projection_ortho ( int id, float l, float r, float b, float t, float n, float f )
+{
+    Projection* proj = NodeMgr::getInst().getNodePtr<Projection> (id);
+    if ( proj )
+	proj->ortho ( l, r, b, t, n, f );
+}
+
+void get_projectionmatrix ( int id, float* mat )
+{
+    Projection* proj = NodeMgr::getInst().getNodePtr<Projection> (id);
+    if ( proj )
+	proj->projmatrix ().toArray(mat);
+}
+
+void get_projectioninversematrix ( int id, float* mat )
+{
+    Projection* proj = NodeMgr::getInst().getNodePtr<Projection> (id);
+    if ( proj )
+	proj->inversematrix ().toArray(mat);
+}
+
 //float find_view ( float* min, float* max, float percentOfView, int camid, int vpid )
 //{
 //    vec3f a ( min ), b(max);
@@ -191,6 +246,13 @@ void viewport_attachcamera ( int id, int camid )
         p->attachcamera ( camid );
 }
 
+void viewport_attachprojection ( int id, int projid )
+{
+    Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
+    if ( p )
+        p->attachproj ( projid );
+}
+
 void viewport_name ( int id, const char* nm )
 {
     Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
@@ -209,6 +271,25 @@ void viewport_update ( int id, QPainter& painter )
         p->update ();
     }
 }
+
+void viewport_update2 ( int id )
+{
+}
+
+void get_viewportmatrix ( int id, float* mat )
+{
+    Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
+    if ( p )
+	p->vpmatrix().toArray ( mat );
+}
+
+void get_viewportinversematrix ( int id, float* mat )
+{
+    Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
+    if ( p )
+	p->inversematrix().toArray ( mat );;
+}
+
 
 void viewport_dirty ( int id )
 {
@@ -1133,15 +1214,15 @@ void get_font_desc ( int fontid, char* buffer )
         strcpy ( buffer, s.c_str() );
     }
 }
-
+#include <tinylog.h>
 // root
 //   |-transform
 //        |- mesh
 int scene_load ( const char* file, int* data )
 {
     // load mesh
-    NodeMgr::getInst();
     LoadScene loadscene ( file, true, true );
+    
     for ( list<SGNode*>::iterator pp=loadscene.begin(); pp!=loadscene.end(); ++pp )
         *data++ = (*pp)->getID();
     return loadscene.size();
@@ -1394,47 +1475,47 @@ void get_bbox ( int id, float* min, float* max )
     }
 }
 
-void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid )
-{
-    Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
-    if ( node ) 
-    {
-        CameraOrtho* cameraNode;
-        if ( -1 == camid )
-        {
-            cameraNode = node->camera();
-        }
-        else
-        {
-            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
-        }
+// void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid )
+// {
+//     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
+//     if ( node ) 
+//     {
+//         CameraOrtho* cameraNode;
+//         if ( -1 == camid )
+//         {
+//             cameraNode = node->camera();
+//         }
+//         else
+//         {
+//             cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+//         }
 
-        if ( cameraNode )
-        {
-            vec4f rst = cameraNode->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
-            rst.xyz().xyz ( sceneCoord );
-        }
-    }
-}
+//         if ( cameraNode )
+//         {
+//             vec4f rst = cameraNode->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
+//             rst.xyz().xyz ( sceneCoord );
+//         }
+//     }
+// }
 
-void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid )
-{
-    Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
-    if ( node ) 
-    {
-        CameraOrtho* cameraNode;
-        if ( -1 == camid )
-            cameraNode = node->camera();
-        else
-            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+// void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid )
+// {
+//     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
+//     if ( node ) 
+//     {
+//         CameraOrtho* cameraNode;
+//         if ( -1 == camid )
+//             cameraNode = node->camera();
+//         else
+//             cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
 
-        if ( cameraNode )
-        {
-            vec4f rst = node->vpmatrix() * cameraNode->mvmatrix() * vec4f ( vec3f(sceneCoord) );
-            rst.xyz().xyz ( viewportCoord );
-        }
-    }
-}
+//         if ( cameraNode )
+//         {
+//             vec4f rst = node->vpmatrix() * cameraNode->mvmatrix() * vec4f ( vec3f(sceneCoord) );
+//             rst.xyz().xyz ( viewportCoord );
+//         }
+//     }
+// }
 
 
 int get_nodetype ( int nodeid )
@@ -1727,7 +1808,7 @@ float get_point_size ( int id )
     return -1.0f;
 }
 
-void SGR_DLL get_point_coord ( int id, float* xyz )
+void get_point_coord ( int id, float* xyz )
 {
     PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
     if ( pnt )
