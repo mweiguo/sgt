@@ -5,6 +5,7 @@
 // --------------------------------------------------
 const int SGVTools::HAND_TOOL = 1;
 const int SGVTools::ZOOM_TOOL = 2;
+const int SGVTools::COORDQUERY_TOOL = 3;
 
 
 SGVTools& SGVTools::getInst()
@@ -17,10 +18,11 @@ SGVTools::SGVTools ()
 {
     _tools[HAND_TOOL] = new HandTool ();
     _tools[ZOOM_TOOL] = new ZoomTool ();
+    _tools[COORDQUERY_TOOL] = new CoordQueryTool ();
     _currentTool = NULL;
 }
 
-void SGVTools::setEnviroments ( QViewport* view )
+void SGVTools::initialize ( QViewport* view )
 {
     std::map< int, SGVTool* >::iterator pp, end=_tools.end();
     for ( pp=_tools.begin(); pp!=end; ++pp )
@@ -260,5 +262,22 @@ void ZoomTool::mousewheel ( float x, float y, float delta )
 //     camera_scale ( _view->camid(), _scale );
 //     camera_translate ( _view->camid(), scenecoord[0], scenecoord[1], scenecoord[2] );
 //     _view->update ();
+}
+
+CoordQueryTool::CoordQueryTool ()
+{
+}
+
+SGR::vec2f CoordQueryTool::viewportToScene ( SGR::vec2f vpxy )
+{
+    float imv[16], ipr[16], ivp[16];
+    get_camerainversematrix ( _view->camid(), imv );
+    get_projectioninversematrix ( _view->projid(), ipr );
+    get_viewportinversematrix ( _view->vpid(), ivp );
+    SGR::mat4f imvmat(imv), iprmat(ipr), ivpmat(ivp);
+    SGR::mat4f mat = imvmat * iprmat * ivpmat;
+
+    SGR::vec4f scenepos = mat * SGR::vec4f ( vpxy );
+    return scenepos.xy();
 }
 

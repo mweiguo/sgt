@@ -18,6 +18,7 @@ public:
     QViewport( const char* title="", QWidget* parent=NULL );
     int vpid () { return _viewport; }
     int camid () { return _camid; }
+    int projid () { return _projid; }
     
     float full_view ();
     float find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec, float percentOfView );
@@ -43,6 +44,9 @@ private:
 /*     list<SGR::Viewport*> _viewports; */
 //     int _x, _y;
     int _viewport, _camid, _projid;
+    // transform parameters
+    float _scale;
+    float _cameraPos[3];
 };
 
 #endif

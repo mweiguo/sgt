@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     }
     catch ( std::exception& ex )
     {
-	LOG_ERROR ( ex.what() );
+	LOG_INFO ( "%s\n", ex.what() );
 	return 0;
     }
 
