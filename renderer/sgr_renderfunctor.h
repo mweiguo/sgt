@@ -127,77 +127,83 @@ inline void QtRenderVisitor::apply ( TextNode& text )
     QRectF rc, rc1;
     QMatrix oldm = _opt->painter->matrix();
     QMatrix newm;
+
+
+    float scale;
+    vec3f scenesize;
     if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCREEN )
     {
+	vec4f p0 = _opt->reverse_mvpw * vec4f(0,0,0,1);
+	vec4f p1 = _opt->reverse_mvpw * vec4f(text.getSize().x(), 0, 0, 1);
  	vec3f screen_size = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
-// 	LOG_INFO ("%s, SCREEN_SIZE, (%f, %f, %f)\n", text.text().c_str(), screen_size.x(), screen_size.y(), screen_size.z() );
-	float calcHeight = text.width() * screen_size.y() / screen_size.x();
-	vec4f p0   	 = _opt->reverse_mvpw * vec4f(0,0,0,1);
-	vec4f p1   	 = _opt->reverse_mvpw * vec4f(text.getSize().x(), calcHeight, 0, 1);
-	vec4f scenesize  = p1 - p0;
- 	float scale = text.getSize().x() / screen_size.x();
- 	LOG_INFO ("text.x=%f, text.y=%f, scene.x=%f, scene.y=%f\n", text.anchorPos().x(), text.anchorPos().y(), scenesize.x(), scenesize.y() );
-// 	LOG_INFO ("      p0.x=%f, p0.y=%f,   p1.x=%f, p1.y=%f, scale=%f\n", p0.x(), p0.y(), p1.x(), p1.y(), scale );
-// 	float dx=0, dy=0;
-// 	if ( text.isAnchorHCenter () )
-// 	    dx = -scenesize.x()/2.f;
-// 	else if ( text.isAnchorRight () )
-// 	    dx = -scenesize.x();
-
-// 	if ( text.isAnchorVCenter () )
-// 	    dy = -calcHeight/2.f;
-// 	else if ( text.isAnchorTop () )
-// 	    dy = -calcHeight;
-
-// 	// calculate rectangle for text
-// 	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
- 	rc.setRect ( text.anchorPos().x(), text.anchorPos().y(), scenesize.x()/scale, scenesize.y()/scale );
-// 	LOG_INFO ("%s,  x=%f, y=%f, w=%f, h=%f\n", text.text().c_str(), text.anchorPos().x(), text.anchorPos().y(), scenesize.x(), fabs(scenesize.y()) );
-// 	// this point is rect lb point
-//  	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
-  	vec4f ttt = vec4f ( text.anchorPos().x(), text.anchorPos().y(), 0, 1 );
-// 	// reverse and scale it inplace
- 	vec4f ttt1 = vec4f ( text.anchorPos().x()+scenesize.x(), text.anchorPos().y()+scenesize.y(), 0, 1 );
-  	QMatrix mm1, mm2, mm3, mm4, mm5, mm;
- 	mm.translate ( ttt.x(), ttt.y() );
-// 	mm.scale ( scale, scale );
- 	mm.translate ( 0, ttt1.y()-ttt.y() );
- 	mm.scale ( 1, -1 );
- 	mm.translate ( -ttt.x(), -ttt.y() );
-	newm = oldm * mm;
+	scale = (p1.x() - p0.x()) / screen_size.x();
+ 	scenesize = screen_size;
     }
     else if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCENE )
     {
-// 	// in this mode, scene size is fixed, and current device-scene coordinate mapping rate is 1:1, so screen unit = scene unit
- 	vec3f scenesize = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
- 	float scale = text.renderScale();
-
-	float dx=0, dy=0;
-	if ( text.isAnchorHCenter () )
-	    dx = -text.width()/2.f;
-	else if ( text.isAnchorRight () )
-	    dx = -text.width();
-
-	float calcHeight = text.width() * scenesize.y() / scenesize.x();
-	if ( text.isAnchorVCenter () )
-	    dy = -calcHeight / 2.f;
-	else if ( text.isAnchorTop () )
-	    dy = -calcHeight;
-
-	// calculate rectangle for text
-	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
-	// this point is rect lb point
- 	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
-	// reverse and scale it inplace
-	vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 );
- 	QMatrix mm1, mm2, mm3, mm4, mm5, mm;
-	mm.translate ( ttt.x(), ttt.y() );
-	mm.scale ( scale, scale );
-	mm.translate ( 0, ttt1.y()-ttt.y() );
-	mm.scale ( 1, -1 );
-	mm.translate ( -ttt.x(), -ttt.y() );
-	newm = oldm * mm;
+ 	scenesize = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension();
+ 	scale = text.renderScale();
     }
+
+    float dx=0, dy=0;
+    if ( text.isAnchorHCenter () )
+	dx = -text.width()/2.f;
+    else if ( text.isAnchorRight () )
+	dx = -text.width();
+
+    float calcHeight = text.width() * scenesize.y() / scenesize.x();
+    if ( text.isAnchorVCenter () )
+	dy = -calcHeight / 2.f;
+    else if ( text.isAnchorTop () )
+	dy = -calcHeight;
+
+    // calculate rectangle for text
+    rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
+    LOG_INFO ("rect.x=%f, rect.y=%f, rect.w=%f, rect.h=%f\n", text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
+    // this point is rect lb point
+    vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
+    // reverse and scale it inplace
+    vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 );
+    QMatrix mm1, mm2, mm3, mm4, mm5, mm;
+    mm.translate ( ttt.x(), ttt.y() );
+    mm.scale ( scale, scale );
+    mm.translate ( 0, ttt1.y()-ttt.y() );
+    mm.scale ( 1, -1 );
+    mm.translate ( -ttt.x(), -ttt.y() );
+    newm = oldm * mm;
+/*     } */
+/*     else if ( text.getSizeMode() == TextNode::TXTSIZEMODE_SCENE ) */
+/*     { */
+/* // 	// in this mode, scene size is fixed, and current device-scene coordinate mapping rate is 1:1, so screen unit = scene unit */
+/*  	vec3f scenesize = FontMetric::getInst().getBBox ( *(text.getAttrSet()->getFont()), text.text().c_str() ).dimension(); */
+/*  	float scale = text.renderScale(); */
+
+/* 	float dx=0, dy=0; */
+/* 	if ( text.isAnchorHCenter () ) */
+/* 	    dx = -text.width()/2.f; */
+/* 	else if ( text.isAnchorRight () ) */
+/* 	    dx = -text.width(); */
+
+/* 	float calcHeight = text.width() * scenesize.y() / scenesize.x(); */
+/* 	if ( text.isAnchorVCenter () ) */
+/* 	    dy = -calcHeight / 2.f; */
+/* 	else if ( text.isAnchorTop () ) */
+/* 	    dy = -calcHeight; */
+
+/* 	// calculate rectangle for text */
+/* 	rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() ); */
+/* 	// this point is rect lb point */
+/*  	vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 ); */
+/* 	// reverse and scale it inplace */
+/* 	vec4f ttt1 = _opt->matrix * vec4f ( text.anchorPos().x()+dx+scenesize.x(), text.anchorPos().y()+dy+scenesize.y(), 0, 1 ); */
+/*  	QMatrix mm1, mm2, mm3, mm4, mm5, mm; */
+/* 	mm.translate ( ttt.x(), ttt.y() ); */
+/* 	mm.scale ( scale, scale ); */
+/* 	mm.translate ( 0, ttt1.y()-ttt.y() ); */
+/* 	mm.scale ( 1, -1 ); */
+/* 	mm.translate ( -ttt.x(), -ttt.y() ); */
+/* 	newm = oldm * mm; */
+/*     } */
 
     _opt->painter->setWorldMatrix ( newm );
     _opt->painter->drawText ( rc, Qt::TextWordWrap | Qt::TextDontClip | Qt::AlignCenter, text.text().c_str() );
