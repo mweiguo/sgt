@@ -3,7 +3,7 @@
   <scene id="201" isVisible="1" translate="0 0 0" scale="1 1 1">
     <layer id="202" name="default" isVisible="1" fgcolor="#ff0000FF" bgcolor="#ff000044">
       <transform id="211" translate="1 1 0" scale="1 1 1">
-	<text id="212" anchor="7" font="" fgcolor="#00ff00ff" sizemode="screenmode" width="20" height="1">111</text>
+	<text id="212" anchor="7" font="" fgcolor="#00ff00ff" sizemode="screenmode" width="20" height="20">111</text>
       </transform>
       <line id="204" x1='0' y1='0' x2='2' y2='0'></line>
       <polyline id="206" fgcolor="#0000ffff" bgcolor="bygroup">0 1 1 1</polyline>
