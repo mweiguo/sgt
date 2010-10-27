@@ -37,7 +37,10 @@ QViewport::QViewport( const char* title, QWidget* parent )
 	_cameraPos[0] = 0;
 	_cameraPos[1] = 0;
 	_cameraPos[2] = 0;
-
+	_minTranslate = SGR::vec3f(-1e6, -1e6, -1e6);
+	_maxTranslate = SGR::vec3f(1e6, 1e6, 1e6);
+	_minScale     = 1e-6;
+	_maxScale     = 1e6;
     }
     catch ( std::exception& ex )
     {
@@ -47,10 +50,19 @@ QViewport::QViewport( const char* title, QWidget* parent )
 
 float QViewport::full_view ()
 {
-    float minvec[3], maxvec[3];
-    get_bbox ( 0, minvec, maxvec );
-    _scale = find_view ( SGR::vec3f(minvec), SGR::vec3f(maxvec), 0.6 );
+    SGR::vec3f center = ( _minTranslate + _maxTranslate ) / 2.0f;
+
+    camera_reset ( _camid );
+    camera_translate ( _camid, center.x(), center.y(), center.z() );
+    camera_scale ( _camid, _minScale );
+
+    _cameraPos[0] = center.x();
+    _cameraPos[1] = center.y();
+    _cameraPos[2] = center.z();
+    _scale = _minScale;
+
     update ();
+    LOG_INFO ("full_view  current scale = %f", _minScale);
     return _scale;
 }
 
@@ -58,25 +70,20 @@ float QViewport::find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec,
 {
     // translate
     SGR::vec3f center = ( minvec + maxvec ) / 2.0f;
+
     // scale
-//	float maxdimension = ( maxvec - minvec ).max_element ();
-    QSize wndsize = size();
-    if ( wndsize.width() > wndsize.height() )
+    float s = calcScale ( minvec, maxvec );
+    if ( s != 0 )
     {
-	_scale = percentOfView / ( maxvec - minvec ).y();
-// 	    _scale = (wndsize.width() * percentOfView) / ( maxdimension );
+	_scale = percentOfView / s;
+
+	camera_reset ( _camid );
+	camera_translate ( _camid, center.x(), center.y(), center.z() );
+	camera_scale ( _camid, _scale );
+	_cameraPos[0] = center.x();
+	_cameraPos[1] = center.y();
+	_cameraPos[2] = center.z();
     }
-    else
-    {
-	_scale = percentOfView / ( maxvec - minvec ).x();
-// 	    _scale = (wndsize.height() * percentOfView) / ( maxdimension );
-    }
-    camera_reset ( _camid );
-    camera_translate ( _camid, center.x(), center.y(), center.z() );
-    camera_scale ( _camid, _scale );
-    _cameraPos[0] = center.x();
-    _cameraPos[1] = center.y();
-    _cameraPos[2] = center.z();
     return _scale;
 }
 
@@ -150,6 +157,38 @@ void QViewport::zoomout ()
     update ();
 }
 
+void QViewport::calcCameraConstraint ( int nodeid )
+{
+    float minarr[3], maxarr[3];
+    get_bbox ( nodeid, minarr, maxarr );
+    SGR::vec3f minvec(minarr), maxvec(maxarr);
+    SGR::vec3f sz = (maxvec - minvec)/2.0f;
+    minvec -= sz;
+    maxvec += sz;
+
+    _minTranslate = minvec;
+    _maxTranslate = maxvec;
+
+    _minScale = calcScale ( minvec, maxvec );
+    _maxScale = 1;
+    camera_constraint ( minarr, maxarr, _minScale, _maxScale );
+}
+
+float QViewport::calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec )
+{
+    float scale;
+    QSize wndsize = size();
+    if ( wndsize.width() > wndsize.height() )
+    {
+	scale = 1.0f / ( maxvec - minvec ).y();
+    }
+    else
+    {
+	scale = 1.0f / ( maxvec - minvec ).x();
+    }
+    return scale;
+}
+
 void QViewport::resizeEvent ( QResizeEvent* event )
 {
     try 
@@ -160,6 +199,8 @@ void QViewport::resizeEvent ( QResizeEvent* event )
 	    viewport_geometry ( _viewport, w/2, h/2, w, -w );
 	else
 	    viewport_geometry ( _viewport, w/2, h/2, h, -h );
+
+	calcCameraConstraint(0);
     }
     catch ( std::exception& ex )
     {

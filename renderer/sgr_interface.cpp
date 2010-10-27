@@ -115,6 +115,13 @@ void camera_name ( int id, const char* nm )
         cam->name ( nm );
 }
 
+void camera_constraint ( int id, float* minarr, float* maxarr, float minScale, float maxScale )
+{
+    CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho> (id);
+    if ( cam )
+        cam->setConstraint ( vec3f(minarr), vec3f(maxarr), minScale, maxScale );
+}
+
 void get_cameramatrix ( int id, float* mat )
 {
     CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho> (id);

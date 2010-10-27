@@ -29,7 +29,9 @@ public:
     void zoomin ();
     void zoomout ();
 
+    void calcCameraConstraint ( int nodeid );
 protected:
+    float calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec );
     virtual void resizeEvent ( QResizeEvent* event );
     virtual void paintEvent ( QPaintEvent* event );
 
@@ -47,6 +49,9 @@ private:
     // transform parameters
     float _scale;
     float _cameraPos[3];
+
+    SGR::vec3f _minTranslate, _maxTranslate;
+    float _minScale, _maxScale;
 };
 
 #endif
