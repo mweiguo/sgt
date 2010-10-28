@@ -29,7 +29,8 @@ public:
     void zoomin ();
     void zoomout ();
 
-    void calcCameraConstraint ( int nodeid );
+    void setCameraConstraint ( int nodeid, float percentOfView );
+    void setCameraConstraint ( SGR::vec3f minTranslate, SGR::vec3f maxTranslate, float minScale, float maxScale );
 protected:
     float calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec );
     virtual void resizeEvent ( QResizeEvent* event );
@@ -52,6 +53,9 @@ private:
 
     SGR::vec3f _minTranslate, _maxTranslate;
     float _minScale, _maxScale;
+    bool _isInConstraintMode;
+/*     SGR::vec3f _minTranslate, _maxTranslate; */
+/*     float _minScale, _maxScale; */
 };
 
 #endif

@@ -41,6 +41,8 @@ QViewport::QViewport( const char* title, QWidget* parent )
 	_maxTranslate = SGR::vec3f(1e6, 1e6, 1e6);
 	_minScale     = 1e-6;
 	_maxScale     = 1e6;
+
+	_isInConstraintMode = false;
     }
     catch ( std::exception& ex )
     {
@@ -62,7 +64,6 @@ float QViewport::full_view ()
     _scale = _minScale;
 
     update ();
-    LOG_INFO ("full_view  current scale = %f", _minScale);
     return _scale;
 }
 
@@ -95,7 +96,12 @@ void QViewport::left ()
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
-    _cameraPos[0] -= delta;
+    LOG_INFO ( "QViewport::left  _isInConstraintMode = %d, camerapos.x=%f, limit=%f\n", _isInConstraintMode, _cameraPos[0],  _minTranslate.x() );
+    if ( _isInConstraintMode && ((p1.x()-delta) < _minTranslate.x()) )
+	_cameraPos[0] -= (p1.x()-_minTranslate.x());
+    else
+	_cameraPos[0] -= delta;
+    LOG_INFO ( "\tcamerapos.x=%f\n", _cameraPos[0] );
     // camera translate
     camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
     update ();
@@ -109,7 +115,12 @@ void QViewport::right ()
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
-    _cameraPos[0] += delta;
+
+    if ( _isInConstraintMode && ( (p2.x()+delta)>_maxTranslate.x() ) )
+	_cameraPos[0] += (_maxTranslate.x()-p2.x());
+    else
+	_cameraPos[0] += delta;
+    
     // camera translate
     camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
     update ();
@@ -123,7 +134,10 @@ void QViewport::up ()
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
-    _cameraPos[1] += delta;
+    if ( _isInConstraintMode && ((p1.y()+delta) > _maxTranslate.y()) )
+	_cameraPos[1] += (_maxTranslate.y()-p1.y());
+    else
+	_cameraPos[1] += delta;
     // camera translate
     camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
     update ();
@@ -137,7 +151,10 @@ void QViewport::down ()
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
-    _cameraPos[1] -= delta;
+    if ( _isInConstraintMode && ( (p2.y()-delta)<_minTranslate.y() ) )
+	_cameraPos[1] -= (p2.y()-_minTranslate.y());
+    else
+	_cameraPos[1] -= delta;
     // camera translate
     camera_translate ( _camid, _cameraPos[0], _cameraPos[1], _cameraPos[2] );
     update ();
@@ -145,33 +162,63 @@ void QViewport::down ()
 
 void QViewport::zoomin ()
 {
-    _scale *= 1.2;
+    if ( _isInConstraintMode && (_scale >= _maxScale) )
+	_scale = _maxScale;
+    else
+	_scale *= 1.2;
+
     camera_scale ( _camid, _scale );
     update ();
 }
 
 void QViewport::zoomout ()
 {
-    _scale /= 1.2;
+    if ( _isInConstraintMode && ( _scale <= _minScale ))
+	_scale = _minScale;
+    else
+	_scale /= 1.2;
+
     camera_scale ( _camid, _scale );
     update ();
 }
 
-void QViewport::calcCameraConstraint ( int nodeid )
+void QViewport::setCameraConstraint ( int nodeid, float percentOfView )
 {
     float minarr[3], maxarr[3];
     get_bbox ( nodeid, minarr, maxarr );
     SGR::vec3f minvec(minarr), maxvec(maxarr);
-    SGR::vec3f sz = (maxvec - minvec)/2.0f;
-    minvec -= sz;
-    maxvec += sz;
+    SGR::vec3f sz = (maxvec - minvec) / percentOfView;
+    SGR::vec3f center = ( minvec + maxvec ) / 2.0f;
+//     LOG_INFO ( "before : min.x=%f, min.y=%f, max.x=%f, max.y=%f\n", 
+// 	       center.x()-sz.x()/2.0f, center.y()-sz.y()/2.0f,
+// 	       center.x()+sz.x()/2.0f, center.y()+sz.y()/2.0f );
+    QSize wndsize = size();
+    if ( wndsize.width() > wndsize.height() )
+	sz.x ( (wndsize.width() / wndsize.height()) * sz.y () );
+    else
+	sz.y ( (wndsize.height() / wndsize.width()) * sz.x () );
+//     LOG_INFO ( "       : min.x=%f, min.y=%f, max.x=%f, max.y=%f\n", 
+// 	       center.x()-sz.x()/2.0f, center.y()-sz.y()/2.0f,
+// 	       center.x()+sz.x()/2.0f, center.y()+sz.y()/2.0f );
 
-    _minTranslate = minvec;
-    _maxTranslate = maxvec;
+    _minTranslate = center - (sz / 2.0f);
+    _maxTranslate = center + (sz / 2.0f);
+//     LOG_INFO ( "       : min.x=%f, min.y=%f, max.x=%f, max.y=%f\n", 
+// 	       _minTranslate.x(), _minTranslate.y(),
+// 	       _maxTranslate.x(), _maxTranslate.y() );
 
-    _minScale = calcScale ( minvec, maxvec );
+    _minScale = calcScale ( _minTranslate, _maxTranslate );
     _maxScale = 1;
-    camera_constraint ( minarr, maxarr, _minScale, _maxScale );
+    _isInConstraintMode = true;
+}
+
+void QViewport::setCameraConstraint ( SGR::vec3f minTranslate, SGR::vec3f maxTranslate, float minScale, float maxScale )
+{
+    _minTranslate = minTranslate;
+    _maxTranslate = maxTranslate;
+    _minScale     = minScale;
+    _maxScale     = maxScale;
+    _isInConstraintMode = true;
 }
 
 float QViewport::calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec )
@@ -179,13 +226,9 @@ float QViewport::calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec 
     float scale;
     QSize wndsize = size();
     if ( wndsize.width() > wndsize.height() )
-    {
-	scale = 1.0f / ( maxvec - minvec ).y();
-    }
-    else
-    {
 	scale = 1.0f / ( maxvec - minvec ).x();
-    }
+    else
+	scale = 1.0f / ( maxvec - minvec ).y();
     return scale;
 }
 
@@ -200,7 +243,7 @@ void QViewport::resizeEvent ( QResizeEvent* event )
 	else
 	    viewport_geometry ( _viewport, w/2, h/2, h, -h );
 
-	calcCameraConstraint(0);
+	setCameraConstraint(0, 0.8);
     }
     catch ( std::exception& ex )
     {

@@ -159,7 +159,7 @@ inline void QtRenderVisitor::apply ( TextNode& text )
 
     // calculate rectangle for text
     rc.setRect ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
-    LOG_INFO ("rect.x=%f, rect.y=%f, rect.w=%f, rect.h=%f\n", text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
+//    LOG_INFO ("rect.x=%f, rect.y=%f, rect.w=%f, rect.h=%f\n", text.anchorPos().x()+dx, text.anchorPos().y()+dy, scenesize.x(), scenesize.y() );
     // this point is rect lb point
     vec4f ttt = _opt->matrix * vec4f ( text.anchorPos().x()+dx, text.anchorPos().y()+dy, 0, 1 );
     // reverse and scale it inplace

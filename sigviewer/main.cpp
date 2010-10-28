@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
     }
 
     QViewport vp;
-    vp.resize(400, 300);
-    vp.calcCameraConstraint(0);
+    vp.resize(800, 400);
+    vp.setCameraConstraint(0, 0.8);
     vp.show();
 // //    MyThread t;
 // //    t.start();

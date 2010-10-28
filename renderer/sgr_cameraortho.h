@@ -6,6 +6,7 @@
 #include "sgr_bbox.h"
 #include "sgr_nodemgr.h"
 #include "sgr_global.h"
+#include <tinyLog.h>
 namespace SGR
 {
 
@@ -41,7 +42,7 @@ public:
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~CameraOrtho () {}
     
-    void setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale );
+//    void setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale );
 protected:
     void recalcuMatrix ();
 private:
@@ -53,9 +54,9 @@ private:
 
     bool _dirty;
 
-    vec3f _minTranslate, _maxTranslate;
-    float _minScale, _maxScale;
-    bool _isInConstraintMode;
+/*     vec3f _minTranslate, _maxTranslate; */
+/*     float _minScale, _maxScale; */
+/*     bool _isInConstraintMode; */
 };
 
 inline CameraOrtho::CameraOrtho (const string& name) : _name(name)
@@ -67,21 +68,21 @@ inline CameraOrtho::CameraOrtho (const string& name) : _name(name)
     _scale = _precision;
     dirty ( true );
 
-    _minScale = _maxScale = 0;
-    _minTranslate = _maxTranslate = vec3f(0,0,0);
-    _isInConstraintMode = false;
+/*     _minScale = _maxScale = 0; */
+/*     _minTranslate = _maxTranslate = vec3f(0,0,0); */
+/*     _isInConstraintMode = false; */
 }
 
 
 inline void CameraOrtho::zoom ( float scale )
 {
-    if ( _isInConstraintMode )
-    {
-	if ( scale<=_minScale )
-	    scale = _minScale;
-	if ( scale>=_maxScale )
-	    scale = _maxScale;
-    }
+/*     if ( _isInConstraintMode ) */
+/*     { */
+/* 	if ( scale<=_minScale ) */
+/* 	    scale = _minScale; */
+/* 	if ( scale>=_maxScale ) */
+/* 	    scale = _maxScale; */
+/*     } */
 
     if ( scale < 0 )
         scale = -1/scale;
@@ -104,22 +105,23 @@ inline void CameraOrtho::zoom ( float scale )
 inline void CameraOrtho::translate ( const vec3f& off )
 {
     vec3f offset = off;
-    if ( _isInConstraintMode )
-    {
-	if ( offset.x() <= _minTranslate.x() )
-	    offset.x( _minTranslate.x() );
-	if ( offset.y() <= _minTranslate.y() )
-	    offset.y( _minTranslate.y() );
-	if ( offset.z() <= _minTranslate.z() )
-	    offset.z( _minTranslate.z() );
+//    LOG_INFO ("CameraOrtho::translate, _isInConstraintMode=%d", _isInConstraintMode);
+/*     if ( _isInConstraintMode ) */
+/*     { */
+/* 	if ( offset.x() <= _minTranslate.x() ) */
+/* 	    offset.x( _minTranslate.x() ); */
+/* 	if ( offset.y() <= _minTranslate.y() ) */
+/* 	    offset.y( _minTranslate.y() ); */
+/* 	if ( offset.z() <= _minTranslate.z() ) */
+/* 	    offset.z( _minTranslate.z() ); */
 
-	if ( offset.x() >= _maxTranslate.x() )
-	    offset.x( _maxTranslate.x() );
-	if ( offset.y() >= _maxTranslate.y() )
-	    offset.y( _maxTranslate.y() );
-	if ( offset.z() >= _maxTranslate.z() )
-	    offset.z( _maxTranslate.z() );
-    }
+/* 	if ( offset.x() >= _maxTranslate.x() ) */
+/* 	    offset.x( _maxTranslate.x() ); */
+/* 	if ( offset.y() >= _maxTranslate.y() ) */
+/* 	    offset.y( _maxTranslate.y() ); */
+/* 	if ( offset.z() >= _maxTranslate.z() ) */
+/* 	    offset.z( _maxTranslate.z() ); */
+/*     } */
 
     _translate.xyz ( -offset.x(), -offset.y(), -offset.z() );
     recalcuMatrix ();
@@ -146,22 +148,22 @@ inline void CameraOrtho::recalcuMatrix ()
     _inversemvmatrix = tmat * smat;
 }
 
-inline void CameraOrtho::setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale )
-{
-    if ( minTranslate == maxTranslate || minScale == maxScale )
-    {
-	_isInConstraintMode = false;
-    }
-    else
-    {
-	_minTranslate = minTranslate;
-	_maxTranslate = maxTranslate;
-	_minScale = minScale;
-	_maxScale = maxScale;
-	_isInConstraintMode = true;
-    }
+/* inline void CameraOrtho::setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale ) */
+/* { */
+/*     if ( minTranslate == maxTranslate || minScale == maxScale ) */
+/*     { */
+/* 	_isInConstraintMode = false; */
+/*     } */
+/*     else */
+/*     { */
+/* 	_minTranslate = minTranslate; */
+/* 	_maxTranslate = maxTranslate; */
+/* 	_minScale = minScale; */
+/* 	_maxScale = maxScale; */
+/* 	_isInConstraintMode = true; */
+/*     } */
 	
-}
+/* } */
 
 }
 //typedef NodeMgr<CameraOrtho>      CameraMgr;

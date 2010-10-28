@@ -69,7 +69,6 @@ extern "C"
     void SGR_DLL camera_scale ( int id, float scale );
     void SGR_DLL camera_reset ( int id );
     void SGR_DLL camera_name ( int id, const char* name );
-    void SGR_DLL camera_constraint ( int id, float* minarr, float* maxarr, float minScale, float maxScale );
     void SGR_DLL get_cameramatrix ( int id, float* mat4f );
     void SGR_DLL get_camerainversematrix ( int id, float* mat4f );
 //    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
