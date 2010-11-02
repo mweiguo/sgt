@@ -1,18 +1,27 @@
 #setup camera
-set camid 10
-camera_create 10 "cam1"
+set camid [camera_create 1 "cam1"]
 
 # setup viewport
-set vpid  20
-viewport_create 20 "viewport1"
+set vpid  [viewport_create 100 "viewport1"]
 viewport_geometry $vpid 0 0 400 300
 viewport_attachcamera $vpid $camid 
 viewport_add $vpid
 
-# create a rectangle for test
-set rcid 100
-[rectangle_create 100]
-rectangle_size $rcid 2 2
-add_child 0 $rcid
+## create a rectangle for test
+#set rcid [rectangle_create 3]
+#rectangle_size $rcid 2 2
+#add_child 0 $rcid
 
 update_bbox 0
+
+proc find_viewi { id percentOfView camid vpid } {
+    set minmax [get_bbox $id]
+    set minx [lindex $minmax 0]
+    set miny [lindex $minmax 1]
+    set minz [lindex $minmax 2]
+    set maxx [lindex $minmax 3]
+    set maxy [lindex $minmax 4]
+    set maxz [lindex $minmax 5]
+    find_view $minx $miny $minz $maxx $maxy $maxz 0.8 $camid $vpid
+}
+

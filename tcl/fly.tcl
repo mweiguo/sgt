@@ -1,4 +1,4 @@
-set flyTime 10000
+set flyTime 5000
 set flyDeltaTime 80
 set flybrk 0
 
@@ -58,7 +58,7 @@ proc flyToDelta { x y z scale } {
     set currentY [expr $currentY + $deltaY]
     set currentZ [expr $currentZ + $deltaZ]
     set currentScale [expr $currentScale + $deltaScale]
-#    puts "currentX=$currentX currentY=$currentY currentZ=$currentZ currentScale=$currentScale"
+    puts "currentX=$currentX currentY=$currentY currentZ=$currentZ currentScale=$currentScale"
     set rst [expr abs($currentX-$x)<$translateThreshold && abs($currentY-$y)<$translateThreshold && abs($currentZ-$z)<$translateThreshold && abs($currentScale-$scale)<$scaleThreshold ]
 #    puts $rst
     if { $rst==1  } {
