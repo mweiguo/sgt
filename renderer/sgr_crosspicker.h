@@ -7,6 +7,7 @@
 #include "sgr_grhagl.h"
 #include "sgr_polylinenode.h"
 #include "sgr_polynode.h"
+#include "sgr_parentfinder.h"
 
 namespace SGR
 {
