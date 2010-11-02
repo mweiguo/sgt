@@ -42,6 +42,12 @@ extern "C"
 
     const int DRAWLINE_TOOL           = 1;
     /*********************************/
+    /*********** RENDER LIB **********/
+    /*********************************/
+    // 1 == qt, 2 == opengl
+    void SGR_DLL use_renderlib ( int lib );
+
+    /*********************************/
     /******** TCL COMMANDS REG *******/
     /*********************************/
     struct Tcl_Interp;

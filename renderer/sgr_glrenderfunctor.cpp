@@ -6,8 +6,39 @@
 namespace SGR
 {
 
-GLRenderVisitor::GLRenderVisitor ()
+GLStateChanger::GLStateChanger ( GLRenderOption* opt, AttrSet* set )
 {
+    if ( NULL == set )
+	return;
+}
+
+GLRenderVisitor::GLRenderVisitor ( RenderOption* opt, RenderList& renderlist )
+{
+    _opt = dynamic_cast<GLRenderOption*>(opt);
+    if ( NULL == _opt )
+	return;
+
+    // setup opengl matrixes, include mvmat, projmat, viewport
+    glViewport ( _opt->vpXYWH[0], _opt->vpXYWH[1], _opt->vpXYWH[2], _opt->vpXYWH[3]);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glLoadMatrixf ( (float*)(&(_opt->projmat)) );
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glLoadMatrixf ( (float*)(&(_opt->mvmat)) );
+
+    AttrSet* lastAttrset = NULL;
+    for ( RenderList::iterator pp=renderlist.begin(); pp!=renderlist.end(); ++pp )
+    {
+	if ( (*pp)->getAttrSet() != lastAttrset )
+	{
+	    // switch all state in AttrSet
+	    GLStateChanger changeState ( _opt, (*pp)->getAttrSet() );
+	    lastAttrset = (*pp)->getAttrSet();
+	}
+	(*pp)->accept ( *this );
+    }
+    glFlush();
 }
 
 void GLRenderVisitor::apply ( RectangleNodef& rect )

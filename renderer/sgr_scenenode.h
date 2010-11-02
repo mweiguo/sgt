@@ -2,6 +2,7 @@
 #define _SCENENODE_H_
 
 #include "sgr_nodemgr.h"
+#include "sgr_transformnode.h"
 namespace SGR
 {
 

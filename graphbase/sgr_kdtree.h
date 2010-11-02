@@ -91,6 +91,8 @@ public:
         vector<ObjectType>::clear();
         _nodes.clear();
     }
+    void insert ( ObjectType obj );
+    void remove ( ObjectType obj );
 
 #ifdef _USESTATISTIC_
     string memstatistic ();
