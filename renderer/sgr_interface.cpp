@@ -50,6 +50,14 @@ using namespace SGR;
 //{
 //    QViewport::getInst().setEnviroment ( camid );
 //}
+void use_renderlib ( int lib )
+{
+    if ( 1 == lib )
+	Rendering::renderlib = Rendering::RENDER_IN_QT;
+    else
+	Rendering::renderlib = Rendering::RENDER_IN_OPENGL;
+}
+
 void node_translate ( int id, float tx, float ty, float tz )
 {
     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode> (id);
@@ -265,7 +273,7 @@ void viewport_update ( int id, QPainter& painter )
     Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
     if ( p )
     {
-        RenderOption opt;
+        QRenderOption opt;
         opt.painter = &painter;
         RenderFlow renderflow ( *p, opt );
         p->update ();
@@ -274,6 +282,13 @@ void viewport_update ( int id, QPainter& painter )
 
 void viewport_update2 ( int id )
 {
+    Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
+    if ( p )
+    {
+        RenderOption opt;
+        RenderFlow renderflow ( *p, opt );
+        p->update ();
+    }
 }
 
 void get_viewportmatrix ( int id, float* mat )
