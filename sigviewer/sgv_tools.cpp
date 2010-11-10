@@ -16,18 +16,18 @@ SGVTools& SGVTools::getInst()
 
 SGVTools::SGVTools ()
 {
-    _tools[HAND_TOOL] = new HandTool ();
-    _tools[ZOOM_TOOL] = new ZoomTool ();
-    _tools[COORDQUERY_TOOL] = new CoordQueryTool ();
+//     _tools[HAND_TOOL] = new HandTool ();
+//     _tools[ZOOM_TOOL] = new ZoomTool ();
+//     _tools[COORDQUERY_TOOL] = new CoordQueryTool ();
     _currentTool = NULL;
 }
 
-void SGVTools::initialize ( QViewport* view )
+void SGVTools::initialize ( View* pview )
 {
     std::map< int, SGVTool* >::iterator pp, end=_tools.end();
     for ( pp=_tools.begin(); pp!=end; ++pp )
     {
-	pp->second->setView ( view );
+	pp->second->initialize ( pview );
     }
 }
 
@@ -148,136 +148,8 @@ bool SGVTool::isShiftPressed ()
     return _isShiftPressed;
 }
 
-void SGVTool::setView ( QViewport* view )
+void SGVTool::initialize ( View* pview )
 {
-    _view = view;
-}
-
-// --------------------------------------------------
-
-void HandTool::lbuttondown ( float x, float y )
-{
-    SGVTool::lbuttondown ( x, y );
-}
-
-void HandTool::lbuttonup ( float x, float y )
-{
-    SGVTool::lbuttonup ( x, y );
-    float dx = _startX - x;
-    float dy = _startY - y;
-    camera_translate ( _view->camid(), dx, dy, 0 );
-    _view->update ();
-}
-
-void HandTool::lbuttonmove ( float x, float y )
-{
-    SGVTool::lbuttonmove ( x, y );
-    float dx = _startX - x;
-    float dy = _startY - y;
-    camera_translate ( _view->camid(), dx, dy, 0 );
-    _view->update ();
-}
-
-void HandTool::mbuttondown ( float x, float y )
-{
-    SGVTool::mbuttondown ( x, y );
-}
-
-void HandTool::mbuttonup ( float x, float y )
-{
-    SGVTool::mbuttonup ( x, y );
-    float dx = _startX - x;
-    float dy = _startY - y;
-    camera_translate ( _view->camid(), dx, dy, 0 );
-    _view->update ();
-}
-
-void HandTool::mbuttonmove ( float x, float y )
-{
-    SGVTool::mbuttonmove ( x, y );
-    float dx = _startX - x;
-    float dy = _startY - y;
-    camera_translate ( _view->camid(), dx, dy, 0 );
-    _view->update ();
-}
-
-// --------------------------------------------------
-ZoomTool::ZoomTool ()
-{
-    _scale = 1;
-}
-
-void ZoomTool::lbuttondown ( float x, float y )
-{
-    SGVTool::lbuttondown ( x, y );
-}
-
-void ZoomTool::lbuttonup ( float x, float y )
-{
-    SGVTool::lbuttonup ( x, y );
-
-    float mincoord[3], maxcoord[3];
-    mincoord[0] = x < _startX ? x : _startX;
-    mincoord[1] = y < _startY ? y : _startY;
-    mincoord[2] = 0;
-    maxcoord[0] = x >= _startX ? x : _startX;
-    maxcoord[1] = y >= _startY ? y : _startY;
-    maxcoord[2] = 0;
-
-    _view->find_view ( mincoord, maxcoord, 0.8 );
-    _view->update ();
-}
-
-void ZoomTool::lbuttonmove ( float x, float y )
-{
-    SGVTool::lbuttonmove ( x, y );
-}
-
-void ZoomTool::mousewheel ( float x, float y, float delta )
-{
-//     SGVTool::mousewheel ( x, y, delta );
-//     if ( !isCtrlPressed() )
-// 	return;
-
-
-//     // get screen center in scene coordinates
-//     // get cneter of sceneCenter and current pos
-//     QSize wndsize = _view->size();
-//     float vpcoord[3] = { wndsize.width()/2.f, wndsize.height()/2.f, 0 };
-//     float scenecoord[3];
-//     get_scenepos ( _view->vpid(), vpcoord, scenecoord );
-//     scenecoord[0] = (scenecoord[0] + x) / 2.f;
-//     scenecoord[1] = (scenecoord[1] + y) / 2.f;
-//     scenecoord[2] = 0;
-
-//     if ( delta > 0 )
-//     {
-// 	_scale *= 1.5;
-//     }
-//     else
-//     {
-// 	_scale /= 1.5;
-//     }
-
-//     camera_scale ( _view->camid(), _scale );
-//     camera_translate ( _view->camid(), scenecoord[0], scenecoord[1], scenecoord[2] );
-//     _view->update ();
-}
-
-CoordQueryTool::CoordQueryTool ()
-{
-}
-
-SGR::vec2f CoordQueryTool::viewportToScene ( SGR::vec2f vpxy )
-{
-    float imv[16], ipr[16], ivp[16];
-    get_camerainversematrix ( _view->camid(), imv );
-    get_projectioninversematrix ( _view->projid(), ipr );
-    get_viewportinversematrix ( _view->vpid(), ivp );
-    SGR::mat4f imvmat(imv), iprmat(ipr), ivpmat(ivp);
-    SGR::mat4f mat = imvmat * iprmat * ivpmat;
-
-    SGR::vec4f scenepos = mat * SGR::vec4f ( vpxy );
-    return scenepos.xy();
+    _pview = pview;
 }
 

@@ -4,8 +4,7 @@
 #include <map>
 #include <sgr_vec2.h>
 class SGVTool;
-class QViewport;
-
+class View;
 class SGVTools
 {
 public:
@@ -15,7 +14,7 @@ public:
 
     static SGVTools& getInst();
     SGVTools ();
-    void initialize ( QViewport* view );
+    void initialize ( View* pview );
 
     SGVTool* selectTool ( int tool );
     SGVTool* currentTool ();
@@ -27,6 +26,9 @@ public:
 	    return NULL;
 	return dynamic_cast<ToolType*>(pp->second);
     }
+
+    void addTool ( SGVTool* );
+    void removeTool ( SGVTool* );
 private:
     std::map< int, SGVTool* > _tools;
     SGVTool* _currentTool;
@@ -62,42 +64,12 @@ public:
     void setShiftPressed ( bool isPressed );
     bool isShiftPressed ();
 
-    void setView ( QViewport* _view );
+    void initialize ( View* pview );
 protected:
     bool _isCtrlPressed, _isAltPressed, _isShiftPressed;
     float _startX, _startY, _lastX, _lastY;
 
-    QViewport* _view;
-};
-
-class HandTool : public SGVTool
-{
-public:
-    virtual void lbuttondown ( float x, float y );
-    virtual void lbuttonup ( float x, float y );
-    virtual void lbuttonmove ( float x, float y );
-    virtual void mbuttondown ( float x, float y );
-    virtual void mbuttonup ( float x, float y );
-    virtual void mbuttonmove ( float x, float y );
-};
-
-class ZoomTool : public SGVTool
-{
-public:
-    ZoomTool ();
-    virtual void lbuttondown ( float x, float y );
-    virtual void lbuttonup ( float x, float y );
-    virtual void lbuttonmove ( float x, float y );
-    virtual void mousewheel ( float x, float y, float delta );
-protected:
-    float _scale;
-};
-
-class CoordQueryTool : public SGVTool
-{
-public:
-    CoordQueryTool ();
-    SGR::vec2f viewportToScene ( SGR::vec2f vpxy );
+    View* _pview;
 };
 
 #endif // __SGV_TOOLS_H__

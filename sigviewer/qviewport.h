@@ -11,14 +11,14 @@
 #include "sgr_renderflow.h"
 using namespace std;
 #include "agef_global.h"
+#include "view.h"
 
-class QViewport : public QWidget
+class QViewport : public QWidget, virtual public View
 {
 public:
     QViewport( const char* title="", QWidget* parent=NULL );
-    int vpid () { return _viewport; }
-    int camid () { return _camid; }
-    int projid () { return _projid; }
+    ~QViewport();
+    virtual void updateWindow ();
     
     float full_view ();
     float find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec, float percentOfView );
@@ -43,9 +43,6 @@ protected:
     virtual void keyPressEvent ( QKeyEvent * event );
     virtual void keyReleaseEvent ( QKeyEvent * event );
 private:
-
-/*     list<SGR::Viewport*> _viewports; */
-//     int _x, _y;
     int _viewport, _camid, _projid;
     // transform parameters
     float _scale;
@@ -54,8 +51,6 @@ private:
     SGR::vec3f _minTranslate, _maxTranslate;
     float _minScale, _maxScale;
     bool _isInConstraintMode;
-/*     SGR::vec3f _minTranslate, _maxTranslate; */
-/*     float _minScale, _maxScale; */
 };
 
 #endif

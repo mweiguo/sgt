@@ -6,6 +6,8 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <sgr_mat4.h>
+#include "coordquery.h"
+
 
 QViewport::QViewport( const char* title, QWidget* parent )
 {
@@ -30,7 +32,7 @@ QViewport::QViewport( const char* title, QWidget* parent )
 	LOG_INFO ("sigviewer initialize ok.\n");
 
 	// init tools
-	SGVTools::getInst().initialize ( this );	
+	SGVTools::getInst().initialize ( this );
 
 	// init data member
 	_scale = 1.0f;
@@ -48,6 +50,15 @@ QViewport::QViewport( const char* title, QWidget* parent )
     {
 	LOG_ERROR (ex.what());
     }
+}
+
+QViewport::~QViewport()
+{
+}
+
+void QViewport::updateWindow ()
+{
+    update ();
 }
 
 float QViewport::full_view ()

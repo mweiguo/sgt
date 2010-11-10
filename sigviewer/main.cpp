@@ -55,10 +55,20 @@ int main(int argc, char *argv[])
 	return 0;
     }
 
+#ifdef _QTRENDER_
     QViewport vp;
     vp.resize(800, 400);
     vp.setCameraConstraint(0, 0.8);
     vp.show();
+#endif
+
+#ifdef _OPENGLRENDER_
+    QGLViewport vp;
+    vp.resize(800, 400);
+    vp.show();
+#endif
+
+
 // //    MyThread t;
 // //    t.start();
     return app.exec();

@@ -5,24 +5,24 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include <sgr_vec3.h>
+#include <sgr_vec2.h>
+#include "view.h"
 
-class QGLViewport : public QGLWidget
+class SGVTools;
+class QGLViewport : public QGLWidget, virtual public View
 {
 public:
-    static QGLViewport& getInst();
+    QGLViewport( const char* title );
+    virtual ~QGLViewport();
 
-    int vpid () { return _viewportid; }
-    int camid () { return _camid; }
-    int projid () { return _projid; }
-    
-    float full_view ();
-    float find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec, float percentOfView );
-    
+    virtual void updateWindow ();
+    SGVTools* sgvtools () { return _tools; }
+    const SGVTools* sgvtools () const { return _tools; }
+
+    SGR::vec2f viewportToScene ( SGR::vec2f vpxy );
 protected:
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
-
 
     virtual void mousePressEvent ( QMouseEvent * event );
     virtual void mouseReleaseEvent ( QMouseEvent * event );
@@ -31,9 +31,8 @@ protected:
     virtual void keyPressEvent ( QKeyEvent * event );
     virtual void keyReleaseEvent ( QKeyEvent * event );
 private:
-    QGLViewport( const char* title );
-
     int _viewportid, _camid, _projid;
+    SGVTools* _tools;
 };
 
 #endif // _QGLVIEWPORT_H_
