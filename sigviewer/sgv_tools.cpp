@@ -1,11 +1,16 @@
 #include "sgv_tools.h"
 #include "qviewport.h"
 #include "sgr_interface.h"
+#include "handtool.h"
+#include "zoomtool.h"
+#include "coordquery.h"
+#include "locatetool.h"
 
 // --------------------------------------------------
 const int SGVTools::HAND_TOOL = 1;
 const int SGVTools::ZOOM_TOOL = 2;
 const int SGVTools::COORDQUERY_TOOL = 3;
+const int SGVTools::LOCATE_TOOL = 4;
 
 
 SGVTools& SGVTools::getInst()
@@ -16,10 +21,16 @@ SGVTools& SGVTools::getInst()
 
 SGVTools::SGVTools ()
 {
-//     _tools[HAND_TOOL] = new HandTool ();
-//     _tools[ZOOM_TOOL] = new ZoomTool ();
-//     _tools[COORDQUERY_TOOL] = new CoordQueryTool ();
     _currentTool = NULL;
+    _pview = NULL;
+}
+
+SGVTools::~SGVTools ()
+{
+    for ( std::map< int, SGVTool* >::iterator pp = _tools.begin(); pp!=_tools.end(); ++pp )
+    {
+	delete pp->second;
+    }
 }
 
 void SGVTools::initialize ( View* pview )
@@ -29,6 +40,7 @@ void SGVTools::initialize ( View* pview )
     {
 	pp->second->initialize ( pview );
     }
+    _pview = pview;
 }
 
 SGVTool* SGVTools::selectTool ( int tool )
@@ -46,7 +58,52 @@ SGVTool* SGVTools::currentTool ()
     return _currentTool;
 }
 
+void SGVTools::addTool ( int idx )
+{
+    SGVTool* tool = NULL;
+    switch ( idx )
+    {
+    case HAND_TOOL:
+    {
+	tool = new HandTool(this);
+	break;
+    }
+    case ZOOM_TOOL:
+	tool = new ZoomTool(this);
+	break;
+    case COORDQUERY_TOOL:
+	tool = new CoordQueryTool(this);
+	break;
+    case LOCATE_TOOL:
+	tool = new LocateTool(this);
+	break;
+    }
+
+    if ( tool )
+    {
+	_tools[idx] = tool;
+	_currentTool = tool;
+	tool->initialize ( _pview );
+    }
+}
+
+void SGVTools::removeTool ( int idx )
+{
+    std::map< int, SGVTool* >::iterator pp = _tools.find ( idx );
+    if ( pp != _tools.end() )
+    {
+	delete pp->second;
+	_tools.erase ( pp );
+    }
+}
+
 // --------------------------------------------------
+
+SGVTool::SGVTool ( SGVTools* tools )
+{
+    _pview = NULL;
+    _tools = tools;
+}
 
 void SGVTool::lbuttondown ( float x, float y )
 {

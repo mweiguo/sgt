@@ -5,7 +5,7 @@
 class ZoomTool : public SGVTool
 {
 public:
-    ZoomTool ();
+    ZoomTool ( SGVTools* tools );
     virtual void lbuttondown ( float x, float y );
     virtual void lbuttonup ( float x, float y );
     virtual void lbuttonmove ( float x, float y );

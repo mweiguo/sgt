@@ -11,15 +11,17 @@ public:
     static const int HAND_TOOL;
     static const int ZOOM_TOOL;
     static const int COORDQUERY_TOOL;
+    static const int LOCATE_TOOL;
 
     static SGVTools& getInst();
     SGVTools ();
+    ~SGVTools ();
     void initialize ( View* pview );
 
     SGVTool* selectTool ( int tool );
     SGVTool* currentTool ();
     template<class ToolType>
-    ToolType* getTool ( int tool )
+    ToolType* getTool ( const int tool )
     {
 	std::map< int, SGVTool* >::iterator pp = _tools.find ( tool );
 	if ( pp==_tools.end() )
@@ -27,16 +29,19 @@ public:
 	return dynamic_cast<ToolType*>(pp->second);
     }
 
-    void addTool ( SGVTool* );
-    void removeTool ( SGVTool* );
+    void addTool ( int );
+    void removeTool ( int );
 private:
     std::map< int, SGVTool* > _tools;
     SGVTool* _currentTool;
+    View* _pview;
 };
 
 class SGVTool
 {
 public:
+    SGVTool ( SGVTools* tools );
+
     virtual void lbuttondown ( float x, float y );
     virtual void lbuttonup ( float x, float y );
     virtual void lbuttonmove ( float x, float y );
@@ -70,6 +75,7 @@ protected:
     float _startX, _startY, _lastX, _lastY;
 
     View* _pview;
+    SGVTools* _tools;
 };
 
 #endif // __SGV_TOOLS_H__

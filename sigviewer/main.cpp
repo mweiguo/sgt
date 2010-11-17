@@ -4,10 +4,20 @@
 
 #include <tinylog.h>
 
+#define _OPENGLRENDER_ 1
+
+#ifdef _OPENGLRENDER_
+#include "qglviewport.h"
+#endif
+
+#ifdef _QTRENDER_
 #include "qviewport.h"
+#endif
+
 #include "sgr_interface.h"
 #include "tcltkconsole.h"
 #include <exception>
+
 
 class MyThread : public QThread
 {
@@ -63,7 +73,8 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef _OPENGLRENDER_
-    QGLViewport vp;
+    use_renderlib ( 2 );
+    QGLViewport vp ( "default window" );
     vp.resize(800, 400);
     vp.show();
 #endif

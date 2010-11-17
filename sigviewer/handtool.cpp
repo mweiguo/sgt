@@ -2,6 +2,10 @@
 #include <sgr_interface.h>
 #include "view.h"
 
+HandTool::HandTool ( SGVTools* tools ) : SGVTool ( tools )
+{
+}
+
 void HandTool::lbuttondown ( float x, float y )
 {
     SGVTool::lbuttondown ( x, y );

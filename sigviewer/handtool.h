@@ -5,6 +5,7 @@
 class HandTool : public SGVTool
 {
 public:
+    HandTool ( SGVTools* tools );
     virtual void lbuttondown ( float x, float y );
     virtual void lbuttonup ( float x, float y );
     virtual void lbuttonmove ( float x, float y );

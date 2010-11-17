@@ -1,7 +1,7 @@
 #include "zoomtool.h"
 #include "view.h"
 
-ZoomTool::ZoomTool ()
+ZoomTool::ZoomTool ( SGVTools* tools ) : SGVTool (tools)
 {
     _scale = 1;
 }
