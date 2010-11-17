@@ -11,8 +11,8 @@ namespace SGR
 class GLRenderOption : public RenderOption
 {
 public:
-    GLRenderOption();
-    virtual ~GLRenderOption();
+    GLRenderOption() {}
+    virtual ~GLRenderOption() {}
 
     float vpXYWH[4];
     SGR::mat4f mvmat, projmat;

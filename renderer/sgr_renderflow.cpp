@@ -34,7 +34,7 @@ Rendering::Rendering ( RenderList& renderlist, RenderOption& opt )
     if ( renderlib == RENDER_IN_QT )
 	QtRenderVisitor func ( renderlist, &opt );
     else if ( renderlib == RENDER_IN_OPENGL )
-	GLRenderVisitor func ();
+	GLRenderVisitor func ( &opt, renderlist );
 }
 
 RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
@@ -86,8 +86,6 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 mat4f old = opt.matrix;
                 opt.matrix = vp.vpmatrix() * proj->projmatrix() * cam->mvmatrix();
                 opt.reverse_mvpw = cam->inversematrix() * proj->inversematrix() * vp.inversematrix();
-                //opt.matrix = cam->mvmatrix();
-                //opt.scale = cam->mvmatrix().sx();
                 Rendering ( *(Culling::getInst()[camid]), opt );
                 opt.matrix = old;
 

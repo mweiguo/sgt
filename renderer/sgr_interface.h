@@ -131,7 +131,7 @@ extern "C"
     /*********************************/
     /************ QUERY **************/
     /*********************************/
-    void SGR_DLL get_bbox ( int id, float* min, float* max );
+    void SGR_DLL get_bbox ( int id, float* minxyz, float* maxxyz );
 /*     void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
 /*     void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
     int SGR_DLL get_nodetype ( int node );

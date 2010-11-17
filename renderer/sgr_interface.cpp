@@ -3,6 +3,7 @@
 #include "sgr_nodes.h"
 #include "sgr_vec3.h"
 #include "sgr_renderfunctor.h"
+#include "sgr_glrenderfunctor.h"
 #include "sgr_renderflow.h"
 #include "sgr_savemesh.h"
 #include "sgr_loadscene.h"
@@ -285,7 +286,7 @@ void viewport_update2 ( int id )
     Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
     if ( p )
     {
-        RenderOption opt;
+        GLRenderOption opt;
         RenderFlow renderflow ( *p, opt );
         p->update ();
     }

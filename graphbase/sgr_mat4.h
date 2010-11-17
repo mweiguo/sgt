@@ -93,6 +93,23 @@ public:
     ValueType m32 () const { return m[3][2]; }
     ValueType m33 () const { return m[3][3]; }
 
+    ValueType& m00 () { return m[0][0]; }
+    ValueType& m01 () { return m[0][1]; }
+    ValueType& m02 () { return m[0][2]; }
+    ValueType& m03 () { return m[0][3]; }
+    ValueType& m10 () { return m[1][0]; }
+    ValueType& m11 () { return m[1][1]; }
+    ValueType& m12 () { return m[1][2]; }
+    ValueType& m13 () { return m[1][3]; }
+    ValueType& m20 () { return m[2][0]; }
+    ValueType& m21 () { return m[2][1]; }
+    ValueType& m22 () { return m[2][2]; }
+    ValueType& m23 () { return m[2][3]; }
+    ValueType& m30 () { return m[3][0]; }
+    ValueType& m31 () { return m[3][1]; }
+    ValueType& m32 () { return m[3][2]; }
+    ValueType& m33 () { return m[3][3]; }
+
     void m00 ( ValueType v ) { m[0][0] = v; }
     void m01 ( ValueType v ) { m[0][1] = v; }
     void m02 ( ValueType v ) { m[0][2] = v; }
