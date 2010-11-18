@@ -11,7 +11,7 @@ public:
     static const int HAND_TOOL;
     static const int ZOOM_TOOL;
     static const int COORDQUERY_TOOL;
-    static const int LOCATE_TOOL;
+    static const int CAMERA_TOOL;
 
     static SGVTools& getInst();
     SGVTools ();

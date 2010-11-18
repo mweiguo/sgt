@@ -10,7 +10,7 @@
 const int SGVTools::HAND_TOOL = 1;
 const int SGVTools::ZOOM_TOOL = 2;
 const int SGVTools::COORDQUERY_TOOL = 3;
-const int SGVTools::LOCATE_TOOL = 4;
+const int SGVTools::CAMERA_TOOL = 4;
 
 
 SGVTools& SGVTools::getInst()
@@ -74,8 +74,8 @@ void SGVTools::addTool ( int idx )
     case COORDQUERY_TOOL:
 	tool = new CoordQueryTool(this);
 	break;
-    case LOCATE_TOOL:
-	tool = new LocateTool(this);
+    case CAMERA_TOOL:
+	tool = new CameraTool(this);
 	break;
     }
 

@@ -5,7 +5,7 @@ QGLViewport::QGLViewport( const char* title ) : View()
 {
     // initialize tools
     _tools.initialize ( this );
-    _tools.addTool ( SGVTools::LOCATE_TOOL );
+    _tools.addTool ( SGVTools::CAMERA_TOOL );
 }
 
 QGLViewport::~QGLViewport()

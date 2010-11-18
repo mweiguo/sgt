@@ -10,5 +10,5 @@ INCLUDEPATH += . ./.. ./../graphbase ./../renderer /local/include ../../stratumS
 LIBS += -L./../bin -L/local/lib -lsigrenderer -ltcl85 -ltk85 ../../stratumSimulatior/tinylog/src/tinylog.a -lQtOpenGLd4
 
 # Input
-HEADERS += view.h qviewport.h sgv_tools.h tcltkconsole.h qglviewport.h examine.h flytool.h handtool.h lookat.h walktool.h zoomtool.h coordquery.h locatetool.h
-SOURCES += view.cpp main.cpp qviewport.cpp sgv_tools.cpp tcltkconsole.cpp qglviewport.cpp handtool.cpp zoomtool.cpp coordquery.cpp locatetool.cpp
+HEADERS += view.h qviewport.h sgv_tools.h tcltkconsole.h qglviewport.h examine.h flytool.h handtool.h lookat.h walktool.h zoomtool.h coordquery.h locatetool.h keyboardmanipulator.h
+SOURCES += view.cpp main.cpp qviewport.cpp sgv_tools.cpp tcltkconsole.cpp qglviewport.cpp handtool.cpp zoomtool.cpp coordquery.cpp locatetool.cpp keyboardmanipulator.cpp
