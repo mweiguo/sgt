@@ -1,4 +1,7 @@
 #include "keyboardmanipulator.h"
+#include "locatetool.h"
+#include <Qt>
+#include <QApplication>
 
 KeyboardManipulater::KeyboardManipulater ( SGVTools* tools ) : SGVTool(tools)
 {
@@ -6,7 +9,7 @@ KeyboardManipulater::KeyboardManipulater ( SGVTools* tools ) : SGVTool(tools)
 
 void KeyboardManipulater::keydown ( int key )
 {
-    CameraTool* cameraTool = _tools->getTool ( SGVTools::LOCATE_TOOL );
+    CameraTool* cameraTool = _tools->getTool<CameraTool> ( SGVTools::CAMERA_TOOL );
     if ( NULL == cameraTool )
 	return;
 
@@ -16,22 +19,22 @@ void KeyboardManipulater::keydown ( int key )
 	cameraTool->locateAll ();
 	break;
     case Qt::Key_Left:
-	cameraTool->moveLeft ();
+	cameraTool->left ();
 	break;
     case Qt::Key_Right:
-	cameraTool->moveRight ();
+	cameraTool->right ();
 	break;
     case Qt::Key_Up:
-	cameraTool->moveUp ();
+	cameraTool->up ();
 	break;
     case Qt::Key_Down:
-	cameraTool->moveDown ();
+	cameraTool->down ();
 	break;
     case Qt::Key_PageDown:
-	cameraTool->zoomIn ();
+	cameraTool->zoomin ();
 	break;
     case Qt::Key_PageUp:
-	cameraTool->zoomOut ();
+	cameraTool->zoomout ();
 	break;
     case Qt::Key_Q:
     case Qt::Key_Escape:

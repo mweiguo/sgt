@@ -1,6 +1,8 @@
 #ifndef _KEYBOARD_MANIPULATER_H_
 #define _KEYBOARD_MANIPULATER_H_
 
+#include "sgv_tools.h"
+
 class KeyboardManipulater : public SGVTool
 {
 public:
