@@ -5,12 +5,14 @@
 #include "zoomtool.h"
 #include "coordquery.h"
 #include "locatetool.h"
+#include "keyboardmanipulator.h"
 
 // --------------------------------------------------
 const int SGVTools::HAND_TOOL = 1;
 const int SGVTools::ZOOM_TOOL = 2;
 const int SGVTools::COORDQUERY_TOOL = 3;
 const int SGVTools::CAMERA_TOOL = 4;
+const int SGVTools::KEYBOARDMANIPULATER_TOOL = 5;
 
 
 SGVTools& SGVTools::getInst()
@@ -76,6 +78,9 @@ void SGVTools::addTool ( int idx )
 	break;
     case CAMERA_TOOL:
 	tool = new CameraTool(this);
+	break;
+    case KEYBOARDMANIPULATER_TOOL:
+	tool = new KeyboardManipulater(this);
 	break;
     }
 

@@ -18,6 +18,8 @@ public:
 protected:
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
+    virtual void keyPressEvent ( QKeyEvent * event );
+    virtual void keyReleaseEvent ( QKeyEvent * event );
 };
 
 #endif // _QGLVIEWPORT_H_

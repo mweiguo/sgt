@@ -21,6 +21,8 @@
 
 #include "sgr_renderlist.h"
 
+#include <tinylog.h>
+
 using namespace std; 
 namespace SGR
 {
@@ -77,7 +79,7 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
             state = RENDERING;
 
             cullingend = clock ();
-            qDebug ( "culling: %d clock", cullingend-cullingstart );
+            LOG_INFO ( "culling: %d clock", cullingend-cullingstart );
             break;
         case RENDERING:
             {
@@ -90,7 +92,7 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 opt.matrix = old;
 
                 renderend = clock();
-                qDebug ( "rendering: %d clock;  render objects: %d", renderend-renderstart, (Culling::getInst()[camid])->size() );
+                LOG_INFO ( "rendering: %d clock;  render objects: %d\n", renderend-renderstart, (Culling::getInst()[camid])->size() );
             }
             state = END;
             break;

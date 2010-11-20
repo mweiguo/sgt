@@ -12,6 +12,7 @@ public:
     static const int ZOOM_TOOL;
     static const int COORDQUERY_TOOL;
     static const int CAMERA_TOOL;
+    static const int KEYBOARDMANIPULATER_TOOL;
 
     static SGVTools& getInst();
     SGVTools ();

@@ -51,7 +51,7 @@ void View::mousePressEvent ( QMouseEvent * event )
 	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
 	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
-	if ( ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );
@@ -78,7 +78,7 @@ void View::mouseReleaseEvent ( QMouseEvent * event )
 	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
 	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
-	if ( ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );
@@ -105,7 +105,7 @@ void View::mouseMoveEvent ( QMouseEvent * event  )
 	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
 	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
-	if ( ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );
@@ -135,7 +135,7 @@ void View::wheelEvent ( QWheelEvent * event )
 	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
 	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
-	if ( NULL == ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );
@@ -155,7 +155,7 @@ void View::keyPressEvent ( QKeyEvent * event )
     try
     {
 	SGVTool* ptool = _tools.currentTool ();
-	if ( NULL == ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );
@@ -175,7 +175,7 @@ void View::keyReleaseEvent ( QKeyEvent * event )
     try
     {
 	SGVTool* ptool = _tools.currentTool ();
-	if ( NULL == ptool )
+	if ( NULL != ptool )
 	{
 	    Qt::KeyboardModifiers ms = event->modifiers ();
 	    ptool->setCtrlPressed ( ms & Qt::ControlModifier ? true : false );

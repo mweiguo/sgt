@@ -6,6 +6,7 @@ QGLViewport::QGLViewport( const char* title ) : View()
     // initialize tools
     _tools.initialize ( this );
     _tools.addTool ( SGVTools::CAMERA_TOOL );
+    _tools.addTool ( SGVTools::KEYBOARDMANIPULATER_TOOL );
 }
 
 QGLViewport::~QGLViewport()
@@ -29,6 +30,7 @@ int QGLViewport::getWidth()
 
 void QGLViewport::paintGL ()
 {
+    LOG_INFO ( "QGLViewport::paintGL" );
     viewport_update2 ( vpid() );
 }
 
@@ -38,3 +40,12 @@ void QGLViewport::resizeGL ( int width, int height )
     projection_ortho ( projid(), -1, 1, -1, 1, 0.1, 10000 );
 }
 
+void QGLViewport::keyPressEvent ( QKeyEvent * event )
+{
+    View::keyPressEvent ( event );
+}
+
+void QGLViewport::keyReleaseEvent ( QKeyEvent * event )
+{
+    View::keyPressEvent ( event );
+}

@@ -2,6 +2,7 @@
 #include "locatetool.h"
 #include <Qt>
 #include <QApplication>
+#include <tinylog.h>
 
 KeyboardManipulater::KeyboardManipulater ( SGVTools* tools ) : SGVTool(tools)
 {
@@ -9,6 +10,7 @@ KeyboardManipulater::KeyboardManipulater ( SGVTools* tools ) : SGVTool(tools)
 
 void KeyboardManipulater::keydown ( int key )
 {
+    LOG_INFO ( "KeyboardManipulater::keydown\n" );
     CameraTool* cameraTool = _tools->getTool<CameraTool> ( SGVTools::CAMERA_TOOL );
     if ( NULL == cameraTool )
 	return;
