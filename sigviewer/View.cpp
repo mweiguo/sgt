@@ -1,7 +1,6 @@
 #include "view.h"
 #include <sgr_seedgen.h>
 #include "sgr_interface.h"
-#include "coordquery.h"
 #include <sgr_mat4.h>
 #include <sgr_vec4.h>
 #include "sgv_tools.h"
@@ -9,6 +8,7 @@
 
 View::View ()
 {
+    // init window states
     _viewportid = SGR::SeedGenerator::getInst().maxseed();
     _camid = SGR::SeedGenerator::getInst().maxseed();
     _projid = SGR::SeedGenerator::getInst().maxseed();
@@ -19,8 +19,6 @@ View::View ()
 
     viewport_attachcamera ( _viewportid, _camid );
     viewport_attachprojection ( _viewportid, _projid );
-
-    _tools.addTool ( SGVTools::COORDQUERY_TOOL );
 }
 
 View::~View ()
@@ -34,22 +32,38 @@ void View::updateWindow ()
 {
 }
 
-int View::getHeight()
+SGR::mat4f View::getVPM () const
 {
-    return 0;
+    SGR::mat4f mat4camera, mat4proj, mat4vp;
+    get_cameramatrix ( _camid, &(mat4camera.m00()) );
+    get_projectionmatrix ( _projid, &(mat4proj.m00()) );
+    get_viewportmatrix ( _viewportid, &(mat4vp.m00()) );
+
+    return mat4vp * mat4proj * mat4camera;
 }
 
-int View::getWidth()
+SGR::mat4f View::getIMPV () const
 {
-    return 0;
+    SGR::mat4f imvmat, iprmat, ivpmat;
+    get_camerainversematrix ( _camid, &(imvmat.m00()) );
+    get_projectioninversematrix ( _projid, &(iprmat.m00()) );
+    get_viewportinversematrix ( _viewportid, &(ivpmat.m00()) );
+    return imvmat * iprmat * ivpmat;
+}
+
+
+SGR::vec2f View::viewportToScene ( SGR::vec2f vpxy ) const
+{
+    SGR::mat4f mat = getIMPV ();
+    SGR::vec4f scenepos = mat * SGR::vec4f ( vpxy );
+    return scenepos.xy();
 }
 
 void View::mousePressEvent ( QMouseEvent * event )
 {
     try
     {
-	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
-	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
+	SGR::vec2f scenepos = viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
 	if ( NULL != ptool )
 	{
@@ -75,8 +89,7 @@ void View::mouseReleaseEvent ( QMouseEvent * event )
 {
     try
     {
-	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
-	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
+	SGR::vec2f scenepos = viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
 	if ( NULL != ptool )
 	{
@@ -102,8 +115,7 @@ void View::mouseMoveEvent ( QMouseEvent * event  )
 {
     try
     {
-	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
-	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
+	SGR::vec2f scenepos = viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
 	if ( NULL != ptool )
 	{
@@ -132,8 +144,7 @@ void View::wheelEvent ( QWheelEvent * event )
 {
     try
     {
-	CoordQueryTool* tool = _tools.getTool<CoordQueryTool> ( SGVTools::COORDQUERY_TOOL );
-	SGR::vec2f scenepos = tool->viewportToScene ( SGR::vec2f(event->x(), event->y()) );
+	SGR::vec2f scenepos = viewportToScene ( SGR::vec2f(event->x(), event->y()) );
 	SGVTool* ptool = _tools.currentTool ();
 	if ( NULL != ptool )
 	{

@@ -1,5 +1,6 @@
 #include "qglviewport.h"
 #include "sgr_interface.h"
+#include <tinylog.h>
 
 QGLViewport::QGLViewport( const char* title ) : View()
 {

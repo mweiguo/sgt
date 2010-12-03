@@ -19,20 +19,9 @@ public:
     QViewport( const char* title="", QWidget* parent=NULL );
     ~QViewport();
     virtual void updateWindow ();
-    
-    float full_view ();
-    float find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec, float percentOfView );
-    void left ();
-    void right ();
-    void up ();
-    void down ();
-    void zoomin ();
-    void zoomout ();
-
-    void setCameraConstraint ( int nodeid, float percentOfView );
-    void setCameraConstraint ( SGR::vec3f minTranslate, SGR::vec3f maxTranslate, float minScale, float maxScale );
+    virtual int getHeight();
+    virtual int getWidth();
 protected:
-    float calcScale ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec );
     virtual void resizeEvent ( QResizeEvent* event );
     virtual void paintEvent ( QPaintEvent* event );
 
@@ -42,15 +31,6 @@ protected:
     virtual void wheelEvent ( QWheelEvent * event );
     virtual void keyPressEvent ( QKeyEvent * event );
     virtual void keyReleaseEvent ( QKeyEvent * event );
-private:
-    int _viewport, _camid, _projid;
-    // transform parameters
-    float _scale;
-    float _cameraPos[3];
-
-    SGR::vec3f _minTranslate, _maxTranslate;
-    float _minScale, _maxScale;
-    bool _isInConstraintMode;
 };
 
 #endif

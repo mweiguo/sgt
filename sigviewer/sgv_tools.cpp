@@ -3,7 +3,6 @@
 #include "sgr_interface.h"
 #include "handtool.h"
 #include "zoomtool.h"
-#include "coordquery.h"
 #include "locatetool.h"
 #include "keyboardmanipulator.h"
 
@@ -72,9 +71,6 @@ void SGVTools::addTool ( int idx )
     }
     case ZOOM_TOOL:
 	tool = new ZoomTool(this);
-	break;
-    case COORDQUERY_TOOL:
-	tool = new CoordQueryTool(this);
 	break;
     case CAMERA_TOOL:
 	tool = new CameraTool(this);

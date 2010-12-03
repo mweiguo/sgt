@@ -1,26 +1,33 @@
 #include "locatetool.h"
 #include "sgv_tools.h"
 #include <sgr_interface.h>
+#include <sgr_vec4.h>
 #include "view.h"
-#include "coordquery.h"
+#include <tinylog.h>
 
 CameraTool::CameraTool ( SGVTools* tools ) : SGVTool(tools)
 {
     _currentScale = 1;
+    _currentTranslate.xyz(0,0,0);
+
+    // camera constraint
+    _minTranslate.xyz (0,0,0);
+    _maxTranslate.xyz (0,0,0);
+    _minScale = _maxScale = 0;
+    _isInConstraintMode   = false;
 }
 
 void CameraTool::locateAll ()
 {
-
     float min[3], max[3];
-    get_bbox ( 0/*_pview->scene()->sceneid()*/, min, max );
+    get_bbox ( 0, min, max );
     SGR::vec3f dimension ( max[0]-min[0], max[1]-min[1], max[2]-min[2] );
 
     // calculate scale
     if ( dimension.x() > dimension.y() )
-	_currentScale = _pview->getHeight() / dimension.y();
+	_currentScale = _pview->getHeight() / (_pview->getVPM() * SGR::vec4f(1,0,0,1)).mod();
     else
-	_currentScale = _pview->getWidth() / dimension.x();
+	_currentScale = _pview->getWidth() / (_pview->getVPM() * SGR::vec4f(1,0,0,1)).mod();
 
     // calculate center
     _currentTranslate = SGR::vec3f ( (max[0]+min[0])/2.0, (max[1]+min[1])/2.0, (max[2]+min[2])/2.0 );
@@ -57,12 +64,12 @@ float CameraTool::find_view ( const SGR::vec3f& minvec, const SGR::vec3f& maxvec
 
 void CameraTool::left ()
 {
-    CoordQueryTool* ptool = _tools->getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
-    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
-    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
+    SGR::vec2f p1 = _pview->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = _pview->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
+
     if ( _isInConstraintMode && ((p1.x()-delta) < _minTranslate.x()) )
 	_currentTranslate.x ( _currentTranslate.x() - (p1.x()-_minTranslate.x()) );
     else
@@ -74,9 +81,8 @@ void CameraTool::left ()
 
 void CameraTool::right ()
 {
-    CoordQueryTool* ptool = _tools->getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
-    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
-    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
+    SGR::vec2f p1 = _pview->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = _pview->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
     float delta = fabs(scenesize.x()) / 20.f;
@@ -93,12 +99,11 @@ void CameraTool::right ()
 
 void CameraTool::up ()
 {
-    CoordQueryTool* ptool = _tools->getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
-    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
-    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
+    SGR::vec2f p1 = _pview->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = _pview->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
-    float delta = fabs(scenesize.x()) / 20.f;
+    float delta = fabs(scenesize.y()) / 20.f;
     if ( _isInConstraintMode && ((p1.y()+delta) > _maxTranslate.y()) )
 	_currentTranslate[1] += (_maxTranslate.y()-p1.y());
     else
@@ -110,17 +115,17 @@ void CameraTool::up ()
 
 void CameraTool::down ()
 {
-    CoordQueryTool* ptool = _tools->getTool<CoordQueryTool> (SGVTools::COORDQUERY_TOOL);
-    SGR::vec2f p1 = ptool->viewportToScene ( SGR::vec2f(0,0) );
-    SGR::vec2f p2 = ptool->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
+    SGR::vec2f p1 = _pview->viewportToScene ( SGR::vec2f(0,0) );
+    SGR::vec2f p2 = _pview->viewportToScene ( SGR::vec2f( _pview->getWidth(), _pview->getHeight() ) );
     SGR::vec2f scenesize = p2 - p1;
     // calculate move step
-    float delta = fabs(scenesize.x()) / 20.f;
+    float delta = fabs(scenesize.y()) / 20.f;
     if ( _isInConstraintMode && ( (p2.y()-delta)<_minTranslate.y() ) )
 	_currentTranslate[1] -= (p2.y()-_minTranslate.y());
     else
-	_currentTranslate[1] -= delta;
+	_currentTranslate.y ( _currentTranslate.y() - delta );
     // camera translate
+    camera_translate ( _pview->camid(), _currentTranslate.x(), _currentTranslate.y(), _currentTranslate.z() );
     _pview->updateWindow ();
 }
 

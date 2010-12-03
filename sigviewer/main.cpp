@@ -4,13 +4,11 @@
 
 #include <tinylog.h>
 
-#define _OPENGLRENDER_ 1
+//#define _OPENGLRENDER_ 1
 
 #ifdef _OPENGLRENDER_
 #include "qglviewport.h"
-#endif
-
-#ifdef _QTRENDER_
+#else // _OPENGLRENDER_
 #include "qviewport.h"
 #endif
 
@@ -65,16 +63,13 @@ int main(int argc, char *argv[])
 	return 0;
     }
 
-#ifdef _QTRENDER_
-    QViewport vp;
-    vp.resize(800, 400);
-    vp.setCameraConstraint(0, 0.8);
-    vp.show();
-#endif
-
 #ifdef _OPENGLRENDER_
     use_renderlib ( 2 );
     QGLViewport vp ( "default window" );
+    vp.resize(800, 400);
+    vp.show();
+#else
+    QViewport vp;
     vp.resize(800, 400);
     vp.show();
 #endif

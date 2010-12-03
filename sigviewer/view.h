@@ -5,6 +5,7 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 #include "sgv_tools.h"
+#include <sgr_mat4.h>
 
 class View
 {
@@ -16,8 +17,12 @@ public:
     virtual int projid () { return _projid; }
     
     virtual void updateWindow ();
-    virtual int getHeight();
-    virtual int getWidth();
+    virtual int getHeight() = 0;
+    virtual int getWidth() = 0;
+// coord mapping
+    SGR::mat4f getVPM () const;
+    SGR::mat4f getIMPV () const;
+    SGR::vec2f viewportToScene ( SGR::vec2f vpxy ) const;
 
 // keyborad & mouse events
     virtual void mousePressEvent ( QMouseEvent * event );
