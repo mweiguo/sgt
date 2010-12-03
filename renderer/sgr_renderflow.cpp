@@ -9,6 +9,7 @@
 #include "sgr_cameraortho.h"
 #include "sgr_viewport.h"
 #include "sgr_mat4.h"
+#include "sgr_vec2.h"
 #include "sgr_renderfunctor.h"
 #include "sgr_glrenderfunctor.h"
 #include "sgr_kdtree.h"
@@ -79,7 +80,7 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
             state = RENDERING;
 
             cullingend = clock ();
-            LOG_INFO ( "culling: %d clock", cullingend-cullingstart );
+            LOG_INFO ( "culling: %d clock\n", cullingend-cullingstart );
             break;
         case RENDERING:
             {
@@ -88,7 +89,16 @@ RenderFlow::RenderFlow ( Viewport& vp, RenderOption& opt )
                 mat4f old = opt.matrix;
                 opt.matrix = vp.vpmatrix() * proj->projmatrix() * cam->mvmatrix();
                 opt.reverse_mvpw = cam->inversematrix() * proj->inversematrix() * vp.inversematrix();
+
+		opt.vpXYWH[0] = vp.position().x();
+		opt.vpXYWH[1] = vp.position().y();
+		opt.vpXYWH[2] = vp.viewportSize().x();
+		opt.vpXYWH[3] = vp.viewportSize().y();
+
+		opt.mvmat = cam->mvmatrix();
+		opt.projmat = proj->projmatrix();
                 Rendering ( *(Culling::getInst()[camid]), opt );
+
                 opt.matrix = old;
 
                 renderend = clock();

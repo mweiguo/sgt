@@ -34,7 +34,7 @@ HEADERS += sgr_global.h \
            renderer/sgr_boxpicker.h \
            renderer/sgr_cameraortho.h \
            renderer/sgr_childrenfinder.h \
-           renderer/sgr_childvisitor.h \
+           Renderer/sgr_childvisitor.h \
            renderer/sgr_colornode.h \
            renderer/sgr_colortable.h \
            renderer/sgr_coordflater.h \

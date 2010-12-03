@@ -28,11 +28,17 @@ public:
 
 
     void position ( int orgx, int orgy );
-    const vec2i& viewportSize() const;
+    vec2i position () const;
+    vec2i& position ();
+
     void viewportSize ( int w, int h );
+    const vec2i& viewportSize() const;
+
     const mat4f& vpmatrix () const;
     const mat4f& inversematrix () const;
+
     void update ();
+
     void name ( const string& nm );
     const string& name () const;
     string name ();

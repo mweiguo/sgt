@@ -61,6 +61,16 @@ void Viewport::position ( int orgx, int orgy )
     _pos.y(orgy); 
 }
 
+vec2i Viewport::position () const
+{
+    return _pos;
+}
+
+vec2i& Viewport::position ()
+{
+    return _pos;
+}
+
 const vec2i& Viewport::viewportSize() const
 { 
     return _size; 

@@ -40,7 +40,9 @@ public:
         setBBoxDirty ( false );
     }
     
-    virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
+    virtual void accept ( NodeVisitor& pvisitor ) { 
+	pvisitor.apply ( *this ); 
+    }
 
     inline T x() const { return _rect.x(); }
     inline T y() const { return _rect.y(); }

@@ -15,6 +15,9 @@ public:
     // matrix = viewpmapping * model-view
     mat4f matrix, reverse_mvpw;
     float scale;
+    float vpXYWH[4];
+    SGR::mat4f mvmat, projmat;
+
     RenderOption() {}
     virtual ~RenderOption() {}
 };

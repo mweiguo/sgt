@@ -14,8 +14,8 @@ public:
     GLRenderOption() {}
     virtual ~GLRenderOption() {}
 
-    float vpXYWH[4];
-    SGR::mat4f mvmat, projmat;
+//    float vpXYWH[4];
+//    SGR::mat4f mvmat, projmat;
 };
 
 class GLStateChanger
