@@ -35,8 +35,15 @@ public:
     }
     void expandby ( const vec3f& pnt )
     {
-        _min = _min.min_element ( pnt );
-        _max = _max.max_element ( pnt );
+        if ( isValidBBox() )
+        {
+            _min = _min.min_element ( pnt );
+            _max = _max.max_element ( pnt );
+        }
+        else
+        {
+            init ( pnt );
+        }
     }
     void setminmax ( const vec3f& min, const vec3f& max )
     {

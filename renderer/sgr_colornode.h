@@ -12,6 +12,10 @@ public:
     ColorNode ( const string& color ) : GColor (color), SGNode() {}
     ColorNode ( const ColorNode& rhs ) : GColor (rhs), SGNode(rhs) {} 
 
+    virtual SGNode* clone ()
+    {
+        return new ColorNode(*this);
+    }
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~ColorNode () {}

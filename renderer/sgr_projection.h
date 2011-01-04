@@ -14,6 +14,8 @@ public:
     void frustum ( float left, float right, float bottom, float top, float near, float far );
     void ortho ( float left, float right, float bottom, float top, float near, float far );
     void perspective ( float fovy, float aspect, float near, float far );
+
+    virtual SGNode* clone ();
 private:
     mat4f _mat;
     mat4f _invmat;

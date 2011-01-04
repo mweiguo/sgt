@@ -1,6 +1,6 @@
 #include "sgr_nodetransformer.h"
 #include "sgr_parentfinder.h"
-
+#include "sgr_imposter.h"
 
 namespace SGR
 {
@@ -202,6 +202,21 @@ namespace SGR
         vec3f coord = node.getCoord();
         node.setCoord ( (_mat * vec4f ( coord )).xyz() );
 
+        ChildVisitor::apply ( node );
+    }
+    void NodeTransformer::apply ( CircleNode& node )
+    {
+        transformBBox ( node );
+        ChildVisitor::apply ( node );
+    }
+    void NodeTransformer::apply ( ImageNode& node )
+    {
+        transformBBox ( node );
+        ChildVisitor::apply ( node );
+    }
+    void NodeTransformer::apply ( ImposterNode& node )
+    {
+        transformBBox ( node );
         ChildVisitor::apply ( node );
     }
     void NodeTransformer::transformBBox ( SGNode& node )

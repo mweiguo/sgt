@@ -7,7 +7,7 @@ namespace SGR
 {
 
 class DrawableNode;
-typedef quickvector<DrawableNode*> RenderList;
+typedef quickvector<const DrawableNode*> RenderList;
 typedef std::map<int, RenderList*> RenderListMgr;
 }
 #endif

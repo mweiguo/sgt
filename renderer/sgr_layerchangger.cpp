@@ -1,6 +1,7 @@
 
 #include "sgr_layerchangger.h"
 #include "sgr_attrset.h"
+#include "sgr_nodes.h"
 
 namespace SGR
 {
@@ -41,8 +42,8 @@ namespace SGR
     void OnRemoveNodeFromLayer::apply ( TextNode& node )
     {
         updateNodeAttrSet ( node );
-        node.setBBoxDirty ( true );
-        node.setParentBBoxDirty ( true );
+        node.setBBoxDirty ();
+        //node.setParentBBoxDirty ( true );
     }
 
     void OnRemoveNodeFromLayer::apply ( LineNodef& node )
@@ -75,6 +76,21 @@ namespace SGR
         updateNodeAttrSet ( node );
     }
 
+    void OnRemoveNodeFromLayer::apply ( CircleNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
+    void OnRemoveNodeFromLayer::apply ( ImageNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
+    void OnRemoveNodeFromLayer::apply ( ImposterNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
     // ******************************************************************
 
     void OnAddNodeToLayer::doAction ( SGNode* node, LayerNode* layer )
@@ -85,10 +101,12 @@ namespace SGR
         _fontnode = _attrset->getFont();
 
         node->accept ( *this );
+// 	qDebug ( "OnAddNodeToLayer::doAction" );
     }
 
     void OnAddNodeToLayer::updateNodeAttrSet ( DrawableNode& node )
     {
+// 	qDebug ( "OnAddNodeToLayer::updateNodeAttrSet" );
         AttrSet* attrset = node.getAttrSet();
         if ( NULL == attrset )
             node.setAttrSet ( _attrset );
@@ -114,12 +132,13 @@ namespace SGR
     void OnAddNodeToLayer::apply ( TextNode& node )
     {
         updateNodeAttrSet ( node );
-        node.setBBoxDirty ( true );
-        node.setParentBBoxDirty ( true );
+        node.setBBoxDirty ();
+        //node.setParentBBoxDirty ( true );
     }
 
     void OnAddNodeToLayer::apply ( LineNodef& node )
     {
+//	qDebug ( "OnAddNodeToLayer::apply layernode" );
         updateNodeAttrSet ( node );
     }
 
@@ -144,6 +163,21 @@ namespace SGR
     }
 
     void OnAddNodeToLayer::apply ( MeshPointNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
+    void OnAddNodeToLayer::apply ( CircleNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
+    void OnAddNodeToLayer::apply ( ImageNode& node )
+    {
+        updateNodeAttrSet ( node );
+    }
+
+    void OnAddNodeToLayer::apply ( ImposterNode& node )
     {
         updateNodeAttrSet ( node );
     }

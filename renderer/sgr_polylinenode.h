@@ -17,45 +17,76 @@ public:
     
     PolylineNode () {}
     PolylineNode ( const PolylineNode<T>& rhs ) : DrawableNode ( rhs ), _polyline(rhs._polyline) {} 
-
-    virtual void updateBBox( const mat4f& mat=mat4f() )
+    virtual SGNode* clone ()
     {
-        _bb = _polyline.boundingbox();
-        
-        vec4f min = mat * vec4f ( _bb.minvec() );
-        vec4f max = mat * vec4f ( _bb.maxvec() );
-        _bb.setminmax ( min.xyz(), max.xyz() );
+        return new PolylineNode(*this);
+    }
 
-        for ( iterator pp=begin(); pp!=end(); ++pp )
+    virtual void updateBBox( const mat4f& mat=mat4f(), bool force=false )
+    {
+        if ( force || isBBoxDirty()  )
         {
-            (*pp)->updateBBox();
-            _bb = _bb.unionbox ( (*pp)->getBBox() );
-        }
+            _bb = _polyline.boundingbox();
 
-        setBBoxDirty ( false );
+            vec4f min = mat * vec4f ( _bb.minvec() );
+            vec4f max = mat * vec4f ( _bb.maxvec() );
+            _bb.setminmax ( min.xyz(), max.xyz() );
+
+            for ( iterator pp=begin(); pp!=end(); ++pp )
+            {
+                if ( force || (*pp)->isBBoxDirty () )
+                    (*pp)->updateBBox(mat, force);
+                _bb = _bb.unionbox ( (*pp)->getBBox() );
+            }
+
+            _isBBoxDirty = false;
+        }
     }
     
+    virtual void computeBBox( const mat4f* mat=0 ) const
+    {
+        if ( false == _isBBoxDirty )
+            return;
+
+        mat4f tmat;
+        if ( 0 == mat )
+        {
+            mat = &tmat;
+            tmat = getParentTranMatrix ();
+        }
+        DrawableNode::computeBBox ( mat );
+
+        BBox bb;
+        bb = _polyline.boundingbox();
+
+        vec4f min = (*mat) * vec4f ( bb.minvec() );
+        vec4f max = (*mat) * vec4f ( bb.maxvec() );
+        bb.setminmax ( min.xyz(), max.xyz() );
+
+        _bb = _bb.unionbox ( bb );
+    }
+
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
     // points interface
     void addPoint ( const T& t )
     {
         _polyline.push_back ( t ); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     void removePoint ( const T& t )
     {
         _polyline.remove ( t ); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     template <class InputIterator>
     void assignpoints ( InputIterator first, InputIterator last )
     {
         _polyline.assign ( first, last); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
 
     pointiterator pointbegin() { return _polyline.begin(); }

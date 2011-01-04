@@ -49,8 +49,13 @@ public:
     virtual void apply ( PolyNode2Df& node );
     virtual void apply ( PointNode& node );
     virtual void apply ( MeshPointNode& node );
+    virtual void apply ( CircleNode& node );
+    virtual void apply ( ImageNode& node );
+    virtual void apply ( ImposterNode& node );
+
     void doAction ( SGNode& node ) { node.accept ( *this ); }
     vector<SGNode*>& pickedNodes () { return _pickedNodes; }
+    void clearPicked() { _pickedNodes.clear(); }
 private:
     BBox _bbox;
     int _camid;
@@ -286,6 +291,37 @@ void BoxPicker::apply ( MeshPointNode& node )
         ChildVisitor::apply ( node );
     }
 }
+
+void BoxPicker::apply ( CircleNode& node )
+{
+    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    {
+        // add to picked list
+        _pickedNodes.push_back ( &node );
+        ChildVisitor::apply ( node );
+    }
+}
+
+void BoxPicker::apply ( ImageNode& node )
+{
+    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    {
+        // add to picked list
+        _pickedNodes.push_back ( &node );
+        ChildVisitor::apply ( node );
+    }
+}
+
+void BoxPicker::apply ( ImposterNode& node )
+{
+    if ( node.isVisible () && is_contain (_bbox, node.getBBox()) )
+    {
+        // add to picked list
+        _pickedNodes.push_back ( &node );
+        ChildVisitor::apply ( node );
+    }
+}
+
 
 }
 #endif // _VOLUMNPICKER_H_

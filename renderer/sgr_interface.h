@@ -9,7 +9,6 @@
 // [100, 199] :          viewport
 // 200+       :          objects
 #include "sgr_global.h"
-
 extern "C"
 {
     const int NODETYPE_UNKNOWN     	  = 0 ;
@@ -42,16 +41,16 @@ extern "C"
 
     const int DRAWLINE_TOOL           = 1;
     /*********************************/
-    /*********** RENDER LIB **********/
-    /*********************************/
-    // 1 == qt, 2 == opengl
-    void SGR_DLL use_renderlib ( int lib );
-
-    /*********************************/
     /******** TCL COMMANDS REG *******/
     /*********************************/
     struct Tcl_Interp;
     void SGR_DLL register_tclcmds ( Tcl_Interp* interp );
+
+    /*********************************/
+    /******** RENDERER SYSTEM ********/
+    /*********************************/
+    void SGR_DLL init_renderer();
+    void SGR_DLL release_renderer();
 
     /*********************************/
     /********** WINDOW INIT **********/
@@ -69,15 +68,14 @@ extern "C"
     /*********************************/
     /******* CAMERA MANAGEMENT *******/
     /*********************************/
-    
     void SGR_DLL camera_create ( int id, const char* name );
     void SGR_DLL camera_translate ( int id, float tx, float ty, float tz );
     void SGR_DLL camera_scale ( int id, float scale );
     void SGR_DLL camera_reset ( int id );
     void SGR_DLL camera_name ( int id, const char* name );
+    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
     void SGR_DLL get_cameramatrix ( int id, float* mat4f );
     void SGR_DLL get_camerainversematrix ( int id, float* mat4f );
-//    float SGR_DLL find_view ( float* min, float* max, float percentOfView, int camid, int vpid );
 
     /*********************************/
     /***** PROJECTION MANAGEMENT *****/
@@ -97,9 +95,8 @@ extern "C"
     void SGR_DLL viewport_attachprojection ( int id, int projid );
     void SGR_DLL viewport_name ( int id, const char* name );
     void SGR_DLL viewport_dirty ( int id );
-    class QPainter;
-    void SGR_DLL viewport_update ( int id, QPainter& painter );
-    void SGR_DLL viewport_update2 ( int id );
+    class QPaintDevice;
+    void SGR_DLL viewport_update ( int id, QPaintDevice& paintdevice, int* scenes=0, int scenecnt=0 );
     void SGR_DLL get_viewportmatrix ( int id, float* mat4f );
     void SGR_DLL get_viewportinversematrix ( int id, float* mat4f );
 
@@ -114,9 +111,7 @@ extern "C"
     /************** IO ***************/
     /*********************************/
     // local scene load
-    // not use baseid, so every id in the file should be unify
     int SGR_DLL scene_load ( const char* file, int* data );
-    // use baseid
     int SGR_DLL node_load ( const char* file, int* data );
     void SGR_DLL node_save ( const char* file, int sceneid );
     void SGR_DLL unload_node (int id);
@@ -131,9 +126,9 @@ extern "C"
     /*********************************/
     /************ QUERY **************/
     /*********************************/
-    void SGR_DLL get_bbox ( int id, float* minxyz, float* maxxyz );
-/*     void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
-/*     void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/\*default value means use camid attached viewport *\/ ); */
+    void SGR_DLL get_bbox ( int id, float* min, float* max );
+    void SGR_DLL get_scenepos ( int vpid, float* viewportCoord3f, float* sceneCoord3f, int camid=-1/*default value means use camid attached viewport */ );
+    void SGR_DLL get_viewportpos ( int vpid, float* sceneCoord3f, float* viewportCoord3f, int camid=-1/*default value means use camid attached viewport */ );
     int SGR_DLL get_nodetype ( int node );
     int SGR_DLL get_nodeparent ( int node );
     void SGR_DLL get_nodechildren ( int node, int* data );
@@ -146,10 +141,10 @@ extern "C"
     // since the system use LOD, and in different level, objects in the scene
     // may be different, so here need parameter camid.
     // when function return. data store pick ids, returning result is the size of ids
-    int SGR_DLL pick ( float x, float y, float z, int camid, int* data );
-    int SGR_DLL pick_volume ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
-    int SGR_DLL box_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
-    int SGR_DLL cross_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
+//     int SGR_DLL pick ( float x, float y, float z, int camid, int* data );
+//     int SGR_DLL pick_volume ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data );
+    int SGR_DLL box_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data, int nodeid=0 );
+    int SGR_DLL cross_pick ( float minx, float miny, float minz, float maxx, float maxy, float maxz, int camid, int* data, int nodeid=0 );
 
     /*********************************/
     /********** build nodes **********/
@@ -164,10 +159,11 @@ extern "C"
     void SGR_DLL node_visible ( int id, bool isVisible );
     void SGR_DLL set_userdata ( int id, void* data );
     void SGR_DLL get_userdata ( int id, void** data );
-    void SGR_DLL update_bbox ( int id );
+    void SGR_DLL update_bbox ( int id, bool force=false );
 
     // mesh
     void SGR_DLL mesh_create ( int id );
+    void SGR_DLL mesh_coord ( int meshid, int index, float* coords3d );
     void SGR_DLL mesh_coords ( int meshid, float* coords3d, int elementN );
     void SGR_DLL mesh_subcoords ( int meshid, int* indexes, int elementN, float* coords3d );
     int SGR_DLL mesh_appendcoords ( int id, float* coords3d, int elementN );
@@ -200,10 +196,11 @@ extern "C"
     void SGR_DLL attrset_fgcolor ( int id, int colorid );
     void SGR_DLL attrset_bgcolor ( int id, int colorid );
     void SGR_DLL attrset_font ( int id, int fontid );
+    void SGR_DLL attrset_linewidth ( int id, int width );
     void SGR_DLL set_attrset ( int nodeid, int attrsetid );
     void SGR_DLL unset_attrset ( int nodeid );
     int SGR_DLL attrset_refcnt ( int nodeid );
-    int SGR_DLL get_attrset ( int attrsetid );
+    int SGR_DLL get_attrset ( int nodeid );
     unsigned int SGR_DLL get_attrset_fgcolor ( int attrsetid );
     unsigned int SGR_DLL get_attrset_bgcolor ( int attrsetid );
     int SGR_DLL get_attrset_font ( int attrsetid );
@@ -220,7 +217,7 @@ extern "C"
     // scene
     void SGR_DLL scene_create ( int id );
     // layer
-    void SGR_DLL layer_create ( int id, const char* name="" );
+    void SGR_DLL layer_create ( int id, const char* name="", unsigned int fgcolor=0x000000ff, unsigned int bgcolor=0x000000ff, unsigned int linewidth=0 );
     void SGR_DLL layer_name ( int id, const char* name );
     void SGR_DLL layer_visible ( int id, bool isVisible );
     void SGR_DLL layer_fgcolor ( int id, int color );
@@ -248,7 +245,7 @@ extern "C"
     void SGR_DLL transform_create ( int id );
     void SGR_DLL transform_translate3f ( int id, float tx, float ty, float tz );
     void SGR_DLL transform_translates ( int id, const char* str );
-    //void SGR_DLL transform_scale ( int id, float sx, float sy, float sz );
+    void SGR_DLL transform_scale3f ( int id, float sx, float sy, float sz );
     void SGR_DLL transform_scale ( int id, const char* str );
     // pickablegroup
     void SGR_DLL pickablegroup_create ( int id, const char* name="" );
@@ -261,17 +258,21 @@ extern "C"
     void SGR_DLL groupnode_create ( int id, const char* name="" );
     void SGR_DLL groupnode_name ( int id, const char* name );
     // text
-    void SGR_DLL text_create ( int id, const char* str= "" );
+    void SGR_DLL text_create ( int id, const char* str= "", int anchor=5, int sizemode=0, float size=20, bool isNeedBackground=false );
     void SGR_DLL text_string ( int id, const char* str );
     //void SGR_DLL text_font ( int id, int fontid );
     //  1     2     3
     //  4     5     6
     //  7     8     9
     void SGR_DLL text_anchor ( int id, int anchor );
+    void SGR_DLL text_size ( int id, float size );
+    // 0 = scenemode, 1 = screenmode
+    void SGR_DLL text_sizemode ( int id, int sizemode );
     //  1     2     3
     //  4     5     6
     //  7     8     9
     void SGR_DLL text_justify ( int id, int justify );
+    void SGR_DLL text_needbackground ( int id, bool isNeedBackground );
     // font
 
     void SGR_DLL font_create ( int id, const char* desc="" );
@@ -298,11 +299,27 @@ extern "C"
     void SGR_DLL poly_create ( int id );
     void SGR_DLL poly_points ( int id, float* xycoords, int pointcnt );
 
-    // polygon
+    // point
     void SGR_DLL point_create ( int id );
     void SGR_DLL point_coord ( int id, float x, float y );
     void SGR_DLL point_size ( int id, float sz );
+    void SGR_DLL point_name ( int id, const char* name );
     float SGR_DLL get_point_size ( int id );
     void SGR_DLL get_point_coord ( int id, float* xyz );
+    void SGR_DLL get_point_name ( int id, char* nane );
+
+    // circle
+    void SGR_DLL circle_create ( int id, float radius=0, float x=0, float y=0, float z=0 );
+    void SGR_DLL circle_radius ( int id, float radius );
+    void SGR_DLL circle_center ( int id, float x, float y, float z );
+
+    // image
+    void SGR_DLL image_create ( int id, const char* filePath="", float sizew=0, float sizeh=0 );
+    void SGR_DLL image_path ( int id, const char* filePath );
+    void SGR_DLL image_size ( int id, float w, float h );
+
+    // imposter
+    void SGR_DLL imposter_create ( int id, const char* range="" );
+    void SGR_DLL imposter_range ( int id, const char* range );
 }
 #endif

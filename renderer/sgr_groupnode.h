@@ -14,6 +14,10 @@ public:
     {
 	_groupname = rhs._groupname;
     }
+    virtual SGNode* clone ()
+    {
+        return new GroupNode(*this);
+    }
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~GroupNode () {}

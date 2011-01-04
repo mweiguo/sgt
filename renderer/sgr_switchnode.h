@@ -13,6 +13,10 @@ public:
     SwitchNode () : SGNode(), _selection(-1) {}
     SwitchNode ( const SwitchNode& rhs ) : SGNode(rhs), _selection(rhs._selection) {}
     
+    virtual SGNode* clone ()
+    {
+        return new SwitchNode(*this);
+    }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~SwitchNode () {}
     void selection ( int idx ) { _selection=idx; }

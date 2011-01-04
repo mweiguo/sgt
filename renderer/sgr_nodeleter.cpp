@@ -163,4 +163,22 @@ void Nodeleter::apply ( MeshPointNode& node )
     NodeMgr::getInst().deleteNode ( &node );
 }
 
+void Nodeleter::apply ( CircleNode& node )
+{
+    ChildVisitor::apply ( node );
+    NodeMgr::getInst().deleteNode ( &node );
+}
+
+void Nodeleter::apply ( ImageNode& node )
+{
+    ChildVisitor::apply ( node );
+    NodeMgr::getInst().deleteNode ( &node );
+}
+
+void Nodeleter::apply ( ImposterNode& node )
+{
+    ChildVisitor::apply ( node );
+    NodeMgr::getInst().deleteNode ( &node );
+}
+
 }

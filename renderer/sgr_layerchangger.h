@@ -5,6 +5,9 @@
 
 namespace SGR
 {
+    class GColor;
+    class AttrSet;
+    class FontNode;
     // these two class will update child nodes' attrset.
     class OnRemoveNodeFromLayer : public ChildVisitor
     {
@@ -19,6 +22,9 @@ namespace SGR
         virtual void apply ( PolyNode2Df& node );
         virtual void apply ( PointNode& node );
         virtual void apply ( MeshPointNode& node );
+        virtual void apply ( CircleNode& node );
+        virtual void apply ( ImageNode& node );
+        virtual void apply ( ImposterNode& node );
     private:
         void updateNodeAttrSet ( DrawableNode& node );
     private:
@@ -39,6 +45,9 @@ namespace SGR
         virtual void apply ( PolyNode2Df& node );
         virtual void apply ( PointNode& node );
         virtual void apply ( MeshPointNode& node );
+        virtual void apply ( CircleNode& node );
+        virtual void apply ( ImageNode& node );
+        virtual void apply ( ImposterNode& node );
         
         void doAction ( SGNode* child, LayerNode* layer );
     private:

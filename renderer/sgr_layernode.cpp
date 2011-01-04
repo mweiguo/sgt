@@ -2,15 +2,21 @@
 #include "sgr_attrset.h"
 #include "sgr_fontnode.h"
 #include "sgr_layerchangger.h"
+#include <QFont>
 
 namespace SGR
 {
+LayerMgr layerMgr;
 
 LayerNode::LayerNode ( const string& name) : GroupNode(name), _fgcolor(0x0ffffffff), _bgcolor(0x000000ff), 
                                            _attrset(0)//, _renderOrder(-1)
 {
+    QFont font;
+    string ff = font.family().toStdString();
+    
     LayerMgr::getInst().append ( this );
-    _fontnode = new FontNode ();
+    _fontnode = new FontNode ( font.family().toStdString().c_str(),
+			       font.pointSize() );
 
     _attrset = new AttrSet (/*order*/);
     _attrset->setFont ( _fontnode );
@@ -55,6 +61,16 @@ void LayerNode::setFont ( const string& name, const string& f, int ps )
     _fontnode->defName ( name );
 }
 
+void LayerNode::setLineWidth ( int width )
+{
+    _attrset->setLineWidth ( width );
+}
+
+int LayerNode::getLineWidth ()
+{
+    return _attrset->getLineWidth ();
+}
+
 // void LayerNode::setRenderOrder ( int order )
 // {
 //     _renderOrder = order; 
@@ -88,6 +104,11 @@ void LayerNode::removeChild ( SGNode* pNode )
 }
 
 //////////////////////////////////////////////////////////////////////
+LayerMgr& LayerMgr::getInst () 
+{
+    return layerMgr;
+}
+
 void LayerMgr::append ( LayerNode* layer )
 {
     _layers.push_back ( layer ); 

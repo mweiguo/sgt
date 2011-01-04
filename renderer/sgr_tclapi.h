@@ -171,7 +171,7 @@ int tcl_dump_node (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj*
 
 // query
 int tcl_get_bbox (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
-//int tcl_get_scenepos (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
+int tcl_get_scenepos (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );
 
 // pick
 int tcl_pick (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] );

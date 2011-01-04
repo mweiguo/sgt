@@ -19,14 +19,17 @@ public:
     DrawableNode( const DrawableNode& rhs );
     virtual ~DrawableNode();
 
-    
+    virtual SGNode* clone ()
+    {
+        return new DrawableNode(*this);
+    }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
     //void setColor ( unsigned int color );
     //unsigned int getColor ();
     //virtual bool getLayerColor ( unsigned int& color );
-    void setVisible ( bool isVisible ) { _bRender = isVisible; }
-    bool isVisible () { return _bRender; }
+/*     void setVisible ( bool isVisible ) { _bRender = isVisible; } */
+/*     bool isVisible () { return _bRender; } */
 
     void setAttrSet ( AttrSet* pAttrSet ) 
     { 
@@ -41,9 +44,10 @@ public:
             pAttrSet->incRef(); 
     }
     AttrSet* getAttrSet () { return _pAttrSet; }
+    const AttrSet* getAttrSet () const { return _pAttrSet; }
 
 protected:
-    bool _bRender;
+//    bool _bRender;
     AttrSet* _pAttrSet;
     //int _color;
 };

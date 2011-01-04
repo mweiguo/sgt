@@ -3,8 +3,6 @@
 
 #include "sgr_global.h"
 #include <sgr_vec3.h>
-#include <tinylog.h>
-
 namespace SGR
 {
 
@@ -44,6 +42,9 @@ namespace SGR
     typedef PolyNode<vec2f>  PolyNode2Df;
     class PointNode;
     class MeshPointNode;
+    class CircleNode;
+    class ImageNode;
+    class ImposterNode;
 
     class SGR_DLL NodeVisitor 
     {
@@ -51,7 +52,7 @@ namespace SGR
         NodeVisitor(){}
         virtual void apply ( const SGNode& /*node*/ ) {}
         virtual void apply ( const LayerNode& /*node*/ ) {}
-        virtual void apply ( const RectangleNodef& /*node*/ ) {LOG_INFO ("NodeVisitor::const_RECT\n");}
+        virtual void apply ( const RectangleNodef& /*node*/ ) {}
         virtual void apply ( const TransformNode& /*node*/ ) {}
         virtual void apply ( const ArrayNode& /*node*/ ) {}
         virtual void apply ( const LODNode& /*node*/ ) {}
@@ -64,7 +65,7 @@ namespace SGR
         virtual void apply ( const LineNodef& /* node */ ) {}
         virtual void apply ( SGNode& /*node*/ ) {}
         virtual void apply ( LayerNode& /*node*/ ) {}
-        virtual void apply ( RectangleNodef& /*node*/ ) { LOG_INFO ("NodeVisitor::RECT\n");}
+        virtual void apply ( RectangleNodef& /*node*/ ) {}
         virtual void apply ( TransformNode& /*node*/ ) {}
         virtual void apply ( ArrayNode& /*node*/ ) {}
         virtual void apply ( LODNode& /*node*/ ) {}
@@ -83,6 +84,9 @@ namespace SGR
         virtual void apply ( PolyNode2Df& /*node*/ ) {}
         virtual void apply ( PointNode& /*node*/ ) {}
         virtual void apply ( MeshPointNode& /*node*/ ) {}
+        virtual void apply ( CircleNode& /*node*/ ) {}
+        virtual void apply ( ImageNode& /*node*/ ) {}
+	virtual void apply ( ImposterNode& /*node*/ ) {}
    };
 }
 

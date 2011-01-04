@@ -16,6 +16,11 @@ public:
     LayerNode ( const string& name="default" );
     LayerNode ( const LayerNode& rhs );
     virtual ~LayerNode ();
+    virtual SGNode* clone ()
+    {
+        return new LayerNode(*this);
+    }
+
 
     void setFgColor ( GColor color );
     GColor getFgColor () { return _fgcolor; }
@@ -27,6 +32,9 @@ public:
 
     FontNode* getFontNode () { return _fontnode; }
     void setFont ( const string& name, const string& family="Courier New", int pointSize=12 );
+
+    void setLineWidth ( int width );
+    int getLineWidth ();
 
 //     void setRenderOrder ( int order );
 //     int getRenderOrder () { return _renderOrder; }
@@ -47,19 +55,15 @@ private:
 class LayerMgr
 {
 public:
-    static LayerMgr& getInst () 
-    {
-        static LayerMgr inst;
-        return inst;
-    }
+    static LayerMgr& getInst ();
     void append ( LayerNode* layer );
     void remove ( LayerNode* layer );
     void incr ( LayerNode* layer, int step=1 );
     int indexof ( LayerNode* layer );
     void clear() { _layers.clear(); }
+    LayerMgr () {}
 private:
     list<LayerNode*> _layers;
-    LayerMgr () {}
 };
 
 }

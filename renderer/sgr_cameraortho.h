@@ -6,7 +6,6 @@
 #include "sgr_bbox.h"
 #include "sgr_nodemgr.h"
 #include "sgr_global.h"
-#include <tinyLog.h>
 namespace SGR
 {
 
@@ -19,6 +18,10 @@ public:
     bool dirty() { return _dirty; }
     void dirty( bool v ) { _dirty = v; }
     
+    virtual SGNode* clone ()
+    {
+        return new CameraOrtho(*this);
+    }
         
     // bbox in object-coord;
     BBox viewvolume ()
@@ -41,8 +44,6 @@ public:
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~CameraOrtho () {}
-    
-//    void setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale );
 protected:
     void recalcuMatrix ();
 private:
@@ -53,10 +54,6 @@ private:
     short _precision; // 小数点后保留几位小数，如果是保留2位，则为100
 
     bool _dirty;
-
-/*     vec3f _minTranslate, _maxTranslate; */
-/*     float _minScale, _maxScale; */
-/*     bool _isInConstraintMode; */
 };
 
 inline CameraOrtho::CameraOrtho (const string& name) : _name(name)
@@ -67,23 +64,11 @@ inline CameraOrtho::CameraOrtho (const string& name) : _name(name)
     _precision = 1;
     _scale = _precision;
     dirty ( true );
-
-/*     _minScale = _maxScale = 0; */
-/*     _minTranslate = _maxTranslate = vec3f(0,0,0); */
-/*     _isInConstraintMode = false; */
 }
 
 
 inline void CameraOrtho::zoom ( float scale )
 {
-/*     if ( _isInConstraintMode ) */
-/*     { */
-/* 	if ( scale<=_minScale ) */
-/* 	    scale = _minScale; */
-/* 	if ( scale>=_maxScale ) */
-/* 	    scale = _maxScale; */
-/*     } */
-
     if ( scale < 0 )
         scale = -1/scale;
 
@@ -99,30 +84,10 @@ inline void CameraOrtho::zoom ( float scale )
 
     if ( scale != _precision )
         dirty ( true );
-
 }
 
-inline void CameraOrtho::translate ( const vec3f& off )
+inline void CameraOrtho::translate ( const vec3f& offset )
 {
-    vec3f offset = off;
-//    LOG_INFO ("CameraOrtho::translate, _isInConstraintMode=%d", _isInConstraintMode);
-/*     if ( _isInConstraintMode ) */
-/*     { */
-/* 	if ( offset.x() <= _minTranslate.x() ) */
-/* 	    offset.x( _minTranslate.x() ); */
-/* 	if ( offset.y() <= _minTranslate.y() ) */
-/* 	    offset.y( _minTranslate.y() ); */
-/* 	if ( offset.z() <= _minTranslate.z() ) */
-/* 	    offset.z( _minTranslate.z() ); */
-
-/* 	if ( offset.x() >= _maxTranslate.x() ) */
-/* 	    offset.x( _maxTranslate.x() ); */
-/* 	if ( offset.y() >= _maxTranslate.y() ) */
-/* 	    offset.y( _maxTranslate.y() ); */
-/* 	if ( offset.z() >= _maxTranslate.z() ) */
-/* 	    offset.z( _maxTranslate.z() ); */
-/*     } */
-
     _translate.xyz ( -offset.x(), -offset.y(), -offset.z() );
     recalcuMatrix ();
     //// camera translation and object transltation are opposite 
@@ -147,23 +112,6 @@ inline void CameraOrtho::recalcuMatrix ()
     smat = mat4f::scale_matrix ( scale, scale, scale );
     _inversemvmatrix = tmat * smat;
 }
-
-/* inline void CameraOrtho::setConstraint ( vec3f minTranslate, vec3f maxTranslate, float minScale, float maxScale ) */
-/* { */
-/*     if ( minTranslate == maxTranslate || minScale == maxScale ) */
-/*     { */
-/* 	_isInConstraintMode = false; */
-/*     } */
-/*     else */
-/*     { */
-/* 	_minTranslate = minTranslate; */
-/* 	_maxTranslate = maxTranslate; */
-/* 	_minScale = minScale; */
-/* 	_maxScale = maxScale; */
-/* 	_isInConstraintMode = true; */
-/*     } */
-	
-/* } */
 
 }
 //typedef NodeMgr<CameraOrtho>      CameraMgr;

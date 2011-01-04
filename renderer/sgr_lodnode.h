@@ -22,6 +22,10 @@ public:
     {
 	copy ( levelDelimiters.begin(), levelDelimiters.end(), back_inserter(levelDelimiters));
     }
+    virtual SGNode* clone ()
+    {
+        return new LODNode(*this);
+    }
     // in proj mode, v is dist
     // in ortho mode, v is scale
     SGNode* selectPresentation ( float v ) 

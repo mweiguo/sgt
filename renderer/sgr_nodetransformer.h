@@ -2,6 +2,8 @@
 #define _SGR_NODETRANSFORMER_H_
 
 #include "sgr_childvisitor.h"
+#include "sgr_mat4.h"
+#include <vector>
 
 namespace SGR
 {
@@ -33,11 +35,14 @@ public:
     virtual void apply ( PolyNode2Df& node );
     virtual void apply ( PointNode& node );
     virtual void apply ( MeshPointNode& node );
+    virtual void apply ( CircleNode& node );
+    virtual void apply ( ImageNode& node );
+    virtual void apply ( ImposterNode& node );
 protected:
     void transformBBox ( SGNode& node );
 protected:
     mat4f _mat;
-    vector < int > _transformNodeStack;
+    std::vector < int > _transformNodeStack;
 };
 
 }

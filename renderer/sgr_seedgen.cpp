@@ -2,11 +2,10 @@
 
 namespace SGR
 {
-
+    SeedGenerator seedGenerator;
     SeedGenerator& SeedGenerator::getInst ()
     {
-        static SeedGenerator inst;
-        return inst;
+        return seedGenerator;
     }
     int SeedGenerator::minseed()
     { 

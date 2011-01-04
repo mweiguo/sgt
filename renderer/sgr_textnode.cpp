@@ -21,6 +21,7 @@ TextNode::TextNode ()
     _size.xy ( 1, 1 );
     _renderScale = 1;
     _anchorPos = vec2f(0,0);
+    _isDrawBackground = false;
 }
 
 TextNode::TextNode ( const string& content ) : _text(content) 
@@ -30,6 +31,7 @@ TextNode::TextNode ( const string& content ) : _text(content)
     _size.xy ( 1, 1 );
     _renderScale = 1;
     _anchorPos = vec2f(0,0);
+    _isDrawBackground = false;
 }
 
 TextNode::TextNode ( const TextNode& rhs ) : DrawableNode ( rhs )
@@ -42,69 +44,137 @@ TextNode::TextNode ( const TextNode& rhs ) : DrawableNode ( rhs )
     _size         = rhs._size;
     _renderScale  = rhs._renderScale;
     _anchorPos    = rhs._anchorPos;
+    _isDrawBackground = rhs._isDrawBackground;
 }
 
 TextNode::~TextNode ()
 {
 }
 
-void TextNode::updateBBox( const mat4f& mat )
+SGNode* TextNode::clone ()
 {
-    _anchorPos = mat * vec4f ( 0, 0, 0, 1 );
+    return new TextNode(*this);
+}
 
+void TextNode::updateBBox( const mat4f& mat, bool force )
+{
+    if ( force || isBBoxDirty()  )
+    {
+        if ( NULL==getAttrSet() || NULL==getAttrSet()->getFont() )
+            return;
+        _anchorPos = mat * vec4f ( 0, 0, 0, 1 );
+
+        //    qDebug ("TextNode::updateBBox pass");
+
+        if ( TXTSIZEMODE_SCENE == _sizeMode )
+        {
+            vec3f scenesize = FontMetric::getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
+            _renderScale = _size.x() / fabs(scenesize.x());
+            //	_anchorPos = mat4f::scale_matrix(1.0f/_renderScale, 1.0f/_renderScale, 1.0f/_renderScale) * mat * vec4f ( 0, 0, 0, 1 );
+
+            //	qDebug ("TextNode::updateBBox scene mode %f", _renderScale);
+            //     _size = FontMetric::getInst().getBBox ( *getAttrSet()->getFont(), _text ).dimension();
+            _bb.init ( vec3f(0.f, 0.f, 0.f) );
+            _bb.expandby ( _size );
+
+            if ( isAnchorHCenter () )
+                _bb.translate ( vec3f(-_size.x()/2.f, 0.f, 0.f ) );
+            else if ( isAnchorRight () )
+                _bb.translate ( vec3f(-_size.x(), 0.f, 0.f) );
+
+            if ( isAnchorVCenter () )
+                _bb.translate ( vec3f(0, -_size.y()/2.f, 0.f) );
+            else if ( isAnchorTop () )
+                _bb.translate ( vec3f(0, -_size.y(), 0.f) );
+
+            vec4f min = mat * vec4f ( _bb.minvec() );
+            vec4f max = mat * vec4f ( _bb.maxvec() );
+
+            _bb.setminmax ( min.xyz(), max.xyz() );
+
+        }
+        else if ( TXTSIZEMODE_SCREEN == _sizeMode )
+        {
+            // do nothing, because we assume text's bbox is invalid in screen mode.
+        }
+
+        for ( iterator pp=begin(); pp!=end(); ++pp )
+        {
+            if ( force || (*pp)->isBBoxDirty () )
+                (*pp)->updateBBox(mat, force);
+            _bb = _bb.unionbox ( (*pp)->getBBox() );
+        }
+        _isBBoxDirty = false;
+    }
+}
+
+void TextNode::computeBBox( const mat4f* mat ) const
+{
+    if ( false == _isBBoxDirty )
+        return;
+
+    mat4f tmat;
+    if ( 0 == mat )
+    {
+        mat = &tmat;
+        tmat = getParentTranMatrix ();
+    }
+    DrawableNode::computeBBox ( mat );
+
+    BBox bb;
     if ( NULL==getAttrSet() || NULL==getAttrSet()->getFont() )
         return;
+    _anchorPos = (*mat) * vec4f ( 0, 0, 0, 1 );
+
+    //    qDebug ("TextNode::updateBBox pass");
 
     if ( TXTSIZEMODE_SCENE == _sizeMode )
     {
-	vec3f scenesize = FontMetric::getInst().getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
-	_renderScale = _size.x() / fabs(scenesize.x());
-//	_anchorPos = mat4f::scale_matrix(1.0f/_renderScale, 1.0f/_renderScale, 1.0f/_renderScale) * mat * vec4f ( 0, 0, 0, 1 );
-//     _size = FontMetric::getInst().getBBox ( *getAttrSet()->getFont(), _text ).dimension();
-	_bb.init ( vec3f(0.f, 0.f, 0.f) );
-	_bb.expandby ( _size );
+        vec3f scenesize = FontMetric::getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
+        _renderScale = _size.x() / fabs(scenesize.x());
+        //	_anchorPos = mat4f::scale_matrix(1.0f/_renderScale, 1.0f/_renderScale, 1.0f/_renderScale) * mat * vec4f ( 0, 0, 0, 1 );
 
-	if ( isAnchorHCenter () )
-	    _bb.translate ( vec3f(-_size.x()/2.f, 0.f, 0.f ) );
-	else if ( isAnchorRight () )
-	    _bb.translate ( vec3f(-_size.x(), 0.f, 0.f) );
+        //	qDebug ("TextNode::updateBBox scene mode %f", _renderScale);
+        //     _size = FontMetric::getInst().getBBox ( *getAttrSet()->getFont(), _text ).dimension();
+        bb.init ( vec3f(0.f, 0.f, 0.f) );
+        bb.expandby ( _size );
 
-	if ( isAnchorVCenter () )
-	    _bb.translate ( vec3f(0, -_size.y()/2.f, 0.f) );
-	else if ( isAnchorTop () )
-	    _bb.translate ( vec3f(0, -_size.y(), 0.f) );
+        if ( isAnchorHCenter () )
+            bb.translate ( vec3f(-_size.x()/2.f, 0.f, 0.f ) );
+        else if ( isAnchorRight () )
+            bb.translate ( vec3f(-_size.x(), 0.f, 0.f) );
 
-	vec4f min = mat * vec4f ( _bb.minvec() );
-	vec4f max = mat * vec4f ( _bb.maxvec() );
+        if ( isAnchorVCenter () )
+            bb.translate ( vec3f(0, -_size.y()/2.f, 0.f) );
+        else if ( isAnchorTop () )
+            bb.translate ( vec3f(0, -_size.y(), 0.f) );
 
-	_bb.setminmax ( min.xyz(), max.xyz() );
+        vec4f min = (*mat) * vec4f ( bb.minvec() );
+        vec4f max = (*mat) * vec4f ( bb.maxvec() );
+
+        bb.setminmax ( min.xyz(), max.xyz() );
 
     }
     else if ( TXTSIZEMODE_SCREEN == _sizeMode )
     {
-	// do nothing, because we assume text's bbox is invalid in screen mode.
+        // do nothing, because we assume text's bbox is invalid in screen mode.
     }
 
-    for ( iterator pp=begin(); pp!=end(); ++pp )
-    {
-	(*pp)->updateBBox();
-	_bb = _bb.unionbox ( (*pp)->getBBox() );
-    }
-    setBBoxDirty ( false );
+    _bb = _bb.unionbox ( bb );
 }
 
 void TextNode::text ( const string& content )
 {
     _text = content; 
-    if ( getAttrSet() )
+    if ( TXTSIZEMODE_SCENE==getSizeMode() && getAttrSet() && getAttrSet()->getFont() )
     {
-	vec3f scenesize = FontMetric::getInst().getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
+	vec3f scenesize = FontMetric::getBBox ( *(getAttrSet()->getFont()), _text.c_str() ).dimension();
 	_renderScale = _size.x() / fabs(scenesize.x());
     }
 
     //_size = FontMetric::getInst().getBBox ( *_fontnode, _text ).dimension();
-    setBBoxDirty ( true );
-    setParentBBoxDirty ( true );
+    setBBoxDirty ();
+    //setParentBBoxDirty ( true );
 
 }
 
@@ -123,37 +193,37 @@ void TextNode::setAnchor ( int anchorFlag )
     _anchor = anchorFlag; 
 }
 
-bool TextNode::isAnchorLeft () 
+bool TextNode::isAnchorLeft () const
 {
     return ( (AnchorLEFT & _anchor) != 0 ); 
 }
 
-bool TextNode::isAnchorHCenter () 
+bool TextNode::isAnchorHCenter () const
 { 
     return ( (AnchorHCENTER & _anchor) != 0 ); 
 }
 
-bool TextNode::isAnchorRight () 
+bool TextNode::isAnchorRight () const
 { 
     return ( (AnchorRIGHT & _anchor) != 0 ); 
 }
 
-bool TextNode::isAnchorTop () 
+bool TextNode::isAnchorTop () const
 { 
     return ( (AnchorTOP & _anchor) != 0 ); 
 }
 
-bool TextNode::isAnchorVCenter () 
+bool TextNode::isAnchorVCenter () const
 { 
     return ( (AnchorVCENTER & _anchor) != 0 ); 
 }
 
-bool TextNode::isAnchorBottom () 
+bool TextNode::isAnchorBottom () const
 { 
     return ( (AnchorBOTTOM & _anchor) != 0 ); 
 }
 
-short TextNode::anchorValue ()
+short TextNode::anchorValue () const
 {
     int value = 0;
     if ( isAnchorTop() )
@@ -280,6 +350,16 @@ float TextNode::renderScale () const
 vec2f TextNode::anchorPos () const
 {
     return _anchorPos;
+}
+
+void TextNode::setDrawBackground( bool b )
+{
+    _isDrawBackground = b;
+}
+
+bool TextNode::isDrawBackground() const
+{
+    return _isDrawBackground;
 }
 
 // bounding box display control

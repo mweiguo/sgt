@@ -28,7 +28,7 @@ public:
     inline void point1( T x, T y ) { _data.xy(x, y); }
     inline void point2( T x, T y ) { _data.zw(x, y); }
     ~Line () {}
-    BBox boundingbox ()
+    BBox boundingbox () const
     {
         BBox bb;
         //bb.init ( vec3<T>(_data.xy()) );

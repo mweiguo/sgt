@@ -16,12 +16,17 @@ public:
     virtual ~MeshPointNode () {}
 
 
-    virtual void updateBBox( const mat4f& mat=mat4f() );
+    virtual SGNode* clone ()
+    {
+        return new MeshPointNode(*this);
+    }
+    virtual void updateBBox( const mat4f& mat=mat4f(), bool force=false );
+    virtual void computeBBox( const mat4f* mat=0 ) const;
 
     int coordIdx () { return _idx; }
     void coordIdx ( int idx ) { _idx = idx; }
 
-    float pointSize() { setBBoxDirty(true); return _pointSize; }
+    float pointSize() { setBBoxDirty(); return _pointSize; }
     void pointSize(float size) { _pointSize=size; }
 
     void setCoord ( const vec3f& coord );

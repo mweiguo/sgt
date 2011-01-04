@@ -18,10 +18,10 @@ public:
     void setColor ( const string& color ) { _color = ColorConv::string2hex(color); }
     unsigned int getColor () const { return _color; }
     string toString() const { return ColorConv::hex2string(_color); }
-    unsigned int r() { return ((_color & 0xff000000) >> 24); }
-    unsigned int g() { return ((_color & 0x00ff0000) >> 16); }
-    unsigned int b() { return ((_color & 0x0000ff00) >> 8); }
-    unsigned int a() { return ((_color & 0x000000ff)); }
+    unsigned int r() const { return ((_color & 0xff000000) >> 24); }
+    unsigned int g() const { return ((_color & 0x00ff0000) >> 16); }
+    unsigned int b() const { return ((_color & 0x0000ff00) >> 8); }
+    unsigned int a() const { return ((_color & 0x000000ff)); }
 private:
     // 0xRRGGBBAA
     unsigned int _color;

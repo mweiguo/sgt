@@ -30,6 +30,8 @@ namespace SGR
         virtual void apply ( MeshNode3f& node );
         virtual void apply ( MeshLineNode& node );
         virtual void apply ( MeshPointNode& node );
+        virtual void apply ( CircleNode& node );
+        virtual void apply ( ImageNode& node );
 
         T* target () { return _target; }
 
@@ -159,6 +161,26 @@ namespace SGR
     void ParentFinder<T>::apply ( MeshPointNode& node )
     {
         if ( false == IsSameType<T, MeshPointNode>::Result::value ) {
+            ParentVisitor::apply ( node );
+        } else {
+            _target = dynamic_cast<T*>(&node);
+        }
+    }
+
+    template < class T >
+    void ParentFinder<T>::apply ( CircleNode& node )
+    {
+        if ( false == IsSameType<T, CircleNode>::Result::value ) {
+            ParentVisitor::apply ( node );
+        } else {
+            _target = dynamic_cast<T*>(&node);
+        }
+    }
+
+    template < class T >
+    void ParentFinder<T>::apply ( ImageNode& node )
+    {
+        if ( false == IsSameType<T, ImageNode>::Result::value ) {
             ParentVisitor::apply ( node );
         } else {
             _target = dynamic_cast<T*>(&node);

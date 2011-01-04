@@ -1,4 +1,7 @@
 #include "sgr_sgnode.h"
+#include "sgr_parentfinder.h"
+#include "sgr_layerchangger.h"
+
 
 namespace SGR
 {
@@ -21,11 +24,23 @@ namespace SGR
     {
     }
 
+    SGNode* SGNode::clone ()
+    {
+        return new SGNode(*this);
+    }
+
     // nodes relation operations
     void SGNode::addChild ( SGNode* pNode )
     { 
         pNode->_setParent ( this );
         _addChild ( pNode );
+	
+        ParentFinder<LayerNode> finder( this );
+	if ( finder.target() )
+	{
+	    OnAddNodeToLayer onAddNodeToLayer;
+	    onAddNodeToLayer.doAction ( pNode, finder.target() );
+	}
     }
     
     void SGNode::pushfrontChild ( SGNode* pNode )
@@ -68,40 +83,99 @@ namespace SGR
 
     // virtual functions
     // this matrix is transform matrix from it's parents
-    void SGNode::updateBBox( const mat4f& mat )
+    void SGNode::updateBBox( const mat4f& mat, bool force )
     {
+        if ( force || isBBoxDirty()  )
+        {
+            _bb.setInvalid();
+            for ( iterator pp=begin(); pp!=end(); ++pp )
+            {
+                if ( force || (*pp)->isBBoxDirty () )
+                    (*pp)->updateBBox(mat, force);
+                _bb = _bb.unionbox ( (*pp)->getBBox() );
+            }
+            _isBBoxDirty = false;
+        }
+    }
+
+    void SGNode::computeBBox( const mat4f* mat ) const
+    {
+        if ( false == _isBBoxDirty )
+            return;
+
+        mat4f tmat;
+        if ( 0 == mat )
+        {
+            mat = &tmat;
+            tmat = getParentTranMatrix ();
+        }
+
         _bb.setInvalid();
-        for ( iterator pp=begin(); pp!=end(); ++pp )
+        for ( const_iterator pp=begin(); pp!=end(); ++pp )
         {
-            if ( (*pp)->isBBoxDirty () )
-                (*pp)->updateBBox(mat);
-            _bb = _bb.unionbox ( (*pp)->getBBox() );
+            (*pp)->computeBBox ( mat );
+            _bb = _bb.unionbox ( (*pp)->_bb );
         }
-        setBBoxDirty ( false );
+
+        _isBBoxDirty = false;
     }
 
-    void SGNode::setBBoxDirty ( bool isDirty )
+    const BBox& SGNode::getBBox () const
     {
-        _isBBoxDirty = isDirty; 
+        if ( _isBBoxDirty )
+            computeBBox ();
+
+        return _bb;
     }
 
-    void SGNode::setParentBBoxDirty ( bool isDirty )
+
+    void SGNode::setBBoxDirty ()
     {
-        SGNode* parent = this->getParentNode();
-        if ( parent )
+        _isBBoxDirty = true;
+
+        // all it's parents's bbox are invalid
+        SGNode* parent = _parent;
+        while ( parent )
         {
-            parent->setBBoxDirty  ( isDirty );
-            parent->setParentBBoxDirty ( isDirty );
+            parent->_isBBoxDirty = true;
+            parent = parent->_parent;
         }
     }
-    
-    void SGNode::setChildrenBBoxDirty ( bool isDirty )
+
+    //void SGNode::setParentBBoxDirty ( bool isDirty )
+    //{
+    //    SGNode* parent = this->getParentNode();
+    //    if ( parent )
+    //    {
+    //        parent->setBBoxDirty  ( isDirty );
+    //        parent->setParentBBoxDirty ( isDirty );
+    //    }
+    //}
+    //
+    void SGNode::setChildrenBBoxDirty ()
     {
         for ( iterator pp=begin(); pp!=end(); ++pp )
         {
-            (*pp)->setBBoxDirty ( isDirty );
-            (*pp)->setChildrenBBoxDirty ( isDirty );
+            (*pp)->_isBBoxDirty = true;
+            (*pp)->setChildrenBBoxDirty ();
         }
     }
+
+    mat4f SGNode::getParentTranMatrix () const
+    {
+        mat4f tmat;
+        ParentFinder<TransformNode> finder( this );
+        TransformNode* p = finder.target();
+        while ( p )
+        {
+            if ( p )
+                tmat = p->getMatrix() * tmat;
+            ParentFinder<TransformNode> finder( p );
+            p = finder.target();
+        }
+
+        return tmat;
+    }
+
 }
 

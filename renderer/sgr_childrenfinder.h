@@ -17,9 +17,9 @@ namespace SGR
                 (*pp)->accept ( *this );
             }
         }
-	virtual ~ChildrenFinder ()
-	{
-	}
+        virtual ~ChildrenFinder ()
+        {
+        }
         virtual void apply ( SGNode& node )
         {
             if ( true == IsSameType<T, SGNode>::Result::value )
@@ -118,6 +118,21 @@ namespace SGR
         virtual void apply ( PointNode& node )
         {
             if ( true == IsSameType<T, PointNode>::Result::value )
+                _values.push_back ( &node );
+        }
+        virtual void apply ( CircleNode& node )
+        {
+            if ( true == IsSameType<T, PointNode>::Result::value )
+                _values.push_back ( &node );
+        }
+        virtual void apply ( ImageNode& node )
+        {
+            if ( true == IsSameType<T, ImageNode>::Result::value )
+                _values.push_back ( &node );
+        }
+        virtual void apply ( ImposterNode& node )
+        {
+            if ( true == IsSameType<T, ImposterNode>::Result::value )
                 _values.push_back ( &node );
         }
         std::list<SGNode*>& results () { return _values; }

@@ -328,7 +328,6 @@ int tcl_viewport_dirty ( ClientData /*clientData*/, Tcl_Interp* interp, int objc
 //}
 
 
-#include <tinylog.h>
 // local mesh load, treat mesh as a single object
 int tcl_scene_load ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 {
@@ -350,7 +349,6 @@ int tcl_scene_load ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tc
             list[i] = Tcl_NewDoubleObj ( nodes[i] );
         }
 
-	Tcl_Eval ( interp, "puts \"scene_load ok\"" );
         Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
         return TCL_OK;
     } catch ( std::exception& e ) {
@@ -453,35 +451,66 @@ int tcl_get_bbox (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_O
     }
 }
 
+int tcl_get_scenepos (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+{
+    try
+    {
+        if ( objc != 5 ) {
+            Tcl_WrongNumArgs ( interp, 0, objv, "get_scenepos viewportid vx vy vz" );
+            return TCL_ERROR;
+        }
 
-// int tcl_get_scenepos (ClientData clientData, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+        int vpid;
+        Tcl_GetIntFromObj ( interp, objv[1], &vpid );
+        double viewcoord[3];
+        Tcl_GetDoubleFromObj ( interp, objv[2], &viewcoord[0] );
+        Tcl_GetDoubleFromObj ( interp, objv[3], &viewcoord[1] );
+        Tcl_GetDoubleFromObj ( interp, objv[4], &viewcoord[2] );
+        
+        float vcoord[3], scenecoord[3];
+        vcoord[0] = viewcoord[0];
+        vcoord[1] = viewcoord[1];
+        vcoord[2] = viewcoord[2];
+        get_scenepos ( vpid, vcoord, scenecoord );
+        
+        Tcl_Obj *list[3];
+        list[0] = Tcl_NewDoubleObj (scenecoord[0]);
+        list[1] = Tcl_NewDoubleObj (scenecoord[1]);
+        list[2] = Tcl_NewDoubleObj (scenecoord[2]);
+
+        Tcl_SetObjResult ( interp, Tcl_NewListObj(3, list) );
+        return TCL_OK;
+    } catch ( std::exception& e ) {
+        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
+        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
+        return TCL_ERROR;
+    }
+}
+
+// int tcl_pick (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
 // {
 //     try
 //     {
 //         if ( objc != 5 ) {
-//             Tcl_WrongNumArgs ( interp, 0, objv, "get_scenepos viewportid vx vy vz" );
+//             Tcl_WrongNumArgs ( interp, 0, objv, "pick x y z camid" );
 //             return TCL_ERROR;
 //         }
 
-//         int vpid;
-//         Tcl_GetIntFromObj ( interp, objv[1], &vpid );
-//         double viewcoord[3];
-//         Tcl_GetDoubleFromObj ( interp, objv[2], &viewcoord[0] );
-//         Tcl_GetDoubleFromObj ( interp, objv[3], &viewcoord[1] );
-//         Tcl_GetDoubleFromObj ( interp, objv[4], &viewcoord[2] );
-        
-//         float vcoord[3], scenecoord[3];
-//         vcoord[0] = viewcoord[0];
-//         vcoord[1] = viewcoord[1];
-//         vcoord[2] = viewcoord[2];
-//         get_scenepos ( vpid, vcoord, scenecoord );
-        
-//         Tcl_Obj *list[3];
-//         list[0] = Tcl_NewDoubleObj (scenecoord[0]);
-//         list[1] = Tcl_NewDoubleObj (scenecoord[1]);
-//         list[2] = Tcl_NewDoubleObj (scenecoord[2]);
+//         double scenecoord[3];
+//         Tcl_GetDoubleFromObj ( interp, objv[1], &scenecoord[0] );
+//         Tcl_GetDoubleFromObj ( interp, objv[2], &scenecoord[1] );
+//         Tcl_GetDoubleFromObj ( interp, objv[3], &scenecoord[2] );
+//         int camid;
+//         Tcl_GetIntFromObj ( interp, objv[4], &camid );
 
-//         Tcl_SetObjResult ( interp, Tcl_NewListObj(3, list) );
+//         int data[256];
+//         int size = pick ( scenecoord[0], scenecoord[1], scenecoord[2], camid, data );
+        
+//         Tcl_Obj *list[256];
+//         for ( int i=0; i<size; i++ )
+//             list[i] = Tcl_NewIntObj ( data[i] );
+//         Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
+
 //         return TCL_OK;
 //     } catch ( std::exception& e ) {
 //         //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
@@ -490,74 +519,42 @@ int tcl_get_bbox (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_O
 //     }
 // }
 
-int tcl_pick (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
-{
-    try
-    {
-        if ( objc != 5 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "pick x y z camid" );
-            return TCL_ERROR;
-        }
+// int tcl_pick_volume (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
+// {
+//     try
+//     {
+//         if ( objc != 8 ) {
+//             Tcl_WrongNumArgs ( interp, 0, objv, "pick_volume minx miny minz minx miny minz camid" );
+//             return TCL_ERROR;
+//         }
 
-        double scenecoord[3];
-        Tcl_GetDoubleFromObj ( interp, objv[1], &scenecoord[0] );
-        Tcl_GetDoubleFromObj ( interp, objv[2], &scenecoord[1] );
-        Tcl_GetDoubleFromObj ( interp, objv[3], &scenecoord[2] );
-        int camid;
-        Tcl_GetIntFromObj ( interp, objv[4], &camid );
+//         double min[3], max[3];
+//         Tcl_GetDoubleFromObj ( interp, objv[1], &min[0] );
+//         Tcl_GetDoubleFromObj ( interp, objv[2], &min[1] );
+//         Tcl_GetDoubleFromObj ( interp, objv[3], &min[2] );
 
-        int data[256];
-        int size = pick ( scenecoord[0], scenecoord[1], scenecoord[2], camid, data );
-        
-        Tcl_Obj *list[256];
-        for ( int i=0; i<size; i++ )
-            list[i] = Tcl_NewIntObj ( data[i] );
-        Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
+//         Tcl_GetDoubleFromObj ( interp, objv[4], &max[0] );
+//         Tcl_GetDoubleFromObj ( interp, objv[5], &max[1] );
+//         Tcl_GetDoubleFromObj ( interp, objv[6], &max[2] );
 
-        return TCL_OK;
-    } catch ( std::exception& e ) {
-        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
-        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
-        return TCL_ERROR;
-    }
-}
+//         int camid;
+//         Tcl_GetIntFromObj ( interp, objv[7], &camid );
 
-int tcl_pick_volume (ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
-{
-    try
-    {
-        if ( objc != 8 ) {
-            Tcl_WrongNumArgs ( interp, 0, objv, "pick_volume minx miny minz minx miny minz camid" );
-            return TCL_ERROR;
-        }
+//         int data[256];
+//         int size = pick_volume ( min[0], min[1], min[2], max[0], max[1], max[2], camid, data ); 
 
-        double min[3], max[3];
-        Tcl_GetDoubleFromObj ( interp, objv[1], &min[0] );
-        Tcl_GetDoubleFromObj ( interp, objv[2], &min[1] );
-        Tcl_GetDoubleFromObj ( interp, objv[3], &min[2] );
+//         Tcl_Obj *list[256];
+//         for ( int i=0; i<size; i++ )
+//             list[i] = Tcl_NewIntObj ( data[i] );
+//         Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
 
-        Tcl_GetDoubleFromObj ( interp, objv[4], &max[0] );
-        Tcl_GetDoubleFromObj ( interp, objv[5], &max[1] );
-        Tcl_GetDoubleFromObj ( interp, objv[6], &max[2] );
-
-        int camid;
-        Tcl_GetIntFromObj ( interp, objv[7], &camid );
-
-        int data[256];
-        int size = pick_volume ( min[0], min[1], min[2], max[0], max[1], max[2], camid, data ); 
-
-        Tcl_Obj *list[256];
-        for ( int i=0; i<size; i++ )
-            list[i] = Tcl_NewIntObj ( data[i] );
-        Tcl_SetObjResult ( interp, Tcl_NewListObj(size, list) );
-
-        return TCL_OK;
-    } catch ( std::exception& e ) {
-        //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
-        Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
-        return TCL_ERROR;
-    }
-}
+//         return TCL_OK;
+//     } catch ( std::exception& e ) {
+//         //	Tcl_NewStringObj ( (const char*)(e.what()), e.what().size() );
+//         Tcl_SetResult ( interp, (char*)e.what(), TCL_VOLATILE );
+//         return TCL_ERROR;
+//     }
+// }
 
 // remote mesh load, C/S architecture, client should maintian node structure
 int tcl_add_child ( ClientData /*clientData*/, Tcl_Interp* interp, int objc, Tcl_Obj* const objv[] )
@@ -1964,8 +1961,8 @@ void register_tclcmds ( Tcl_Interp* interp )
     Tcl_CreateObjCommand ( interp, "dump_node",             tcl_dump_node               ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "get_bbox",              tcl_get_bbox                ,0 ,0 );
 
-    Tcl_CreateObjCommand ( interp, "pick",                  tcl_pick                    ,0 ,0 );
-    Tcl_CreateObjCommand ( interp, "pick_volume",           tcl_pick_volume             ,0 ,0 );
+//     Tcl_CreateObjCommand ( interp, "pick",                  tcl_pick                    ,0 ,0 );
+//     Tcl_CreateObjCommand ( interp, "pick_volume",           tcl_pick_volume             ,0 ,0 );
 
     Tcl_CreateObjCommand ( interp, "add_child",             tcl_add_child               ,0 ,0 );
     Tcl_CreateObjCommand ( interp, "remove_child",          tcl_remove_child            ,0 ,0 );

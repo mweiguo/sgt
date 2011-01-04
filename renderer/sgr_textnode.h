@@ -50,8 +50,10 @@ public:
     TextNode ( const string& content );
     TextNode ( const TextNode& rhs );
     virtual ~TextNode ();
+    virtual SGNode* clone ();
 
-    virtual void updateBBox( const mat4f& mat=mat4f() );
+    virtual void updateBBox( const mat4f& mat=mat4f(), bool force=false );
+    virtual void computeBBox( const mat4f* mat=0 ) const;
     void text ( const string& content );
     const string& text ();
 
@@ -61,13 +63,13 @@ public:
     //  4     5     6
     //  7     8     9
     void setAnchor ( int anchorFlag );
-    bool isAnchorLeft ();
-    bool isAnchorHCenter ();
-    bool isAnchorRight ();
-    bool isAnchorTop ();
-    bool isAnchorVCenter ();
-    bool isAnchorBottom ();
-    short anchorValue ();
+    bool isAnchorLeft () const;
+    bool isAnchorHCenter () const;
+    bool isAnchorRight () const;
+    bool isAnchorTop () const;
+    bool isAnchorVCenter () const;
+    bool isAnchorBottom () const;
+    short anchorValue () const;
     void anchorValue ( short v );
 
     // set align
@@ -99,6 +101,9 @@ public:
 
     float renderScale () const;
     vec2f anchorPos () const;
+
+    void setDrawBackground( bool );
+    bool isDrawBackground() const;
 private:
     string _text;
     short _anchor;
@@ -108,8 +113,10 @@ private:
     vec2f _size;
     int _sizeMode;
 
-    float _renderScale;
-    vec2f _anchorPos;
+    mutable float _renderScale;
+    mutable vec2f _anchorPos;
+
+    bool _isDrawBackground;
 //private:
 //    FgBgColorComponent _color;
 };

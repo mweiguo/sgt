@@ -7,6 +7,9 @@
 #include "sgr_grhagl.h"
 #include "sgr_polylinenode.h"
 #include "sgr_polynode.h"
+#include "sgr_interface.h"
+#include "sgr_imposter.h"
+#include "sgr_imagenode.h"
 
 namespace SGR
 {
@@ -16,7 +19,11 @@ template <class Output>
 class VolumePicker : public ChildVisitor
 {
 public:
-    VolumePicker ( const BBox& box, int camid/*this is for lod filter*/, Output output ) : _bbox(box), _output(output), _camid(camid)
+    VolumePicker ( const BBox& box, int camid/*this is for lod filter*/, RenderOption* opt, Output output ) :
+	_bbox(box), 
+	_output(output), 
+	_camid(camid),
+	_opt(opt)
     {
         _pickedNodes.clear();
     }
@@ -40,6 +47,9 @@ public:
     virtual void apply ( PolyNode2Df& node );
     virtual void apply ( PointNode& node );
     virtual void apply ( MeshPointNode& node );
+    virtual void apply ( CircleNode& node );
+    virtual void apply ( ImageNode& node );
+    virtual void apply ( ImposterNode& node );
     void operator () ( SGNode& node ) { node.accept ( *this ); }
     vector<SGNode*>& pickedNodes () { return _pickedNodes; }
 private:
@@ -52,6 +62,8 @@ private:
 
     // store picked nodes
     vector<SGNode*> _pickedNodes;
+
+    RenderOption* _opt;
 };
 
 template <class Output>
@@ -80,18 +92,17 @@ void VolumePicker<Output>::apply ( RectangleNodef& node )
 {
     if ( node.isVisible () )
     {
-        vec2f pos = (_curmat * vec4f (0,0,0,1)).xy();
+        vec3f pos = (_curmat * vec4f (0, 0, 0, 1)).xy();
+        vec3f pos1 = (_curmat * vec4f (node.w(), node.h(), 0, 1)).xy();
 
         BBox box;
-        box.init ( vec3f(pos.x(), pos.y(), 0) );
-        box.expandby ( vec3f(pos.x()+node.w(), pos.y()+node.h(), 0 ) );
+        box.init ( pos );
+        box.expandby ( pos1 );
 
-        //qDebug ( "node's box %s", box.dump().c_str() );
-        //qDebug ( "view _bbox %s", _bbox.dump().c_str() );
         if ( is_intersect ( box, _bbox ) )
         {
             RectangleNodef* rect = new RectangleNodef ( node );
-            rect->setRect ( pos.x(), pos.y(), node.w(), node.h() );
+            rect->setRect ( pos.x(), pos.y(), pos1.x()-pos.x(), pos1.y()-pos.y() );
             *_output++ = rect;
 
             // add to picked list
@@ -145,7 +156,16 @@ void VolumePicker<Output>::apply ( PickableGroup& node )
 template <class Output>
 void VolumePicker<Output>::apply ( KdTreeNode& node )
 {
-    node.intersect ( _bbox, _output );
+    vector<DrawableNode*> temp;
+    node.intersect ( _bbox, back_inserter(temp) );
+    // make the copy to _output
+    for ( vector<DrawableNode*>::iterator pp=temp.begin(); pp!=temp.end(); ++pp )
+    {
+        DrawableNode* node = dynamic_cast<DrawableNode*>( (*pp)->clone() );
+        node->removeAllChild ();
+        *_output++ = node;
+    }
+
 }
 
 template <class Output>
@@ -157,9 +177,21 @@ void VolumePicker<Output>::apply ( TextNode& node )
 
         //qDebug ("rect (%f, %f, %f, %f)", pos.x(), pos.y(), node.w(), node.h());
         //qDebug ( "%s", _bbox.dump().c_str() );
+        bool isPicked = false;
+//        int textid = node.getID();
+        if ( node.getSizeMode() == TextNode::TXTSIZEMODE_SCREEN )
+        {
+            if ( is_contain ( _bbox, vec3f(node.anchorPos()) ) )
+                isPicked = true;
+        }
+        else if ( node.getSizeMode() == TextNode::TXTSIZEMODE_SCENE )
+        {
+            const BBox box = node.getBBox();
+            if ( is_intersect ( box, _bbox ) )
+                isPicked = true;
+        }
 
-        const BBox box = node.getBBox();
-        if ( is_intersect ( box, _bbox ) )
+        if ( isPicked )
         {
             TextNode* textnode = new TextNode ( node );
             textnode->removeAllChild ();
@@ -256,9 +288,10 @@ void VolumePicker<Output>::apply ( MeshNode3f& node )
 
             // this stack will be checked in it's children visitation, if stack is not empty, then child node will be picked
             _meshnodeStack.push_back ( meshnode );
+
+	    ChildVisitor::apply ( node );
         }
     }
-    ChildVisitor::apply ( node );
 }
 
 template <class Output>
@@ -390,6 +423,91 @@ void VolumePicker<Output>::apply ( MeshPointNode& node )
         }
     }
     ChildVisitor::apply ( node );
+}
+
+template <class Output>
+void VolumePicker<Output>::apply ( CircleNode& node )
+{
+    if ( node.isVisible () )
+    {
+        vec2f cen = (_curmat * vec4f (node.getCenter())).xy();
+
+        vec3f v1 = (_curmat * vec4f (node.getRadius(),0,0,1)).xyz();
+        vec3f v2 = (_curmat * vec4f (0,0,0,1)).xyz();
+        float newRadius = (v1-v2).mod();
+        
+
+        BBox box;
+        box.init ( vec3f(cen.x()-newRadius, cen.y()-newRadius, 0) );
+        box.expandby ( vec3f(cen.x()+newRadius, cen.y()+newRadius, 0) );
+
+        if ( is_intersect ( box, _bbox ) )
+        {
+            CircleNode* circle = new CircleNode ( node );
+            circle->setCenter ( cen.x(), cen.y() );
+            circle->setRadius ( newRadius );
+
+            *_output++ = circle;
+            // add to picked list
+            _pickedNodes.push_back ( &node );
+        }
+    }
+    ChildVisitor::apply ( node );
+}
+
+template <class Output>
+void VolumePicker<Output>::apply ( ImageNode& node )
+{
+    if ( node.isVisible () )
+    {
+	BBox box = node.getBBox();
+
+        if ( is_intersect ( box, _bbox ) )
+        {
+            ImageNode* imagenode = new ImageNode ( node );
+
+            *_output++ = imagenode;
+            // add to picked list
+            _pickedNodes.push_back ( &node );
+        }
+    }
+    ChildVisitor::apply ( node );
+}
+
+/**
+   working step:
+     1 when culling, check which level should be presentate
+     2 update imposter image if current level is dirty
+     3 push culling result to output
+ */
+template <class Output>
+void VolumePicker<Output>::apply ( ImposterNode& node )
+{
+    if ( node.isVisible () )
+    {
+	BBox box = node.getBBox();
+
+        if ( is_intersect ( box, _bbox ) )
+	{
+	    CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho>(_camid);
+	    if ( cam )
+	    {
+		int idx = node.getLodDelimiterIndex ( cam->mvmatrix().sx() );
+		if ( idx >= 0 )
+		{
+		    if ( node.isImageDirty (idx) )
+			node.updateImage (idx, *_opt);
+		    
+		    ImageNode* image = new ImageNode (node.getImage (idx) );
+		    *_output++ = image;
+		}
+		else
+		{
+		    ChildVisitor::apply ( node );
+		}
+	    }
+	}
+    }
 }
 
 }

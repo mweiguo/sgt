@@ -21,6 +21,9 @@ public:
     virtual void apply ( FontNode& node );
     virtual void apply ( TextNode& node );
     virtual void apply ( LineNodef& node );
+    virtual void apply ( CircleNode& node );
+    virtual void apply ( ImageNode& node );
+    virtual void apply ( ImposterNode& node );
     template < class T >
     T* operator () ( T& rhs )
     {
@@ -180,5 +183,42 @@ inline void Copier::apply ( LineNodef& node )
     ChildVisitor::apply ( node );
     _currparent = old;
 }
+
+void Copier::apply ( CircleNode& node )
+{
+    CircleNode* p = new CircleNode ( node );
+    p->setParentNode ( NULL );
+    p->removeAllChild ();
+    _currparent->addChild ( p );
+    SGNode* old = _currparent;
+    _currparent = p;
+    ChildVisitor::apply ( node );
+    _currparent = old;
+}
+
+void Copier::apply ( ImageNode& node )
+{
+    ImageNode* p = new ImageNode ( node );
+    p->setParentNode ( NULL );
+    p->removeAllChild ();
+    _currparent->addChild ( p );
+    SGNode* old = _currparent;
+    _currparent = p;
+    ChildVisitor::apply ( node );
+    _currparent = old;
+}
+
+void Copier::apply ( ImposterNode& node )
+{
+    ImposterNode* p = new ImposterNode ( node );
+    p->setParentNode ( NULL );
+    p->removeAllChild ();
+    _currparent->addChild ( p );
+    SGNode* old = _currparent;
+    _currparent = p;
+    ChildVisitor::apply ( node );
+    _currparent = old;
+}
+
 }
 #endif // _COPYIER_H_

@@ -17,21 +17,50 @@ class SGR_DLL LineNode : public DrawableNode
 public:
     LineNode ( T x1=0, T y1=0, T x2=0, T y2=0 ) { setPoints(x1,y1,x2,y2); }
     LineNode ( const LineNode<T>& rhs ) : DrawableNode ( rhs ), _line(rhs._line) {} 
-
-    virtual void updateBBox( const mat4f& mat=mat4f() )
+    virtual SGNode* clone ()
     {
-        _bb = _line.boundingbox();
-        
-        vec4f min = mat * vec4f ( _bb.minvec() );
-        vec4f max = mat * vec4f ( _bb.maxvec() );
-        _bb.setminmax ( min.xyz(), max.xyz() );
-
-        for ( iterator pp=begin(); pp!=end(); ++pp )
+        return new LineNode(*this);
+    }
+    virtual void updateBBox( const mat4f& mat=mat4f(), bool force=false )
+    {
+        if ( force || isBBoxDirty()  )
         {
-            (*pp)->updateBBox();
-            _bb = _bb.unionbox ( (*pp)->getBBox() );
+            _bb = _line.boundingbox();
+
+            vec4f min = mat * vec4f ( _bb.minvec() );
+            vec4f max = mat * vec4f ( _bb.maxvec() );
+            _bb.setminmax ( min.xyz(), max.xyz() );
+
+            for ( iterator pp=begin(); pp!=end(); ++pp )
+            {
+                if ( force || (*pp)->isBBoxDirty () )
+                    (*pp)->updateBBox(mat, force);
+                _bb = _bb.unionbox ( (*pp)->getBBox() );
+            }
+            _isBBoxDirty = false;
         }
-        setBBoxDirty ( false );
+    }
+    virtual void computeBBox( const mat4f* mat=0 ) const
+    {
+        if ( false == _isBBoxDirty )
+            return;
+
+        mat4f tmat;
+        if ( 0 == mat )
+        {
+            mat = &tmat;
+            tmat = getParentTranMatrix ();
+        }
+        DrawableNode::computeBBox ( mat );
+
+        BBox bb;
+        bb = _line.boundingbox();
+
+        vec4f min = (*mat) * vec4f ( bb.minvec() );
+        vec4f max = (*mat) * vec4f ( bb.maxvec() );
+        bb.setminmax ( min.xyz(), max.xyz() );
+
+        _bb = _bb.unionbox ( bb );
     }
     
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
@@ -41,8 +70,8 @@ public:
     void setPoints ( T x1, T y1, T x2, T y2 )
     {
         _line.setPoints(x1, y1, x2, y2); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
 
     inline vec2<T> point1() { return _line.point1(); }
@@ -50,14 +79,14 @@ public:
     inline void point1( T x, T y )
     {
         _line.point1(x, y); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     inline void point2( T x, T y ) 
     { 
         _line.point2(x, y); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
 
     inline T x1() const { return _line.x1(); }
@@ -67,26 +96,26 @@ public:
     inline void x1( T v ) 
     { 
         _line.x1 (v); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     inline void y1( T v ) 
     { 
         _line.y1 (v); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     inline void x2( T v ) 
     { 
         _line.x2 (v); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
     inline void y2( T v ) 
     { 
         _line.y2 (v); 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
     }
 
 

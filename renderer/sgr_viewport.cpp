@@ -61,16 +61,6 @@ void Viewport::position ( int orgx, int orgy )
     _pos.y(orgy); 
 }
 
-vec2i Viewport::position () const
-{
-    return _pos;
-}
-
-vec2i& Viewport::position ()
-{
-    return _pos;
-}
-
 const vec2i& Viewport::viewportSize() const
 { 
     return _size; 
@@ -114,6 +104,12 @@ string Viewport::name ()
 {
     return _name; 
 }
+
+SGNode* Viewport::clone ()
+{
+    return new Viewport(*this);
+}
+
 
 // reset view port matrix
 void Viewport::recalcVPMatrix () 

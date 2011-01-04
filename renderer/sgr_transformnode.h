@@ -22,6 +22,11 @@ public:
     {
         _mat = rhs._mat;
     }
+    virtual SGNode* clone ()
+    {
+        return new TransformNode(*this);
+    }
+
     void setTranslate ( const string& str )
     {
         float floattokens[3];
@@ -38,9 +43,9 @@ public:
             iss >> floattokens[i];
         }
         setTranslate ( floattokens[0], floattokens[1], floattokens[2]);
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
     void setTranslate ( float dx, float dy, float dz ) 
     {
@@ -48,9 +53,9 @@ public:
         _mat.dy ( dy );
         _mat.dz ( dz ); 
 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
     void setScale ( const string& str ) 
     {
@@ -71,9 +76,9 @@ public:
         }
         setScale ( floattokens[0], floattokens[1], floattokens[2]);
 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
     void setScale ( float sx, float sy, float sz )
     {
@@ -81,9 +86,9 @@ public:
         _mat.sy(sy);
         _mat.sz(sz); 
 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
     mat4f& getMatrix () { return _mat; }
     const mat4f& getMatrix () const { return _mat; }
@@ -93,24 +98,44 @@ public:
             return;
 
         _mat = rhs; 
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
 
     }
-    virtual void updateBBox( const mat4f& mat=mat4f() )
+    virtual void updateBBox( const mat4f& mat=mat4f(), bool force=false )
     {
-        _bb.setInvalid();
-        mat4f m = mat * _mat;
-        for ( iterator pp=begin(); pp!=end(); ++pp )
+        if ( force || isBBoxDirty()  )
         {
-            (*pp)->updateBBox(m);
-            _bb = _bb.unionbox ( (*pp)->getBBox() );
+            _bb.setInvalid();
+            mat4f m = mat * _mat;
+            for ( iterator pp=begin(); pp!=end(); ++pp )
+            {
+                if ( force || (*pp)->isBBoxDirty () )
+                    (*pp)->updateBBox(m, force);
+                _bb = _bb.unionbox ( (*pp)->getBBox() );
+            }
+
+            _isBBoxDirty = false;
         }
-    
-        setBBoxDirty ( false );
     }
     
+    virtual void computeBBox( const mat4f* mat=0 ) const
+    {
+        if ( false == _isBBoxDirty )
+            return;
+
+        mat4f tmat;
+        if ( 0 == mat )
+        {
+            mat = &tmat;
+            tmat = getParentTranMatrix ();
+        }
+        mat4f m = (*mat) * _mat;
+
+        SGNode::computeBBox ( &m );
+    }
+
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~TransformNode () {}
 private:

@@ -36,6 +36,11 @@ public:
         //_color      = rhs._color;
     }
 
+    virtual SGNode* clone ()
+    {
+        return new FontNode(*this);
+    }
+
     // set font interface
     void setFont ( const string& family="Courier New", int pointSize=12, bool isItalic=false );
 

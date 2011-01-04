@@ -64,6 +64,9 @@ namespace SGR
         friend class PolyNodeParser;
         friend class PointNodeParser;
         friend class MeshpointNodeParser;
+        friend class CircleNodeParser;
+        friend class ImageNodeParser;
+        friend class ImposterNodeParser;
     };
 
     class UnloadNode
@@ -217,6 +220,27 @@ namespace SGR
     {
     public:
         MeshpointNodeParser ( LoadScene* scene ) : NodeParser(scene) {}
+        virtual void parse ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent );
+    };
+
+    class CircleNodeParser : public NodeParser
+    {
+    public:
+        CircleNodeParser ( LoadScene* scene ) : NodeParser(scene) {}
+        virtual void parse ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent );
+    };
+
+    class ImageNodeParser : public NodeParser
+    {
+    public:
+        ImageNodeParser ( LoadScene* scene ) : NodeParser(scene) {}
+        virtual void parse ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent );
+    };
+
+    class ImposterNodeParser : public NodeParser
+    {
+    public:
+        ImposterNodeParser ( LoadScene* scene ) : NodeParser(scene) {}
         virtual void parse ( XERCES_CPP_NAMESPACE::DOMElement* pnode, SGNode* parent );
     };
 

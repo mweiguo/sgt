@@ -23,6 +23,12 @@ public:
         }
     }
 
+    virtual SGNode* clone ()
+    {
+        return new ArrayNode(*this);
+    }
+
+
     void setRowCnt ( int cnt )    { _rowCnt = cnt; }
     void setColumnCnt ( int cnt ) { _columnCnt = cnt; }
     int getRowCnt ()    { return _rowCnt; }

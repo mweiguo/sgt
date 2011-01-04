@@ -5,12 +5,12 @@
 namespace SGR
 {
 
-DrawableNode::DrawableNode() : _bRender(true), _pAttrSet(0)
+DrawableNode::DrawableNode() : _pAttrSet(0)
 {
 }
 
 DrawableNode::DrawableNode ( const DrawableNode& rhs ) : 
-    SGNode(rhs), _bRender(rhs._bRender), _pAttrSet(rhs._pAttrSet)
+    SGNode(rhs), _pAttrSet(rhs._pAttrSet)
 {
     if ( _pAttrSet )
         _pAttrSet->incRef(); 

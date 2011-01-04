@@ -1,28 +1,27 @@
 #ifndef _RENDERFLOW_H_
 #define _RENDERFLOW_H_
 
-#include "sgr_renderlist.h"
-//#include "sgr_quickvector.h"
-#include "sgr_renderoption.h"
+//#include "sgr_renderlist.h"
+#include "sgr_quickvector.h"
+#include <list>
 //#include "sgr_global.h"
 namespace SGR
 {
-// class DrawableNode;
-// typedef quickvector<DrawableNode*> RenderList;
+    class DrawableNode;
+
+typedef quickvector<const DrawableNode*> RenderList;
 
 struct RenderOption;
 class /* SGR_DLL */ Rendering
 {
 public:
-    static const int RENDER_IN_QT;
-    static const int RENDER_IN_OPENGL;
-
     Rendering ( RenderList& renderlist, RenderOption& opt ); 
-    static int renderlib;
 };
 
 
 class Viewport;
+class SGNode;
+
 class /* SGR_DLL */ RenderFlow
 {
     static const int END               = 0;
@@ -32,7 +31,7 @@ class /* SGR_DLL */ RenderFlow
     static const int CULLING           = 4;
     static const int RENDERING         = 5;
 public:
-    RenderFlow ( Viewport& vp, RenderOption& opt );
+    RenderFlow ( Viewport& vp, RenderOption& opt, std::list<SGNode*> scenes=std::list<SGNode*>() );
 };
 
 }

@@ -28,21 +28,16 @@ public:
 
 
     void position ( int orgx, int orgy );
-    vec2i position () const;
-    vec2i& position ();
-
-    void viewportSize ( int w, int h );
     const vec2i& viewportSize() const;
-
+    void viewportSize ( int w, int h );
     const mat4f& vpmatrix () const;
     const mat4f& inversematrix () const;
-
     void update ();
-
     void name ( const string& nm );
     const string& name () const;
     string name ();
 
+    virtual SGNode* clone ();
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 private:
     // reset view port matrix

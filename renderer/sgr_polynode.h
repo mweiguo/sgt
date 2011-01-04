@@ -16,6 +16,10 @@ public:
     PolyNode () {}
     PolyNode ( const PolyNode<T>& rhs ) : PolylineNode<T> ( rhs ) {} 
     
+    virtual SGNode* clone ()
+    {
+        return new PolyNode(*this);
+    }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
 
     ~PolyNode () {}

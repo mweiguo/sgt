@@ -3,7 +3,6 @@
 #include "sgr_nodes.h"
 #include "sgr_vec3.h"
 #include "sgr_renderfunctor.h"
-#include "sgr_glrenderfunctor.h"
 #include "sgr_renderflow.h"
 #include "sgr_savemesh.h"
 #include "sgr_loadscene.h"
@@ -21,12 +20,15 @@
 #include "sgr_boxpicker.h"
 #include "sgr_crosspicker.h"
 #include "sgr_childrenfinder.h"
-#include "sgr_projection.h"
-#include "sgr_mat4.h"
+#include "sgr_circlenode.h"
+
+#include <utl_logger.h>
 
 #include <fstream>
 #include <stdexcept>
 
+#include <QPaintDevice>
+#include <QPainter>
 using namespace std;
 using namespace SGR;
 // camera management
@@ -51,13 +53,15 @@ using namespace SGR;
 //{
 //    QViewport::getInst().setEnviroment ( camid );
 //}
-void use_renderlib ( int lib )
+void init_renderer()
 {
-    if ( 1 == lib )
-	Rendering::renderlib = Rendering::RENDER_IN_QT;
-    else
-	Rendering::renderlib = Rendering::RENDER_IN_OPENGL;
 }
+
+void release_renderer()
+{
+    NodeMgr::getInst().clearAll();
+}
+
 
 void node_translate ( int id, float tx, float ty, float tz )
 {
@@ -124,6 +128,53 @@ void camera_name ( int id, const char* nm )
         cam->name ( nm );
 }
 
+//float find_view ( float* min, float* max, float percentOfView, int camid, int vpid )
+//{
+//    vec3f a ( min ), b(max);
+//    BBox bbox ( a, b );
+//    //BBox bbox ( vec3f(min), vec3f(max) );
+//    vec3f center = bbox.center();
+//    float minDimension = bbox.dimension().w() < bbox.dimension().h() ? bbox.dimension().h() : bbox.dimension().w() ;
+//    if ( 0 == minDimension )
+//    {
+//        stringstream ss;
+//        ss << "find_view: min max should be different";
+//        throw std::invalid_argument ( ss.str().c_str() );
+//    }
+//
+//    // calc scale
+//    vec3f demension = bbox.dimension();
+//    Viewport* t = NodeMgr::getInst().getNodePtr<Viewport> (vpid);
+//    if ( NULL != t )
+//    {
+//        float scale;
+//        const vec2i& size = t->viewportSize ();
+//        if ( size.w() > size.h() )
+//        {
+//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+//            scale = scale * size.h() / size.w();
+//        }
+//        else
+//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+//
+//        camera_reset ( camid );
+//        camera_translate ( camid, center.x(), center.y(), center.z() );
+//        camera_scale ( camid, scale );
+//    //    sgwindow_update ( vpid );
+//        return scale;
+//    }
+//    return 1;
+//    
+////    //float scale        = percentOfView / minDimension;
+////    float scale        = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
+////
+////    camera_reset ( camid );
+////    camera_translate ( camid, center.x(), center.y(), center.z() );
+////    camera_scale ( camid, scale );
+//////    sgwindow_update ( vpid );
+////    return scale;
+//}
+
 void get_cameramatrix ( int id, float* mat )
 {
     CameraOrtho* cam = NodeMgr::getInst().getNodePtr<CameraOrtho> (id);
@@ -177,53 +228,6 @@ void get_projectioninversematrix ( int id, float* mat )
 	proj->inversematrix ().toArray(mat);
 }
 
-//float find_view ( float* min, float* max, float percentOfView, int camid, int vpid )
-//{
-//    vec3f a ( min ), b(max);
-//    BBox bbox ( a, b );
-//    //BBox bbox ( vec3f(min), vec3f(max) );
-//    vec3f center = bbox.center();
-//    float minDimension = bbox.dimension().w() < bbox.dimension().h() ? bbox.dimension().h() : bbox.dimension().w() ;
-//    if ( 0 == minDimension )
-//    {
-//        stringstream ss;
-//        ss << "find_view: min max should be different";
-//        throw std::invalid_argument ( ss.str().c_str() );
-//    }
-//
-//    // calc scale
-//    vec3f demension = bbox.dimension();
-//    Viewport* t = NodeMgr::getInst().getNodePtr<Viewport> (vpid);
-//    if ( NULL != t )
-//    {
-//        float scale;
-//        const vec2i& size = t->viewportSize ();
-//        if ( size.w() > size.h() )
-//        {
-//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
-//            scale = scale * size.h() / size.w();
-//        }
-//        else
-//            scale = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
-//
-//        camera_reset ( camid );
-//        camera_translate ( camid, center.x(), center.y(), center.z() );
-//        camera_scale ( camid, scale );
-//    //    sgwindow_update ( vpid );
-//        return scale;
-//    }
-//    return 1;
-//    
-////    //float scale        = percentOfView / minDimension;
-////    float scale        = demension.w() > demension.h() ? 1 / demension.w() : 1 / demension.h();
-////
-////    camera_reset ( camid );
-////    camera_translate ( camid, center.x(), center.y(), center.z() );
-////    camera_scale ( camid, scale );
-//////    sgwindow_update ( vpid );
-////    return scale;
-//}
-
 void viewport_create ( int id, const char* nm )
 {
     Viewport* t = NodeMgr::getInst().addNode<Viewport> (id);
@@ -269,25 +273,30 @@ void viewport_name ( int id, const char* nm )
         p->name ( nm );
 }
 
-void viewport_update ( int id, QPainter& painter )
+void viewport_update ( int id, QPaintDevice& paintdevice, int* scenes, int scenecnt )
 {
+    QPainter painter ( &paintdevice );
     Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
     if ( p )
     {
-        QRenderOption opt;
+        RenderOption opt;
         opt.painter = &painter;
-        RenderFlow renderflow ( *p, opt );
-        p->update ();
-    }
-}
+	opt.orgpaintdevice = &paintdevice;
 
-void viewport_update2 ( int id )
-{
-    Viewport* p = NodeMgr::getInst().getNodePtr<Viewport> (id);
-    if ( p )
-    {
-        GLRenderOption opt;
-        RenderFlow renderflow ( *p, opt );
+        if ( 0==scenes || 0==scenecnt )
+            RenderFlow renderflow ( *p, opt );
+        else
+        {
+            std::list<SGNode*> lst;
+            for ( int i=0; i<scenecnt; i++ )
+            {
+                SGNode* node = NodeMgr::getInst().getNodePtr<SGNode> (scenes[i]);
+                if ( node )
+                    lst.push_back ( node );
+            }
+
+            RenderFlow renderflow ( *p, opt, lst );
+        }
         p->update ();
     }
 }
@@ -305,7 +314,6 @@ void get_viewportinversematrix ( int id, float* mat )
     if ( p )
 	p->inversematrix().toArray ( mat );;
 }
-
 
 void viewport_dirty ( int id )
 {
@@ -396,10 +404,10 @@ void node_delete ( int id )
 
 void node_visible ( int id, bool isVisible )
 {
-    DrawableNode* drawable = NodeMgr::getInst().getNodePtr<DrawableNode>(id);
-    if ( drawable )
+    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(id);
+    if ( node )
     {
-        drawable->setVisible ( isVisible );
+        node->setVisible ( isVisible );
     }
 }
 
@@ -424,11 +432,14 @@ void get_userdata ( int id, void** data )
     }
 }
 
-void update_bbox ( int id )
+void update_bbox ( int id, bool force )
 {
     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>( id );
     if ( node )
-        node->updateBBox();
+    {
+        node->updateBBox(mat4f(), force);
+        //node->computeBBox ();
+    }
 }
 
 // mesh
@@ -440,6 +451,16 @@ void mesh_create ( int id )
         stringstream ss;
         ss << "mesh node create: id is invalid. id: " << id;
         throw invalid_argument ( ss.str() );
+    }
+}
+
+void mesh_coord ( int id, int index, float* coords3d )
+{
+    MeshNode3f* node = NodeMgr::getInst().getNodePtr<MeshNode3f>( id );
+    if ( node )
+    {
+	vec3f coord(coords3d);
+	node->setCoords ( index, coord );
     }
 }
 
@@ -680,6 +701,15 @@ void attrset_font ( int id, int fontid )
     }
 }
 
+void SGR_DLL attrset_linewidth ( int id, int width )
+{
+    AttrSet* node = NodeMgr::getInst().getNodePtr<AttrSet>( id );
+    if ( node )
+    {
+        node->setLineWidth ( width );
+    }
+}
+
 void set_attrset ( int nodeid, int attrsetid )
 {
     DrawableNode* node = NodeMgr::getInst().getNodePtr<DrawableNode>( nodeid );
@@ -710,9 +740,9 @@ int attrset_refcnt ( int nodeid )
 
 int get_attrset ( int nodeid )
 {
-    AttrSet* attrsetNode = NodeMgr::getInst().getNodePtr<AttrSet>( nodeid );
-    if ( attrsetNode )
-        return attrsetNode->getID();
+    DrawableNode* node = NodeMgr::getInst().getNodePtr<DrawableNode>( nodeid );
+    if ( node && node->getAttrSet() )
+        return node->getAttrSet()->getID();
     return -1;
 }
 
@@ -789,9 +819,9 @@ void scene_create ( int id )
 }
 
 // layer
-void layer_create ( int id, const char* name )
+void layer_create ( int id, const char* name, unsigned int fgcolor, unsigned int bgcolor, unsigned int linewidth )
 {
-    LayerNode* t = NodeMgr::getInst().addNode<LayerNode> (id);
+    LayerNode* t = NodeMgr::getInst().addNode<LayerNode> (id, name);
     if ( NULL == t )
     {
         stringstream ss;
@@ -799,7 +829,9 @@ void layer_create ( int id, const char* name )
         throw invalid_argument ( ss.str() );
     }
 
-    layer_name ( id, name );
+    t->setFgColor ( GColor(fgcolor) );
+    t->setBgColor ( GColor(bgcolor) );
+    t->setLineWidth ( linewidth );
 }
 
 void layer_name ( int id, const char* nm )
@@ -987,7 +1019,7 @@ void transform_translates ( int id, const char* str )
         node->setTranslate ( str );
 }
 
-void transform_scale ( int id, float sx, float sy, float sz )
+void transform_scale3f ( int id, float sx, float sy, float sz )
 {
     TransformNode* node = NodeMgr::getInst().getNodePtr<TransformNode> (id);
     if ( node )
@@ -1064,7 +1096,7 @@ void groupnode_name ( int id, const char* nm )
         node->name ( nm );
 }
 
-void text_create ( int id, const char* str )
+void text_create ( int id, const char* str, int anchor, int sizemode, float size, bool isNeedBackground )
 {
     TextNode* t = NodeMgr::getInst().addNode<TextNode> (id);
     if ( NULL == t )
@@ -1074,6 +1106,13 @@ void text_create ( int id, const char* str )
         throw invalid_argument ( ss.str() );
     }
     t->text ( str );
+    if ( 0 == sizemode )
+	t->setSizeMode ( TextNode::TXTSIZEMODE_SCENE );
+    else if ( 1 == sizemode )
+	t->setSizeMode ( TextNode::TXTSIZEMODE_SCREEN );
+    t->anchorValue ( anchor );
+    t->setSize ( size, size );
+    t->setDrawBackground ( isNeedBackground );
     //text_string ( id, str );
     //return id;
 }
@@ -1139,6 +1178,26 @@ void text_anchor ( int id, int anchor )
     }
 }
 
+void text_size ( int id, float size )
+{
+    TextNode* node = NodeMgr::getInst().getNodePtr<TextNode> (id);
+    if ( node )
+	node->setSize ( size, size );
+}
+
+// 0 = scenemode, 1 = screenmode
+void text_sizemode ( int id, int sizemode )
+{
+    TextNode* node = NodeMgr::getInst().getNodePtr<TextNode> (id);
+    if ( node )
+    {
+	if ( 0 == sizemode )
+	    node->setSizeMode ( TextNode::TXTSIZEMODE_SCENE );
+	else
+	    node->setSizeMode ( TextNode::TXTSIZEMODE_SCREEN );
+    }
+}
+
 //  1     2     3
 //  4     5     6
 //  7     8     9
@@ -1177,6 +1236,15 @@ void text_justify ( int id, int justify )
             node->setAlignFlag ( TextNode::AlignRight & TextNode::AlignBottom );
             break;
         }
+    }
+}
+
+void text_needbackground ( int id, bool isNeedBackground )
+{
+    TextNode* node = NodeMgr::getInst().getNodePtr<TextNode> (id);
+    if ( node )
+    {
+        node->setDrawBackground ( isNeedBackground );
     }
 }
 
@@ -1230,15 +1298,15 @@ void get_font_desc ( int fontid, char* buffer )
         strcpy ( buffer, s.c_str() );
     }
 }
-#include <tinylog.h>
+
 // root
 //   |-transform
 //        |- mesh
 int scene_load ( const char* file, int* data )
 {
     // load mesh
+    NodeMgr::getInst();
     LoadScene loadscene ( file, true, true );
-    
     for ( list<SGNode*>::iterator pp=loadscene.begin(); pp!=loadscene.end(); ++pp )
         *data++ = (*pp)->getID();
     return loadscene.size();
@@ -1281,7 +1349,7 @@ void unload_node ( int id )
     {
         node->setParentNode ( NULL );
         UnloadNode unloadnode ( node );
-        NodeMgr::getInst().erase ( id );
+        //NodeMgr::getInst().erase ( id );
     }
 }
 
@@ -1293,68 +1361,68 @@ void scene_translate ( int id, float tx, float ty, float tz )
 
 void scene_scale ( int id, float scale )
 {
-    transform_scale ( id, scale, scale, scale );
+    transform_scale3f ( id, scale, scale, scale );
 }
 
-int pick ( float x, float y, float z, int camid, int* data )
-{
-//    BBox box ( vec3f(x, y, z), vec3f(x+1, y+1, z+1) );
-    BBox box ( vec3f(x-0.01, y-0.01, z-0.01), vec3f(x+0.01, y+0.01, z+0.01) );
-    RenderList renderlist;
-    VolumePicker<back_insert_iterator<RenderList> > picker ( box, camid, back_inserter(renderlist) );
-    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
-    picker ( *node );
+// int pick ( float x, float y, float z, int camid, int* data )
+// {
+// //    BBox box ( vec3f(x, y, z), vec3f(x+1, y+1, z+1) );
+//     BBox box ( vec3f(x-0.01, y-0.01, z-0.01), vec3f(x+0.01, y+0.01, z+0.01) );
+//     RenderList renderlist;
+//     VolumePicker<back_insert_iterator<RenderList> > picker ( box, camid, back_inserter(renderlist) );
+//     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+//     picker ( *node );
 
-    //int* pData = data;
-    //int sz = renderlist.size();
-    //for ( int i=0; i<sz; ++i )
-    //    *pData++ = renderlist[i]->getID();
+//     //int* pData = data;
+//     //int sz = renderlist.size();
+//     //for ( int i=0; i<sz; ++i )
+//     //    *pData++ = renderlist[i]->getID();
 
-    //for ( int i=0; i<sz; ++i )
-    //    delete renderlist[i];
+//     //for ( int i=0; i<sz; ++i )
+//     //    delete renderlist[i];
 
-    //return sz;
+//     //return sz;
 
-    int* pData = data;
-    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
-    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
-    {
-        *pData++ = (*pp)->getID();
-    }
-    return picker.pickedNodes().size();
-}
+//     int* pData = data;
+//     vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+//     for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+//     {
+//         *pData++ = (*pp)->getID();
+//     }
+//     return picker.pickedNodes().size();
+// }
 
-int pick_volume ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
-{
-    BBox box;
-    box.init ( vec3f(x1, y1, z1) );
-    box.expandby ( vec3f(x2, y2, z2) );
-    RenderList renderlist;
-    VolumePicker<back_insert_iterator<RenderList> > picker ( box, camid, back_inserter(renderlist) );
-    SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
-    picker ( *node );
+// int pick_volume ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
+// {
+//     BBox box;
+//     box.init ( vec3f(x1, y1, z1) );
+//     box.expandby ( vec3f(x2, y2, z2) );
+//     RenderList renderlist;
+//     VolumePicker<back_insert_iterator<RenderList> > picker ( box, camid, back_inserter(renderlist) );
+//     SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+//     picker ( *node );
 
-    //int* pData = data;
-    //int sz = renderlist.size();
-    //for ( int i=0; i<renderlist.size(); ++i )
-    //    *pData++ = renderlist[i]->getID();
+//     //int* pData = data;
+//     //int sz = renderlist.size();
+//     //for ( int i=0; i<renderlist.size(); ++i )
+//     //    *pData++ = renderlist[i]->getID();
 
-    //for ( int i=0; i<sz; ++i )
-    //    delete renderlist[i];
+//     //for ( int i=0; i<sz; ++i )
+//     //    delete renderlist[i];
 
-    //return sz;
+//     //return sz;
 
-    int* pData = data;
-    vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
-    for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
-    {
-        *pData++ = (*pp)->getID();
-    }
-    return picker.pickedNodes().size();
+//     int* pData = data;
+//     vector<SGNode*>::iterator pp, end = picker.pickedNodes().end();
+//     for ( pp=picker.pickedNodes().begin(); pp!=end; ++pp )
+//     {
+//         *pData++ = (*pp)->getID();
+//     }
+//     return picker.pickedNodes().size();
 
-}
+// }
 
-int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
+int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data, int nodeid )
 {
     static BoxPicker picker;
     static float lx1, ly1, lz1, lx2, ly2, lz2;
@@ -1378,12 +1446,12 @@ int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int c
             state = ACTION_GETDATA;
     }
 
-    if ( ACTION_GETSIZE == state  )
+    if ( ACTION_GETSIZE == state || picker.pickedNodes().size()==0 )
     {
         BBox box;
         box.init ( vec3f(x1, y1, z1) );
         box.expandby ( vec3f(x2, y2, z2) );
-        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(nodeid);
         picker.initialize ( box, camid );
         picker.doAction ( *node );
         lx1 = x1; ly1 = y1; lz1 = z1; lx2 = x2; ly2 = y2; lz2 = z2; lcamid = camid;
@@ -1397,13 +1465,16 @@ int box_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int c
         {
             *pData++ = (*pp)->getID();
         }
+        size_t sz = picker.pickedNodes().size();
+        picker.clearPicked();
+        return sz;
     }
 
     return picker.pickedNodes().size();
 
 }
 
-int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data )
+int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int camid, int* data, int nodeid )
 {
     static CrossPicker picker;
     static float lx1, ly1, lz1, lx2, ly2, lz2;
@@ -1427,12 +1498,12 @@ int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int
             state = ACTION_GETDATA;
     }
 
-    if ( ACTION_GETSIZE == state  )
+    if ( ACTION_GETSIZE == state  ||  picker.pickedNodes().size()==0 )
     {
         BBox box;
         box.init ( vec3f(x1, y1, z1) );
         box.expandby ( vec3f(x2, y2, z2) );
-        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(0);
+        SGNode* node = NodeMgr::getInst().getNodePtr<SGNode>(nodeid);
         picker.initialize ( box, camid );
         picker.doAction ( *node );
         lx1 = x1; ly1 = y1; lz1 = z1; lx2 = x2; ly2 = y2; lz2 = z2; lcamid = camid;
@@ -1446,6 +1517,9 @@ int cross_pick ( float x1, float y1, float z1, float x2, float y2, float z2, int
         {
             *pData++ = (*pp)->getID();
         }
+        size_t sz = picker.pickedNodes().size();
+        picker.clearPicked();
+        return sz;
     }
 
     return picker.pickedNodes().size();
@@ -1491,47 +1565,47 @@ void get_bbox ( int id, float* min, float* max )
     }
 }
 
-// void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid )
-// {
-//     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
-//     if ( node ) 
-//     {
-//         CameraOrtho* cameraNode;
-//         if ( -1 == camid )
-//         {
-//             cameraNode = node->camera();
-//         }
-//         else
-//         {
-//             cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
-//         }
+void get_scenepos ( int vpid, float* viewportCoord, float* sceneCoord, int camid )
+{
+    Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
+    if ( node ) 
+    {
+        CameraOrtho* cameraNode;
+        if ( -1 == camid )
+        {
+            cameraNode = node->camera();
+        }
+        else
+        {
+            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+        }
 
-//         if ( cameraNode )
-//         {
-//             vec4f rst = cameraNode->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
-//             rst.xyz().xyz ( sceneCoord );
-//         }
-//     }
-// }
+        if ( cameraNode )
+        {
+            vec4f rst = cameraNode->inversematrix() * node->inversematrix() * vec4f ( vec3f(viewportCoord) );
+            rst.xyz().xyz ( sceneCoord );
+        }
+    }
+}
 
-// void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid )
-// {
-//     Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
-//     if ( node ) 
-//     {
-//         CameraOrtho* cameraNode;
-//         if ( -1 == camid )
-//             cameraNode = node->camera();
-//         else
-//             cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
+void get_viewportpos ( int vpid, float* sceneCoord, float* viewportCoord, int camid )
+{
+    Viewport* node = NodeMgr::getInst().getNodePtr<Viewport>( vpid );
+    if ( node ) 
+    {
+        CameraOrtho* cameraNode;
+        if ( -1 == camid )
+            cameraNode = node->camera();
+        else
+            cameraNode = NodeMgr::getInst().getNodePtr<CameraOrtho>( camid );
 
-//         if ( cameraNode )
-//         {
-//             vec4f rst = node->vpmatrix() * cameraNode->mvmatrix() * vec4f ( vec3f(sceneCoord) );
-//             rst.xyz().xyz ( viewportCoord );
-//         }
-//     }
-// }
+        if ( cameraNode )
+        {
+            vec4f rst = node->vpmatrix() * cameraNode->mvmatrix() * vec4f ( vec3f(sceneCoord) );
+            rst.xyz().xyz ( viewportCoord );
+        }
+    }
+}
 
 
 int get_nodetype ( int nodeid )
@@ -1814,6 +1888,13 @@ void point_size ( int id, float sz )
     }
 }
 
+void point_name ( int id, const char* nm )
+{
+    PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
+    if ( pnt )
+        pnt->name ( nm );
+}
+
 float get_point_size ( int id )
 {
     PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
@@ -1824,7 +1905,7 @@ float get_point_size ( int id )
     return -1.0f;
 }
 
-void get_point_coord ( int id, float* xyz )
+void SGR_DLL get_point_coord ( int id, float* xyz )
 {
     PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
     if ( pnt )
@@ -1835,3 +1916,84 @@ void get_point_coord ( int id, float* xyz )
     }
 }
 
+void SGR_DLL get_point_name ( int id, char* name )
+{
+    PointNode* pnt = NodeMgr::getInst().getNodePtr<PointNode>(id);
+    if ( pnt )
+    {
+        strcpy ( name, pnt->name ().c_str() );
+    }
+}
+
+void circle_create ( int id, float radius, float x, float y, float z )
+{
+    CircleNode* circle = NodeMgr::getInst().addNode<CircleNode> (id);
+    if ( NULL == circle )
+    {
+        stringstream ss;
+        ss << "circle node create: id is invalid, id:" << id;
+        throw invalid_argument ( ss.str() );
+    }
+    circle->setRadius ( radius );
+    circle->setCenter ( x, y, z );
+}
+
+void circle_radius ( int id, float radius )
+{
+    CircleNode* circle = NodeMgr::getInst().getNodePtr<CircleNode>(id);
+    if ( circle )
+        circle->setRadius ( radius );
+}
+
+void circle_center ( int id, float x, float y, float z )
+{
+    CircleNode* circle = NodeMgr::getInst().getNodePtr<CircleNode>(id);
+    if ( circle )
+        circle->setCenter ( x, y, z );
+}
+
+void image_create ( int id, const char* path, float sizew, float sizeh )
+{
+    ImageNode* image = NodeMgr::getInst().addNode<ImageNode> (id);
+    if ( NULL == image )
+    {
+        stringstream ss;
+        ss << "image node create: id is invalid, id:" << id;
+        throw invalid_argument ( ss.str() );
+    }
+    image->filePath ( path );
+    image->size ( vec2f(sizew, sizeh) );
+}
+
+void image_path ( int id, const char* path )
+{
+    ImageNode* image = NodeMgr::getInst().getNodePtr<ImageNode>(id);
+    if ( image )
+        image->filePath ( path );
+}
+
+void image_size ( int id, float w, float h )
+{
+    ImageNode* image = NodeMgr::getInst().getNodePtr<ImageNode>(id);
+    if ( image )
+        image->size ( vec2f(w,h) );
+}
+
+void imposter_create ( int id, const char* range )
+{
+    ImposterNode* imposter = NodeMgr::getInst().addNode<ImposterNode> (id);
+    if ( NULL == imposter )
+    {
+        stringstream ss;
+        ss << "imposter node create: id is invalid, id:" << id;
+        throw invalid_argument ( ss.str() );
+    }
+    imposter->setLodDelimiters ( range );
+}
+
+void imposter_range ( int id, const char* range )
+{
+    ImposterNode* imposter = NodeMgr::getInst().getNodePtr<ImposterNode>(id);
+    if ( imposter )
+	imposter->setLodDelimiters ( range );
+}

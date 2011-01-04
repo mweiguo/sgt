@@ -34,10 +34,13 @@ public:
     inline void dimention( T w, T h ) { _w=w; _h=h; }
     inline vec2<T> dimention() const { return vec2<T>(_w, _h); }
     ~Rectangle () {}
-    BBox boundingbox () {
+    BBox boundingbox () const
+    {
         BBox bb;
-        bb.init ( vec3f(_x, _y, 0) );
-        bb.expandby ( vec3f(_x+_w, _y+_h, 0) );
+        //bb.init ( vec3f(_x, _y, 0) );
+        //bb.expandby ( vec3f(_x+_w, _y+_h, 0) );
+        bb.init ( vec3f(0, 0, 0) );
+        bb.expandby ( vec3f(_w, _h, 0) );
         return bb;
     }
     inline void setUserData ( void* data ) { _userData = data; }

@@ -11,6 +11,7 @@ public:
     PickableGroup( const string& name="" );
     PickableGroup( const PickableGroup& rhs );
     
+    virtual SGNode* clone ();
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~PickableGroup () {}
 };

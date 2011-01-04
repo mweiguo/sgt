@@ -16,15 +16,20 @@ public:
     MeshNode() {}
     MeshNode( const MeshNode& rhs ) : DrawableNode(rhs) {_coords = rhs._coords;}
     
+    virtual SGNode* clone ()
+    {
+        return new MeshNode(*this);
+    }
+
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~MeshNode () {}
 
     void setCoords ( COORDT* data, int elementN )
     {
         _coords.assign ( data, data+elementN );
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
 
     void setSubCoords ( int* indexes, int elementN, COORDT* coords )
@@ -33,36 +38,36 @@ public:
         {
             _coords[indexes[i]] = coords[i];
         }
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
 
     void setCoords ( int index, const COORDT& coords )
     {
         _coords[index] = coords;
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
 
     void appendCoords ( const COORDT& coords )
     {
         _coords.push_back ( coords );
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
 
     void appendCoords ( COORDT* coords, int elementN )
     {
         copy ( coords, coords+elementN, back_inserter(_coords) );
-        setBBoxDirty ( true );
-        setParentBBoxDirty ( true );
-        setChildrenBBoxDirty ( true );
+        setBBoxDirty ();
+        //setParentBBoxDirty ( true );
+        setChildrenBBoxDirty ();
     }
 
-    COORDT& operator[] (int idx ) { setBBoxDirty ( true ); return _coords[idx]; }
+    COORDT& operator[] (int idx ) { setBBoxDirty (); return _coords[idx]; }
     coorditerator coordbegin() { return _coords.begin(); }
     coorditerator coordend() { return _coords.end(); }
     int coordsN () { return _coords.size(); }

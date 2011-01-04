@@ -37,11 +37,7 @@ namespace SGR
 class SGR_DLL NodeMgr : public std::map<int, SGNode*>
 {
 public:
-    static NodeMgr& getInst ()
-    {
-        static NodeMgr* inst = new NodeMgr();
-        return *inst;
-    }
+    static NodeMgr& getInst ();
 
     template < class T >
     T* addNode ( int id )
@@ -100,50 +96,17 @@ public:
         return p;
     }
     
-    void deleteNode ( int id )
-    {
-        iterator pp = find ( id );
-        if ( pp != end() )
-        {
-            SGNode* node = pp->second;
-            node->removeAllChild ();
-            node->setParentNode ( NULL );
-            erase ( id );
-            delete node;
-        }
-    }
-    void deleteNode ( SGNode* node )
-    {
-        node->removeAllChild ();
-        node->setParentNode ( NULL );
-        erase ( node->getID() );
-        delete node;
-    }
+    void deleteNode ( int id );
+    void deleteNode ( SGNode* node );
+    void clearAll ();
 
     // this id is for respond to interface.h 's id
-    int getID ( SGNode* p )
-    {
-        return p->getID();
-    }
+    int getID ( SGNode* p );
 
-    SGNode* root() { return _root; }
+    SGNode* root();
+    NodeMgr ();
 private:
-    NodeMgr () 
-    {
-        _root = addNode<SGNode>(0);
-    }
-    void updateMinMaxId ( int id )
-    {
-        if ( size () < 1 )
-        {
-            _minId = _maxId = id;
-        }
-        else
-        {
-            _minId = _minId < id ? _minId : id;
-            _maxId = _minId < id ? _minId : id;
-        }
-    }
+    void updateMinMaxId ( int id );
 
     SGNode* _lastNode, *_root;
     int _minId, _maxId;

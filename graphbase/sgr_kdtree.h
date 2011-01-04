@@ -91,8 +91,6 @@ public:
         vector<ObjectType>::clear();
         _nodes.clear();
     }
-    void insert ( ObjectType obj );
-    void remove ( ObjectType obj );
 
 #ifdef _USESTATISTIC_
     string memstatistic ();
@@ -133,7 +131,7 @@ public:
 
             transform ( _kdtree->begin(), _kdtree->end(), back_inserter(_objcenters), getBBCenter<ObjectType,GetBBoxFunctor>(getBBox) );
 
-            /* int root =  */_kdtree->addNode ( -1, _kdtree->size() );
+            int root =  _kdtree->addNode ( -1, _kdtree->size() );
             divide (opt, getBBox/*, bb*/);
 
             // set kdtree's objs in sorted order
@@ -148,7 +146,7 @@ public:
 #ifdef _USESTATISTIC_
             _buildFinishedClock = clock();
 #endif // _USESTATISTIC_
-            //_kdtree->dump ( root, 0 );
+            _kdtree->dump ( root, 0 );
         }
         template<class InputIterator>
         BuildKdTree ( KdTree<ObjectType>& kdtree, InputIterator begin, InputIterator end, GetBBoxFunctor getBBox, const BuildKdTreeOption& opt=BuildKdTreeOption() )
@@ -408,7 +406,8 @@ inline bool KdTree<ObjectType>::intersect ( const BBox& box, Output out, GetBBox
 #ifdef _USESTATISTIC_
                 _bbcompcnt++;
 #endif 
-                if ( ! is_intersect ( box, getBoundingBox ( (*this)[i] ) ) )
+                BBox rhsbox = getBoundingBox ( (*this)[i] );
+                if ( !is_intersect ( box, rhsbox ) )
                     continue;
 
                 *out++ = (*this)[i];

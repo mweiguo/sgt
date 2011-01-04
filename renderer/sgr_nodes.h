@@ -16,6 +16,7 @@
 #include "sgr_fontnode.h"
 #include "sgr_textnode.h"
 #include "sgr_linenode.h"
+#include "sgr_circlenode.h"
 #include "sgr_kdtreenode.h"
 #include "sgr_meshnode.h"
 #include "sgr_meshlinenode.h"
@@ -23,6 +24,7 @@
 #include "sgr_polynode.h"
 #include "sgr_pointnode.h"
 #include "sgr_meshpointnode.h"
-
+#include "sgr_imagenode.h"
+#include "sgr_imposter.h"
 
 #endif

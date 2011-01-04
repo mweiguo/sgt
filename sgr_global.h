@@ -1,4 +1,4 @@
-/* $HeadURL$ $Revision: 12504 $ $Author$ */
+/* $HeadURL: http://192.168.10.26/svn/svnsw/trunk/sw/primace/sgrenderer/sgr_global.h $ $Revision: 12504 $ $Author: wgmao $ */
 /**
  * Copyright (c) 2005-2010 Agate Logic, Inc.  All rights reserved.
  * 
@@ -13,16 +13,32 @@
 #ifndef SGR_GLOBAL_H
 #define SGR_GLOBAL_H
 
-#include <Qt/qglobal.h>
+/* #include <Qt/qglobal.h> */
 
-/* #ifdef WIN32 */
-/*   #ifdef SGR_EXPORT */
-/*     # define SGR_DLL Q_DECL_EXPORT */
-/*   #else */
-/*     # define SGR_DLL Q_DECL_IMPORT */
-/*   #endif */
+/* //#ifdef WIN32 */
+/* #ifdef SGR_EXPORT */
+/* # define SGR_DLL Q_DECL_EXPORT */
 /* #else */
-  # define SGR_DLL
+/* # define SGR_DLL Q_DECL_IMPORT */
 /* #endif */
+/* //#else */
+/* //# define SGR_DLL */
+/* //#endif */
+
+#ifdef _MSC_VER //MSVC compiler
+
+  #ifdef SGR_EXPORT
+    #define SGR_DLL __declspec(dllexport)
+  #else
+    #define SGR_DLL __declspec(dllimport)
+  #endif //  SGR_EXPORT
+
+#else // _MSC_VER
+
+  #define SGR_DLL
+
+#endif
+
+
 
 #endif // GVF_GLOBAL_H

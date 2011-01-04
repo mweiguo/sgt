@@ -43,6 +43,7 @@ public:
     iterator end () { return vector<T>::begin()+_currIdx; }
     const_iterator end () const { return vector<T>::begin()+_currIdx; }
 
+    size_t size() const { return _currIdx+1; }
     void reset() { _currIdx = 0; }
     void resize ( size_t size )
     {

@@ -16,14 +16,14 @@ namespace SGR
         Polyline ( const Polyline& rhs ) : std::list<T>(rhs) {}
 
         ~Polyline () {}
-        BBox boundingbox ()
+        BBox boundingbox () const
         {
             BBox bb;
             if ( std::list<T>::empty() )
                 return bb;
 
             bb.init ( std::list<T>::front() );
-	    typename std::list<T>::iterator pp;
+            typename std::list<T>::const_iterator pp;
             for ( pp=std::list<T>::begin(); pp!=std::list<T>::end(); ++pp )
                 bb.expandby ( *pp );
 

@@ -14,8 +14,8 @@ namespace SGR
         int maxseed();
         void minseed ( int seed );
         void maxseed ( int seed );
-    private:
         SeedGenerator();
+    private:
         int _minseed;
         int _maxseed;
     };

@@ -147,4 +147,25 @@ void ParentVisitor::apply ( MeshPointNode& node )
         parent->accept ( *this );
 }
 
+void ParentVisitor::apply ( CircleNode& node )
+{
+    SGNode* parent = node.getParentNode();
+    if ( parent )
+        parent->accept ( *this );
+}
+
+void ParentVisitor::apply ( ImageNode& node )
+{
+    SGNode* parent = node.getParentNode();
+    if ( parent )
+        parent->accept ( *this );
+}
+
+void ParentVisitor::apply ( ImposterNode& node )
+{
+    SGNode* parent = node.getParentNode();
+    if ( parent )
+        parent->accept ( *this );
+}
+
 }

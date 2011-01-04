@@ -12,6 +12,10 @@ public:
     SceneNode() {_isVisible = true;}
     SceneNode( const SceneNode& rhs ) : TransformNode(rhs) {_isVisible = rhs._isVisible;}
     
+    virtual SGNode* clone ()
+    {
+        return new SceneNode(*this);
+    }
     virtual void accept ( NodeVisitor& pvisitor ) { pvisitor.apply ( *this ); }
     virtual ~SceneNode () {}
 };

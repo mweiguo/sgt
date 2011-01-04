@@ -4,6 +4,7 @@
 #include "sgr_rectangle.h"
 #include <map>
 #include <iostream>
+#include <utl_logger.h>
  
 namespace SGR
 {
@@ -30,22 +31,39 @@ namespace SGR
     // reference, http://give.zju.edu.cn/cad/new/book/2.5.1.htm
     bool is_intersect ( const Linef& lhs, const Linef& rhs )
     {
+// 	LOG_INFO ( "LINEa p1(%f, %f), p2(%f, %f)", lhs.x1(), lhs.y1(), lhs.x2(), lhs.y2() );
+// 	LOG_INFO ( "LINEb p1(%f, %f), p2(%f, %f)", rhs.x1(), rhs.y1(), rhs.x2(), rhs.y2() );
+	vec2f out;
+	int cnt = intersect ( lhs, rhs, out );
+//	LOG_INFO ( "cnt = %d, cnt.x=%f, cnt.y=%f", cnt, out.x(), out.y() );
+	return (cnt != 0) && (cnt!=-2);
+/*
         vec3f A ( rhs.x1()-lhs.x1(), rhs.y1()-lhs.y1() );
         vec3f B ( rhs.x2()-lhs.x1(), rhs.y2()-lhs.y1() );
         vec3f t1 = cross ( A, B );
         // 点在线上
         if ( t1 == vec3f(0,0,0) )
-            return true;
+	{
+            LOG_INFO ("123132123");
+	    return true;
+	}
         vec3f C ( rhs.x1()-lhs.x2(), rhs.y1()-lhs.y2() );
         vec3f D ( rhs.x2()-lhs.x2(), rhs.y2()-lhs.y2() );
         vec3f t2 = cross ( C, D );
         // 点在线上
         if ( t1 == vec3f(0,0,0) )
+	{
+            LOG_INFO ("safasfasasf");
             return true;
+	}
 
         if ( (t1.normal() + t2.normal()) == vec3f(0,0,0) )
+	{
+            LOG_INFO ("vxzm,vnzx,vmnxz,mvnsafasfasasf");
             return true;
+	}
         return false;
+*/
         /*
         vec3f A ( lhs.x1(), lhs.y1() );
         vec3f B ( lhs.x2()-lhs.x1(),  lhs.y2()-lhs.y1() );
@@ -146,17 +164,33 @@ namespace SGR
         //  1    3
         //     4
         Linef line1 ( lhs.minvec().x(), lhs.minvec().y(), lhs.minvec().x(), lhs.maxvec().y() );
+//	LOG_INFO ( "LINE 1 p1(%f, %f), p2(%f, %f)", lhs.minvec().x(), lhs.minvec().y(), lhs.minvec().x(), lhs.maxvec().y() );
         if ( is_intersect ( line1, rhs ) )
+	{
+//	    LOG_INFO ( "LINE1 1 bingo" );
             return true;
+	}
         Linef line2 ( lhs.minvec().x(), lhs.maxvec().y(), lhs.maxvec().x(), lhs.maxvec().y() );
+//	LOG_INFO ( "LINE 2 p1(%f, %f), p2(%f, %f)", lhs.minvec().x(), lhs.maxvec().y(), lhs.maxvec().x(), lhs.maxvec().y() );
         if ( is_intersect ( line2, rhs ) )
+	{
+//	    LOG_INFO ( "LINE 2 bingo" );
             return true;
+	}
         Linef line3 ( lhs.maxvec().x(), lhs.maxvec().y(), lhs.maxvec().x(), lhs.minvec().y() );
+//	LOG_INFO ( "LINE 3 p1(%f, %f), p2(%f, %f)", lhs.maxvec().x(), lhs.maxvec().y(), lhs.maxvec().x(), lhs.minvec().y() );
         if ( is_intersect ( line3, rhs ) )
+	{
+//	    LOG_INFO ( "LINE 3 bingo" );
             return true;
+	}
         Linef line4 ( lhs.maxvec().x(), lhs.minvec().y(), lhs.minvec().x(), lhs.minvec().y() );
+//	LOG_INFO ( "LINE 4 p1(%f, %f), p2(%f, %f)", lhs.maxvec().x(), lhs.minvec().y(), lhs.minvec().x(), lhs.minvec().y() );
         if ( is_intersect ( line4, rhs ) )
+	{
+//	    LOG_INFO ( "LINE 4 bingo" );
             return true;
+	}
         return false;
     }
 

@@ -28,6 +28,9 @@ public:
     virtual void apply ( PolyNode2Df& node );
     virtual void apply ( PointNode& node );
     virtual void apply ( MeshPointNode& node );
+    virtual void apply ( CircleNode& node );
+    virtual void apply ( ImageNode& node );
+    virtual void apply ( ImposterNode& node );
 
     void operator() ( SGNode* node );
 };
