@@ -1,0 +1,12 @@
+#ifndef SGRENDERER_GLOBAL_H
+#define SGRENDERER_GLOBAL_H
+
+#include <Qt/qglobal.h>
+
+#ifdef SGRENDERER_LIB
+# define SGRENDERER_EXPORT Q_DECL_EXPORT
+#else
+# define SGRENDERER_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // SGRENDERER_GLOBAL_H
