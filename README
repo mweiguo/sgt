@@ -1,0 +1,9 @@
+all directories explain 
+
+sigviewer   include implementation of view
+unittest    include all unittest, it use gtest
+tcl:        include helper script in tcl
+renderer:   include core implementation of sgrenderer
+graphbase:  include basic graphical item and algorithm
+data:       include data
+plugins:    include firefox plugin
