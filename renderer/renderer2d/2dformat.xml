@@ -1,0 +1,101 @@
+<!-- editor scene structure -->
+<library>
+  <material id="mat">
+    <color foregroud_color="" background_color=""/>
+    <line type="" width=""/>
+  </material>
+</library>
+<scene>
+  <layer foregroud_color="" background_color="" linetype="solid" font="SimSun">
+    <lod>
+      <lodpage delayloading="0" kdtree="./lodpage1.xml">
+	<node>
+	  <transform></transform>
+	  <component>
+	    <primitive id="part1" type="rect" bindmaterial="layer">
+	      <vertex>1 2 10 20 10 10 20 20</vertex>
+	    </primitive>
+	    <primitive id="part2" type="rect" bindmaterial="layer">
+	      <vertex>1 2 10 20 10 10 20 20</vertex>
+	    </primitive>
+	    <primitive id="part3" type="rect" bindmaterial="layer">
+	      <vertex>1 2 10 20 10 10 20 20</vertex>
+	    </primitive>
+	    <primitive id="part4" type="rect" bindmaterial="mat">
+	      <vertex>1 2 10 20 10 10 20 20</vertex>
+	    </primitive>
+	  </component>
+	</node>
+      </lodpage>
+    </lod>
+  </layer>
+</scene>
+
+<!-- distribution scene structure -->
+<library>
+  <material id="mat">
+    <color foregroud_color="" background_color=""/>
+    <line type="" width=""/>
+  </material>
+</library>
+<scene>
+  <layer foregroud_color="" background_color="" linetype="solid" font="SimSun">
+    <lod>
+      <lodpage delayloading="0" kdtree="./lodpage1.xml" imposter="1">
+	<primitive id="part1" type="rect" bindmaterial="layer">
+	  <vertex>1 2 10 20 10 10 20 20</vertex>
+	</primitive>
+	<primitive id="part1" type="rect" bindmaterial="layer">
+	  <vertex>1 2 10 20 10 10 20 20</vertex>
+	</primitive>
+	<primitive id="part1" type="rect" bindmaterial="layer">
+	  <vertex>1 2 10 20 10 10 20 20</vertex>
+	</primitive>
+      </lodpage>
+      <lodpage delayloading="1" filepath="./loapage1.xml" kdtree="./lodpage2.xml"/>
+    </lod>
+  </layer>
+  <layer foregroud_color="" background_color="" linetype="solid" font="SimSun">
+    <lod>
+      <lodpage delayloading="0" kdtree="./lodpage1.xml">
+	<primitive id="part1" type="rect" bindmaterial="layer">
+	  <vertex>1 2 10 20 10 10 20 20</vertex>
+	</primitive>
+      </lodpage>
+    </lod>
+  </layer>
+</scene>
+
+<!-- culling structure -->
+<scene>
+  <layer foregroud_color="" background_color="" linetype="solid" font="SimSun">
+    <lod>
+      <lodpage id="1">
+	<kdtree/>
+      </lodpage>
+      <lodpage id="2">
+	<kdtree/>
+      </lodpage>
+      <lodpage id="3">
+	<kdtree/>
+      </lodpage>
+    <rect/>
+  </layer>
+  <layer foregroud_color="" background_color="" linetype="solid" font="SimSun">
+    <lod>
+      <lodpage id="1">
+	<kdtree/>
+      </lodpage>
+    <lod>
+  </layer>
+</scene>
+
+<!-- rendering structure -->
+<ss color="" linetype="">
+  <ss type="rectangles">
+    <primitive>1 2 3 4</primitive>
+  </ss>
+  <ss type="lines">
+    <primitive>5 6 7 8 9</primitive>
+  </ss>
+</ss>

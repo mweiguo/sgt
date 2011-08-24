@@ -1,0 +1,26 @@
+#ifndef _SGR_NODETYPES_H_
+#define _SGR_NODETYPES_H_
+
+#define SLC_SCENE           0
+#define SLC_LAYER           1
+#define SLC_PLINE           2
+#define SLC_POLY            3
+#define SLC_LINE            4
+#define SLC_TRIANGLE        5
+#define SLC_RECT            6
+
+#define SLC_MODEL           100
+#define SLC_APPEARANCE      110
+#define SLC_MATERIAL        120
+#define SLC_LOD             121
+#define SLC_LODPAGE         122
+#define SLC_TEXTURE         130
+#define SLC_MESH            140
+#define SLC_VERTEX          150
+#define SLC_NORMAL          151
+#define SLC_TEXCOORD        152
+#define SLC_VERTEXINDEX     153
+#define SLC_NORMALINDEX     154
+#define SLC_TEXCOORDINDEX   155
+
+#endif// _SGR_NODETYPES_H_

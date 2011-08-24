@@ -1,0 +1,26 @@
+BIN    = test_nodes.exe
+OBJS   = sgr_nodes.o test_nodes.o
+SRC    = $(OBJS:%.o=%.cpp)
+INC    = $(OBJS:%.o=%.h)
+CXX     = g++
+CXXFLAGS = -c -g
+LINKOPT = 
+INCPATH = -I"../../graphbase"
+
+all : $(BIN)
+
+$(BIN) : $(OBJS)
+	$(CXX) $(OBJS) -o $(BIN) $(LINKOPT)
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+clean :
+	rm -rf *.o
+	rm -rf *.so
+
+install : install.bin
+
+install.bin :
+	cp *.exe ../../build/bin
+
