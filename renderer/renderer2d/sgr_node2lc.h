@@ -12,6 +12,7 @@ public:
     SLCNode2LC ( SLCNode* node );
     LC* generateLC();
     void freeLC ( LC* lc );
+    void convert ( const char* filename );
 
     vector<GlobalLCRecord>      globalRecords;
     vector<SceneRecord>    	scenedata;

@@ -7,8 +7,6 @@
 #include <string>
 
 using namespace std;
-//#include <tinylog.h>
-#include "sgr_global.h"
 
 namespace SGR
 {

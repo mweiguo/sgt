@@ -5,14 +5,20 @@
 #include <vec3.h>
 #include <vector>
 #include <string>
+#include <cstring>
+#include <iostream>
 using namespace std;
 
+template < class T>
+class KdTree;
 // types
 struct GlobalLCRecord
 {
+    GlobalLCRecord();
     int type;
     int depth;
     int value;
+    float minmax[4];
 };
 
 struct LevelLCRecord
@@ -30,8 +36,8 @@ struct SceneRecord
 struct MaterialRecord
 {
     enum LINETYPE {
-	LINETYPE_SOLID,
-	LINETYPE_DASH
+        LINETYPE_SOLID,
+        LINETYPE_DASH
     };
     MaterialRecord ();
     MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype );
@@ -63,6 +69,7 @@ struct LODPageRecord
     char kdtreepath[32];
     bool delayloading;
     bool imposter;
+    int kdtree;
 };
 
 template <class T >
@@ -135,9 +142,9 @@ class LC
 public:
     LC ();
     ~LC ();
-    void saveLC ( const char* filename );
-    bool loadLC ( const char* filename );
-    void freeLC ();
+    void save ( const char* filename );
+    bool load ( const char* filename );
+    void free ();
 
     void buildLevelLC ();
     void freeLevelLC ();
@@ -149,6 +156,9 @@ public:
     int getDepth ();
     int getValue ();
     int getGIndex ();
+    float* getMinMax ();
+    void setMinMax ( float minx, float miny, float maxx, float maxy );
+    void updateMinMax ();
     /** modify
      */
     void insertBeforeElement ();
@@ -168,11 +178,44 @@ public:
     TriangleEntry        *triangleEntry;
     RectEntry            *rectEntry;
 
+    // kdtree support
+    vector< KdTree<int>* > kdtrees;
 protected:
     // navigation
     int cursorDepth;  // base from 0
     int cursor[256];  // store offset for each levelLCEntry
     vector<ModifyCommand> modifyCommands;
+};
+
+struct GetPrimitiveCenter
+{
+    void init ( LC* lc )
+    {
+        _lc = lc;
+    }
+    vec2f operator() ( int gidx ) const
+    {
+        const GlobalLCRecord& grcd = _lc->globalLCEntry->LCRecords[gidx];
+        vec2f rtn ( (grcd.minmax[0] + grcd.minmax[2])/2.0, 
+                    (grcd.minmax[1] + grcd.minmax[3])/2.0 );
+        return rtn;
+    }
+private:
+    LC* _lc;
+};
+
+struct GetPrimitiveMinMax
+{
+    void init ( LC* lc )
+    {
+        _lc = lc;
+    }
+    void operator() ( int gidx, float* minmax ) const
+    {
+        memcpy ( minmax, _lc->globalLCEntry->LCRecords[gidx].minmax, sizeof(float)*4 );
+    }
+private:
+    LC* _lc;
 };
 
 #define ROOT          0

@@ -129,7 +129,7 @@ void kdtreeTest::checkNodeBBoxValid ( const KdTree<T>& kdtree, int nodeIdx, GetB
 	BBox mergedbox;
 	for ( int i=BeginIdx; i<EndIdx-1; i++ )
 	{
-	    BBox first = getBBox ( kdtree[i] );
+	    bbox first = getBBox ( kdtree[i] );
 	    BBox second = getBBox ( kdtree[i] );
 	    mergedbox = mergedbox.unionbox ( first );
 	    mergedbox = mergedbox.unionbox ( second );

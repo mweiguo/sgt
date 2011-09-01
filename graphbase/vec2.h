@@ -38,17 +38,33 @@ public:
     reference normal ();
     self mod ( T length );
     T mod ();
-    self operator - ( const_reference rhs );
+    vec2 operator - ( const_reference rhs ) const;
     reference operator *= ( T rhs ); 
-    vec2 operator = ( const vec2& rhs );
-    vec2 operator + ( const vec2& rhs );
+    vec2 operator = ( const_reference rhs );
+    vec2 operator + ( const_reference rhs ) const;
     T& operator[] (int idx)       { return _v[idx]; }
     T operator[] (int idx) const  { return _v[idx]; }
 
+    vec2 operator + ( T rhs ) const;
     vec2 operator += ( const_reference rhs );
     vec2 operator * ( T rhs );
     vec2 operator / ( T rhs );
     bool operator == ( const_reference rhs );
+    bool operator != ( const_reference rhs ) const;
+    bool operator < ( const_reference rhs ) const;
+    bool operator <= ( const_reference rhs ) const;
+
+    T dot ( const_reference rhs ) const;
+    T min_element () 
+    {
+        return (_v[0] < _v[1]) ? _v[0] : _v[1];
+    }
+    T max_element () 
+    {
+        return (_v[0] > _v[1]) ? _v[0] : _v[1];
+    }
+    vec2 min_element ( const vec2<T>& rhs ) const;
+    vec2 max_element ( const vec2<T>& rhs ) const;
 
 protected:
     T _v[2];
@@ -82,7 +98,7 @@ inline T vec2<T>::mod ()
 }
 
 template < class T >
-inline vec2<T> vec2<T>::operator - ( typename vec2<T>::const_reference rhs )
+inline vec2<T> vec2<T>::operator - ( typename vec2<T>::const_reference rhs ) const
 {
     return vec2 ( _v[0] - rhs._v[0],  _v[1] - rhs._v[1] ); 
 }
@@ -104,11 +120,20 @@ inline vec2<T> vec2<T>::operator = ( const vec2<T>& rhs )
 }
 
 template < class T >
-inline vec2<T> vec2<T>::operator + ( const vec2<T>& rhs )
+inline vec2<T> vec2<T>::operator + ( typename vec2<T>::const_reference rhs ) const
 {
-    x ( x() + rhs.x() );
-    y ( y() + rhs.y() );
+    vec2<T> rtn;
+    rtn.x ( x() + rhs.x() );
+    rtn.y ( y() + rhs.y() );
     return *this;
+}
+
+template < class T >
+inline vec2<T> vec2<T>::operator + ( T rhs ) const
+{ 
+    vec2<T> rtn;
+    rtn.xy ( x()+rhs, y()+rhs );
+    return rtn;
 }
 
 template < class T >
@@ -135,6 +160,46 @@ inline bool vec2<T>::operator == ( const vec2<T>& rhs )
 {
     return (_v[0] == rhs._v[0]) && (_v[1] == rhs._v[1]);
 }
+
+template < class T >
+inline bool vec2<T>::operator != ( typename vec2<T>::const_reference rhs ) const
+{ 
+    return x()!=rhs.x() || y()!=rhs.y();
+}
+
+template < class T >
+inline bool vec2<T>::operator < ( typename vec2<T>::const_reference rhs ) const
+{ 
+    return x()<rhs.x() || y()<rhs.y();
+}
+
+template < class T >
+inline bool vec2<T>::operator <= ( typename vec2<T>::const_reference rhs ) const
+{ 
+    return x()<=rhs.x() || y()<=rhs.y();
+}
+
+
+template < class T >
+T vec2<T>::dot ( typename vec2<T>::const_reference rhs ) const
+{
+    return x() * rhs.x() + y() * rhs.y();
+}
+
+template < class T >
+inline vec2<T> vec2<T>::min_element ( const vec2<T>& rhs ) const
+{
+    return vec2<T> ( x() < rhs.x() ? x() : rhs.x(),
+		     y() < rhs.y() ? y() : rhs.y() );
+} 
+
+template < class T >
+inline vec2<T> vec2<T>::max_element ( const vec2<T>& rhs ) const
+{
+    return vec2<T> ( x() > rhs.x() ? x() : rhs.x(),
+		     y() > rhs.y() ? y() : rhs.y() );
+}
+
 
 typedef vec2<float> vec2f;
 typedef vec2<double> vec2d;

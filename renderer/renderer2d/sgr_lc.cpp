@@ -5,8 +5,19 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
+#include "bbox2d.h"
+#include "kdtree.h"
 using namespace std;
+
+GlobalLCRecord::GlobalLCRecord ()
+{
+    type = SLC_NONE;
+    depth = -1;
+    value = -1;
+    memset ( minmax, 0, sizeof(minmax) );
+}
+
+// --------------------------------------------------------------------------------
 
 SceneRecord::SceneRecord ( const char* nm )
 {
@@ -52,14 +63,16 @@ LODPageRecord::LODPageRecord ()
     memset  ( kdtreepath,  0, 32 * sizeof(char) ); 
     delayloading = false;
     imposter = false;
+    kdtree = -1;
 }
 
-LODPageRecord::LODPageRecord ( const char* kdtree, bool delay, bool imp )
+LODPageRecord::LODPageRecord ( const char* kdtpath, bool delay, bool imp )
 {
     memset  ( kdtreepath,  0, 32 * sizeof(char) ); 
-    strncpy ( kdtreepath, kdtree, 32 ); 
+    strncpy ( kdtreepath, kdtpath, 32 ); 
     delayloading = delay;
     imposter = imp;
+    kdtree = -1;
 }
 
 // --------------------------------------------------------------------------------
@@ -82,7 +95,7 @@ LC::~LC ()
 {
 }
 
-void LC::saveLC ( const char* filename )
+void LC::save ( const char* filename )
 {
     ofstream out;
     out.open ( filename, ofstream::binary );
@@ -129,83 +142,23 @@ void LC::saveLC ( const char* filename )
         out.write ( (char*)rectEntry, rectEntry->LCLen * sizeof(RectRecord) + sizeof(int) );
 
     // write globalLCEntry
-    cout << "globalLCEntry count = " << globalLCEntry->LCLen << ", size = " << globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) << endl;
     out.write ( (char*)globalLCEntry, globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) );
     // write levelLCEntry
     int levelLCEntriesSize = 0;
     for ( int i=0; i<256; i++ ) {
         if ( levelLCEntries[i] != 0 ) {
-            cout << "levelLCEntries[" << i << "] size : " << levelLCEntries[i]->LCLen * sizeof(LevelLCRecord) + sizeof(int) << endl;
             out.write ( (char*)levelLCEntries[i], levelLCEntries[i]->LCLen * sizeof(LevelLCRecord) + sizeof(int) );
             levelLCEntriesSize += levelLCEntries[i]->LCLen * sizeof(LevelLCRecord) + sizeof(int);
         }
         else
             break;
     }
-    cout << "levelLCEntries total size : " << levelLCEntriesSize << endl;
-        
     out.close ();
 }
 
-// // build location cache
-// bool LC::loadLC ( const char* filename )
-// {
-//     ifstream in;
-//     in.open ( filename, ifstream::binary );
-//     if ( in.is_open () == false ) {
-//         cout << "open file " << filename << " error" << endl;
-//         return false;
-//     }
-//     in.seekg (0, ios::end);
-//     int length = in.tellg();
-//     in.seekg (0, ios::beg);
-//     // allocate memory:
-//     char* buffer = (char*)malloc(sizeof(char) * length);
-//     in.read (buffer,length);
-//     in.close();
-
-//     int offset = 0;
-//     // read scene data
-//     sceneEntry = (SceneEntry*)(buffer + offset);
-//     offset += sizeof(int) + (sceneEntry->LCLen==0 ? sizeof(SceneRecord) : sizeof(SceneRecord) * sceneEntry->LCLen);
-//     // read material data
-//     materialEntry = (MaterialEntry*)(buffer + offset);
-//     offset += sizeof(int) + (materialEntry->LCLen==0 ? sizeof(MaterialRecord) : sizeof(MaterialRecord) * materialEntry->LCLen);
-//     // read layer data
-//     layerEntry = (LayerEntry*)(buffer + offset);
-//     offset += sizeof(int) + (layerEntry->LCLen==0 ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerEntry->LCLen);
-//     // read lod data
-//     lodEntry = (LODEntry*)(buffer + offset);
-//     offset += sizeof(int) + (lodEntry->LCLen==0 ? sizeof(LODRecord) : sizeof(LODRecord) * lodEntry->LCLen);
-//     // read lodpage data
-//     lodpageEntry = (LODPageEntry*)(buffer + offset);
-//     offset += sizeof(int) + (lodpageEntry->LCLen==0 ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpageEntry->LCLen);
-//     // read line data
-//     lineEntry  = (LineEntry*)(buffer + offset);
-//     offset += sizeof(int) + (lineEntry->LCLen==0 ? sizeof(LineRecord) : sizeof(LineRecord) * lineEntry->LCLen);
-//     // read triangle data
-//     triangleEntry = (TriangleEntry*)(buffer + offset);
-//     offset += sizeof(int) + (triangleEntry->LCLen==0 ? sizeof(TriangleRecord) : sizeof(TriangleRecord) * triangleEntry->LCLen);
-//     // read rect data
-//     rectEntry = (RectEntry*)(buffer + offset);
-//     offset += sizeof(int) + (rectEntry->LCLen==0 ? sizeof(RectRecord) : sizeof(RectRecord) * rectEntry->LCLen);
-
-//     // read GlobalLCEntry
-//     globalLCEntry = (GlobalLCEntry*)(buffer+offset);
-//     // read levelLCEntries
-//     offset += sizeof(int) + globalLCEntry->LCLen * sizeof(GlobalLCRecord);
-//     for ( int i=0; i<256; i++ )
-//     {
-//         levelLCEntries[i] = (LevelLCEntry*)(buffer + offset);
-//         offset += sizeof(int) + levelLCEntries[i]->LCLen * sizeof(LevelLCRecord);
-//         if ( offset >= length )
-//             break;
-//     }
-//     return true;
-// }
 
 // build location cache
-bool LC::loadLC ( const char* filename )
+bool LC::load ( const char* filename )
 {
     ifstream in;
     in.open ( filename, ifstream::binary );
@@ -213,9 +166,9 @@ bool LC::loadLC ( const char* filename )
         cout << "open file " << filename << " error" << endl;
         return false;
     }
-	in.seekg (0, ios::end);
-	int totallength = in.tellg();
-	in.seekg (0, ios::beg);
+    in.seekg (0, ios::end);
+    int totallength = in.tellg();
+    in.seekg (0, ios::beg);
 
     int length, sz;
     // read scene data
@@ -281,31 +234,44 @@ bool LC::loadLC ( const char* filename )
         levelLCEntries[i] = (LevelLCEntry*)malloc ( sizeof(int) + sz );
         levelLCEntries[i]->LCLen = length;
         in.read ( (char*)levelLCEntries[i]->LCRecords, sz );
-		if ( in.tellg() >= totallength )
-			break;
+	if ( in.tellg() >= totallength )
+	    break;
     }
     in.close();
+
+    // load kdtrees
+    for ( int i=0; i<lodpageEntry->LCLen; i++ )
+    {
+	LODPageRecord& lodpage = lodpageEntry->LCRecords[i];
+	if ( 0 != strcmp ( "", lodpage.kdtreepath ) ) {
+	    
+	    kdtrees.push_back ( new KdTree<int>() );
+	    kdtrees.back ()->load ( lodpage.kdtreepath );
+	    lodpage.kdtree = kdtrees.size()-1;
+	}
+    }
+
     return true;
 }
 
-void LC::freeLC ()
+void LC::free ()
 {
-    free ( sceneEntry );
-    free ( materialEntry );
-    free ( layerEntry );
-    free ( lodEntry );
-    free ( lodpageEntry );
-    free ( lineEntry );
-    free ( triangleEntry );
-    free ( rectEntry );
-    free ( globalLCEntry );
+    ::free ( sceneEntry );
+    ::free ( materialEntry );
+    ::free ( layerEntry );
+    ::free ( lodEntry );
+    ::free ( lodpageEntry );
+    ::free ( lineEntry );
+    ::free ( triangleEntry );
+    ::free ( rectEntry );
+    ::free ( globalLCEntry );
     for ( int i=0; i<256; i++ )
     {
         if ( levelLCEntries[i] != 0 ) {
-            free ( levelLCEntries[i] );
-	    levelLCEntries[i] = 0;
-	    break;
-	}
+            ::free ( levelLCEntries[i] );
+            levelLCEntries[i] = 0;
+            break;
+        }
     }
     
     sceneEntry = 0;
@@ -317,7 +283,6 @@ void LC::freeLC ()
     triangleEntry = 0;
     rectEntry = 0;
     globalLCEntry = 0;
-
 }
 
 void LC::buildLevelLC ()
@@ -348,7 +313,7 @@ void LC::buildLevelLC ()
             levelLCEntries[i] = tempEntry;
             tempEntry->LCLen = gIndexEntry.size();
 
-            for ( int j=0; j<gIndexEntry.size(); j++ ) {
+            for ( size_t j=0; j<gIndexEntry.size(); j++ ) {
                 tempEntry->LCRecords[j].gOffset       = gIndexEntry[j];
                 tempEntry->LCRecords[j].firstChildIdx = firstChildEntry[j];
             }
@@ -362,7 +327,7 @@ void LC::freeLevelLC ()
     for ( int i=0; i<256; i++ )
     {
         if ( levelLCEntries[i] != 0 ) {
-            free ( levelLCEntries[i] );
+            ::free ( levelLCEntries[i] );
             levelLCEntries[i] = 0;
         }
     }
@@ -485,6 +450,74 @@ int LC::getGIndex ()
     return record.gOffset;
 }
 
+float* LC::getMinMax ()
+{
+    int offset = cursor[cursorDepth];
+    LevelLCRecord& record = levelLCEntries[cursorDepth]->LCRecords[offset];
+    GlobalLCRecord& grecord = globalLCEntry->LCRecords[record.gOffset];
+    return grecord.minmax;
+}
+
+void LC::setMinMax ( float minx, float miny, float maxx, float maxy )
+{
+    int offset = cursor[cursorDepth];
+    LevelLCRecord& record = levelLCEntries[cursorDepth]->LCRecords[offset];
+    GlobalLCRecord& grecord = globalLCEntry->LCRecords[record.gOffset];
+    grecord.minmax[0] = minx;
+    grecord.minmax[1] = miny;
+    grecord.minmax[2] = maxx;
+    grecord.minmax[3] = maxy;
+}
+
+void LC::updateMinMax ()
+{
+    int offset = cursor[cursorDepth];
+    LevelLCRecord& record = levelLCEntries[cursorDepth]->LCRecords[offset];
+    GlobalLCRecord& grecord = globalLCEntry->LCRecords[record.gOffset];
+    BBox2d bbox;
+    switch ( grecord.type )
+    {
+    case SLC_LINE:
+    {
+        LineRecord& line = lineEntry->LCRecords[grecord.value];
+        vec2f& p0 = line.data[0];
+        vec2f& p1 = line.data[1];
+        bbox.init ( p0 );
+        bbox.expandby ( p1 );
+        break;
+    }
+    case SLC_TRIANGLE:
+    {
+        TriangleRecord& tri = triangleEntry->LCRecords[grecord.value];
+        vec2f& p0 = tri.data[0];
+        vec2f& p1 = tri.data[1];
+        vec2f& p2 = tri.data[2];
+        bbox.init ( p0 );
+        bbox.expandby ( p1 );
+        bbox.expandby ( p2 );
+        break;
+    }
+    case SLC_RECT:
+    {
+        RectRecord& quad = rectEntry->LCRecords[grecord.value];
+        vec2f& p0 = quad.data[0];
+        vec2f& p1 = quad.data[1];
+        vec2f& p2 = quad.data[2];
+        vec2f& p3 = quad.data[3];
+        bbox.init ( p0 );
+        bbox.expandby ( p1 );
+        bbox.expandby ( p2 );
+        bbox.expandby ( p3 );
+        break;
+    }
+    }
+
+    grecord.minmax[0] = bbox.minvec().x();
+    grecord.minmax[1] = bbox.minvec().y();
+    grecord.minmax[2] = bbox.maxvec().x();
+    grecord.minmax[3] = bbox.maxvec().y();
+}
+
 void LC::insertBeforeElement ()
 {
     // get global index
@@ -540,7 +573,7 @@ void LC::endEdit()
     temp.assign ( globalLCEntry->LCRecords, globalLCEntry->LCRecords + globalLCEntry->LCLen );
     
     // modify global LC entry
-    for ( int i=0; i<modifyCommands.size(); i++ )
+    for ( size_t i=0; i<modifyCommands.size(); i++ )
     {
         ModifyCommand& cmd = modifyCommands[i];
         switch ( cmd.commandMask )
@@ -570,7 +603,7 @@ void LC::endEdit()
         }
     }
     // copy back
-    free ( globalLCEntry );
+    ::free ( globalLCEntry );
     int sz = temp.size() * sizeof(GlobalLCRecord) + sizeof(int);
     globalLCEntry = (GlobalLCEntry*)malloc ( sz );
     memset ( globalLCEntry, 0, sz );

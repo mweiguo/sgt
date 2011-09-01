@@ -1,5 +1,5 @@
-BIN    = test_node2lc.exe
-OBJS   = sgr_nodes.o test_node2lc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o
+BIN    = test_vfculler.exe
+OBJS   = sgr_lc.o test_vfculler.o sgr_vfculler.o ../../graphbase/sgr_math.o sgr_bboxupdater.o sgr_lcreport.o
 SRC    = $(OBJS:%.o=%.cpp)
 INC    = $(OBJS:%.o=%.h)
 CXX     = g++

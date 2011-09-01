@@ -1,5 +1,8 @@
 #include "sgr_node2lc.h"
 #include "sgr_nodes.h"
+#include "sgr_lc2kdtree.h"
+#include "sgr_bboxupdater.h"
+
 #include <list>
 #include <cstring>
 #include <cstdlib>
@@ -171,4 +174,18 @@ void SLCNode2LC::freeLC ( LC* lc )
     free ( lc->rectEntry );
     lc->freeLevelLC ();
     delete lc;
+}
+
+void SLCNode2LC::convert ( const char* filename )
+{
+    LC* lc = generateLC();
+    lc->save ( filename );
+
+    // update bbox
+    BBox2dUpdater::forward_update ( *lc );
+
+    // save kdt, if there have
+    LC2KDT::buildKDTs ( *lc );
+    
+    freeLC ( lc );
 }

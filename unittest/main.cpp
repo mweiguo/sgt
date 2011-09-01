@@ -1,6 +1,4 @@
 
-#include <QtCore/QCoreApplication>
-
 #include <gtest/gtest.h>
 #include "tst_grhagl.h"
 #include "tst_textnode.h"
@@ -12,5 +10,4 @@ int main(int argc, char *argv[])
 {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-
 }
