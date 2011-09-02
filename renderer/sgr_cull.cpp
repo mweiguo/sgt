@@ -26,15 +26,16 @@ void render ( LC& lc, vector<int>& objectIndex )
 // apply appearance
 // draw element
 
-<texture def="tex1" filename="file1.png"/>
-<texture def="tex2" filename="file2.png"/>
+// 3d scene format
+
+
 <model id="cow">
+    <vertex>1 2 3 4 5 6 7 8 9</vertex>
+    <texcoord>0.1 0.2 0.5 0.6</texcoord>
+    <normal>0.1 0.2 0.3 0.1 0.3 0.2</normal>
     <appearance type="phong">
         <material texture="tex1" shininess="0.1" diffuse="0.8 0.8 0.8" />
         <mesh type=triangle>
-            <vertex>1 2 3 4 5 6 7 8 9</vertex>
-            <texcoord>0.1 0.2 0.5 0.6</texcoord>
-            <normal>0.1 0.2 0.3 0.1 0.3 0.2</normal>
             <vertexindex>0 1 2 3 2 0</vertexindex>
             <texcoordindex>0 1 2 3 2 0</texcoordindex>
             <normalindex>0 1 2 3 2 0</normalindex>
@@ -43,12 +44,9 @@ void render ( LC& lc, vector<int>& objectIndex )
     <appearance type="blin">
         <material texture="tex2" shininess="0.1" diffuse="0.8 0.8 0.8">
         <mesh type=triangle>
-            <vertex></vertex>
-            <texcoord></texcoord>
-            <normal></normal>
-            <vertexindex></vertexindex>
-            <texcoordindex></texcoordindex>
-            <normalindex></normalindex>
+            <vertexindex>0 1 2 3 2 0</vertexindex>
+            <texcoordindex>0 1 2 3 2 0</texcoordindex>
+            <normalindex>0 1 2 3 2 0</normalindex>
         </mesh>
     </appearance>
 </model>

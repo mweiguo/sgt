@@ -36,12 +36,12 @@ SLCSceneNode::SLCSceneNode ( const char* gname ) : SLCNode()
 string SLCSceneNode::toXML () const
 {
     stringstream ss;
-    ss << "<group name=\"" << name << "\">" << endl;
+    ss << "<scene name=\"" << name << "\">" << endl;
 
     for ( list<SLCNode*>::const_iterator pp=children.begin(); pp!=children.end(); ++pp )
 	ss << (*pp)->toXML();
 
-    ss << "</group>" << endl;
+    ss << "</scene>" << endl;
     return ss.str();
 }
 

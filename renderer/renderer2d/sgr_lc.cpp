@@ -30,20 +30,20 @@ SceneRecord::SceneRecord ( const char* nm )
 MaterialRecord::MaterialRecord ()
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
-    backgroud_color.xyz ( 0.8, 0.8, 0.8 );
-    foregroud_color.xyz ( 0.2, 0.2, 0.2 );
+    background_color.xyz ( 0.8, 0.8, 0.8 );
+    foreground_color.xyz ( 0.2, 0.2, 0.2 );
     linewidth = 0;
     linetype = LINETYPE_SOLID;
 }
 
-MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype )
+MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
-    backgroud_color = bg;
-    foregroud_color = fg;
+    background_color = bg;
+    foreground_color = fg;
     linewidth = lw;
-    linetype  = linetype;
+    linetype  = lt;
 }
 
 // --------------------------------------------------------------------------------
@@ -74,6 +74,32 @@ LODPageRecord::LODPageRecord ( const char* kdtpath, bool delay, bool imp )
     imposter = imp;
     kdtree = -1;
 }
+
+// --------------------------------------------------------------------------------
+
+DrawableRecord::DrawableRecord ( int matidx ) : materialIdx(matidx)
+{
+}
+
+// --------------------------------------------------------------------------------
+
+RectRecord::RectRecord () : DrawableRecord(-1)
+{
+    data[0].xy ( 0.0f, 0.0f );
+    data[1].xy ( 0.0f, 0.0f );
+    data[2].xy ( 0.0f, 0.0f );
+    data[3].xy ( 0.0f, 0.0f );
+}
+
+RectRecord::RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, int matidx )
+    : DrawableRecord(matidx)
+{
+    data[0] = p0;
+    data[1] = p1;
+    data[2] = p2;
+    data[3] = p3; 
+}
+
 
 // --------------------------------------------------------------------------------
 

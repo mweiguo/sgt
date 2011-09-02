@@ -1,16 +1,21 @@
-#include "sgr_bboxupdater.h"
+#include <list>
+#include <string>
+#include <fstream>
+#include <ctime>
 #include "sgr_vfculler.h"
 #include "sgr_lcreport.h"
 
-#include <iostream>
-#include <ctime>
 using namespace std;
+#include "sgr_statesetbuilder.h"
+
 int main ( int argc, char* argv[] )
 {
-    if ( argc != 2) {
-        cout << "usage : " << argv[0] << " slcFileName" << endl;
-        return 0;
+    if ( argc != 3 )
+    {
+	cout << "usage : " << argv[0] << " slcFileName stateSetDump";
+	return 0;
     }
+
     LC lc;
     clock_t t = clock();
     lc.load ( argv[1] );
@@ -19,13 +24,20 @@ int main ( int argc, char* argv[] )
     t = clock();
     vfculler vfc;
     vec2f min = vec2f ( -1, -1 );
-    vec2f max = vec2f (  100, 1000 );
+    vec2f max = vec2f (  10, 700 );
     lc.toElement ( ROOT );
     vfc.cull ( lc, BBox2d(min, max) );
     cout << "view frustum culling ok, elapse " << clock() - t << "(ms), render object count = " << vfc.renderObjects.size() << endl;
-//     for ( list<int>::iterator pp=vfc.renderObjects.begin(); pp!=vfc.renderObjects.end(); ++pp )
-//         cout << *pp << endl;
-//     cout << endl;
+
+    t = clock();
+    StateSetBuilder::build ( &lc, vfc.renderObjects );
+    cout << "stateset builder ok, elapse " << clock() - t << "(ms) " << endl;
+    string xml = StateSetBuilder::root->toXML();
+    ofstream o;
+    o.open ( argv[2] );
+    o << xml;
+    o.close ();
+    StateSetBuilder::freeStateSets ( StateSetBuilder::root );
 
     LCReport rpt ( lc );
     rpt.printCounter();

@@ -180,8 +180,8 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
     {
         MaterialRecord& mr = lc.materialEntry->LCRecords[idx];
         ss << "name : " << mr.name <<
-            ", backgroud_color ( " << mr.backgroud_color.x() << "," << mr.backgroud_color.y() << "," << mr.backgroud_color.z() <<
-            " ), foregroud_color ( " << mr.foregroud_color.x() << "," << mr.foregroud_color.y() << "," << mr.foregroud_color.z() <<
+            ", background_color ( " << mr.background_color.x() << "," << mr.background_color.y() << "," << mr.background_color.z() <<
+            " ), foreground_color ( " << mr.foreground_color.x() << "," << mr.foreground_color.y() << "," << mr.foreground_color.z() <<
             " ), linewidth = " << mr.linewidth;
         switch ( mr.linetype )
         {

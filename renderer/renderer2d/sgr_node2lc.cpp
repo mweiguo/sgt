@@ -86,7 +86,10 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     case SLC_RECT:
     {
         SLCRectNode* rc = dynamic_cast<SLCRectNode*>(node);
-        quaddata.push_back ( RectRecord(rc->pnts[0], rc->pnts[1], rc->pnts[2], rc->pnts[3] ) );
+        map<string, int>::iterator pp = materialMap.find ( rc->bindmat->name );
+        if ( pp!=materialMap.end() )
+	    quaddata.push_back ( RectRecord(rc->pnts[0], rc->pnts[1], rc->pnts[2], rc->pnts[3], pp->second ) );
+	
         ii = rectIdx++; break;
     }
     }

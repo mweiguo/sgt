@@ -42,8 +42,8 @@ struct MaterialRecord
     MaterialRecord ();
     MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype );
     char name[32];
-    vec3i backgroud_color;
-    vec3i foregroud_color;
+    vec3i background_color;
+    vec3i foreground_color;
     float linewidth;
     int linetype;
 };
@@ -104,9 +104,22 @@ struct DataGroup4
     T data[4];
 };
 
+struct DrawableRecord
+{
+    DrawableRecord ( int matidx );
+    int materialIdx;
+};
+
+struct RectRecord : public DrawableRecord
+{
+    RectRecord ();
+    RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, int matidx );
+    vec2f data[4];
+};
+
 typedef DataGroup2<vec2f> LineRecord;
 typedef DataGroup3<vec2f> TriangleRecord;
-typedef DataGroup4<vec2f> RectRecord;
+//typedef DataGroup4<vec2f> RectRecord;
 
 typedef DataGroup1<vec3f> VertexRecord;
 

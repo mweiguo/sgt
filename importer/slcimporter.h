@@ -4,7 +4,11 @@
 #include <COLLADAFWIWriter.h>
 #include <COLLADAFWPrerequisites.h>
 #include <COLLADABUURI.h>
+#include <COLLADAFW.h>
+//#include <COLLADAFWUniqueId.h>
+
 #include <string>
+#include <map>
 using namespace std;
 
 using namespace COLLADAFW;
@@ -16,6 +20,21 @@ namespace COLLADAFW
 class SLCImporter : public COLLADAFW::IWriter
 {
     COLLADABU::URI mInputFile;
+
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Material>    UniqueIdFWMaterialMap;
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Image>       UniqueIdFWImageMap;
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Effect>      UniqueIdFWEffectMap;
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::VisualScene> UniqueIdFWVisualSceneMap;
+//    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Geometry>    UniqueIdFWGeometry;
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Camera>      UniqueIdFWCamera;
+    typedef std::map<COLLADAFW::UniqueId, COLLADAFW::Light>       UniqueIdFWLight;
+    UniqueIdFWMaterialMap    _materialMap;
+    UniqueIdFWImageMap       _imageMap;
+    UniqueIdFWEffectMap      _effectMap;
+    UniqueIdFWVisualSceneMap _visualSceneMap;
+//    UniqueIdFWGeometry       _geometryMap;
+    UniqueIdFWCamera         _cameraMap;
+    UniqueIdFWLight          _lightMap;
 public:
     void import ( const char* daeFileName );
     /** This method will be called if an error in the loading process occurred and the loader cannot
@@ -96,7 +115,7 @@ public:
 	@return The writer should return true, if writing succeeded, false otherwise.*/
     virtual bool writeKinematicsScene( const KinematicsScene* kinematicsScene );
 
-    string writeNode ( const COLLADAFW::Node* node );
+    string writeNode ( const COLLADAFW::Node* node, const string& prefix );
 
 };
 

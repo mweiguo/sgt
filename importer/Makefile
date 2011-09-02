@@ -1,6 +1,6 @@
 TARGET=importer.exe
 CXX=g++
-CXXFLAGS=-c -g
+CXXFLAGS=-c -g -fpermissive
 INCPATH=-I"../build/include/COLLADAFramework" -I"../build/include/COLLADASaxFrameLoder" -I"../build/include/COLLADABaseUtils" -I"../build/include/COLLADAStreamWriter" -I"../build/include/GeneratedSaxParser"
 
 LINKOPT=-L"../build/lib" -lOpenCOLLADAFramework -lOpenCOLLADASaxFrameworkLoader -lOpenCOLLADABaseUtils

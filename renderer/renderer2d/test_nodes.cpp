@@ -9,6 +9,7 @@ int main ( int argc, char* argv[] )
     if ( argc != 2 )
     {
 	cout << "usage : " << argv[0] << " outputFileName" << endl;
+	cout << argv[0] << " will generate xml format for a simple scene" << endl;
 	return 0;
     }
 

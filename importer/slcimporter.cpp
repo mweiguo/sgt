@@ -1,7 +1,6 @@
 #include "slcimporter.h"
 #include <iostream>
 #include <COLLADASaxFWLLoader.h>
-#include <COLLADAFW.h>
 #include <iostream>
 
 using namespace std;
@@ -20,6 +19,11 @@ void SLCImporter::import ( const char* daeFileName )
 	cout << "load failed" << endl;
 	return;
     }
+
+    for ( UniqueIdFWMaterialMap::iterator pp=_materialMap.begin(); pp!=_materialMap.end(); ++pp ) {
+	cout << "material: " << pp->first.toAscii() << endl;
+    }
+
     cout << "load ok" << endl;
 }
 
@@ -83,105 +87,112 @@ bool SLCImporter::writeScene ( const Scene* scene )
     const InstanceVisualScene* inst =  scene->getInstanceVisualScene ();
     ss << "\tName = " << inst->getName() << endl;
     const UniqueId& uid = inst->getInstanciatedObjectId ();
-    ss << "\tUniqueId   = " << uid.toAscii() << endl;
+    ss << "\tInstanciatedObjectId   = " << uid.toAscii() << endl;
     cout << ss.str();
     return true;
 }
 
-string SLCImporter::writeNode ( const COLLADAFW::Node* node )
+string SLCImporter::writeNode ( const COLLADAFW::Node* node, const string& prefix )
 {
     stringstream ss;
-    ss << "\t\tOriginalId = " << node->getOriginalId () << endl;
-    ss << "\t\tName = " << node->getName () << endl;
+    ss << prefix << "OriginalId = " << node->getOriginalId () << endl;
+    ss << prefix << "Name = " << node->getName () << endl;
     switch ( node->getType () )
     {
     case Node::NODE:
-	ss << "\t\tType = NODE" << endl;
+	ss << prefix << "Type = NODE" << endl;
 	break;
     case Node::JOINT:
-	ss << "\t\tType = JOINT" << endl;
+	ss << prefix << "Type = JOINT" << endl;
 	break;
     }
     const TransformationPointerArray& tparray = node->getTransformations ();
     if ( tparray.getCount() != 0 )
-	ss << "\t\tTransformations : " << endl;
+	ss << prefix << "Transformations : " << endl;
     for ( int i=0; i<tparray.getCount(); i++ )
     {
 	const Transformation* t = tparray[i];
 	switch ( t->getTransformationType() )
 	{
 	case Transformation::MATRIX:
-	    ss << "\t\t\tTransformationType = MATRIX" << endl;
+	    ss << prefix << "\tTransformationType = MATRIX" << endl;
 	    break;
 	case Transformation::TRANSLATE:
-	    ss << "\t\t\tTransformationType = TRANSLATE" << endl;
+	    ss << prefix << "\tTransformationType = TRANSLATE" << endl;
 	    break;
 	case Transformation::ROTATE:
-	    ss << "\t\t\tTransformationType = ROTATE" << endl;
+	    ss << prefix << "\tTransformationType = ROTATE" << endl;
 	    break;
 	case Transformation::SCALE:
-	    ss << "\t\t\tTransformationType = SCALE" << endl;
+	    ss << prefix << "\tTransformationType = SCALE" << endl;
 	    break;
 	case Transformation::LOOKAT:
-	    ss << "\t\t\tTransformationType = LOOKAT" << endl;
+	    ss << prefix << "\tTransformationType = LOOKAT" << endl;
 	    break;
 	case Transformation::SKEW:
-	    ss << "\t\t\tTransformationType = SKEW" << endl;
+	    ss << prefix << "\tTransformationType = SKEW" << endl;
 	    break;
 	}
     }
+    COLLADABU::Math::Matrix4 mat = node->getTransformationMatrix();
+    ss << prefix << "\tmat = ";
+    for ( int i=0; i<16; i++ )
+	ss << mat.getElement( i ) << ", ";
+    ss << endl;
+
     const InstanceGeometryPointerArray& gparray = node->getInstanceGeometries ();
-    if ( gparray.getCount() != 0 )
-	ss << "\t\tInstanceGeometries : " << endl;
     for ( int i=0; i<gparray.getCount(); i++ )
     {
+	ss << prefix << "InstanceGeometry : " << i << endl;
+	const InstanceGeometry* instgeo = gparray[i];
+	ss << prefix << "\tName = " << instgeo->getName() << endl;
+	ss << prefix << "\tInstanciatedObjectId = " << instgeo->getInstanciatedObjectId().toAscii() << endl;
         const InstanceGeometry::MaterialBindingArray& mbarray = gparray[i]->getMaterialBindings();
-	if ( mbarray.getCount() != 0 )
-	    ss << "\t\t\tMaterialBinding : " << endl;
 	for ( int j=0; j<mbarray.getCount(); j++ )
 	{
+	    ss << prefix << "\tMaterialBinding : " << j << endl;
 	    const InstanceGeometry::MaterialBinding& mb = mbarray[j];
-	    ss << "\t\t\t\tMaterialId = " << mb.getMaterialId () << endl;
-	    ss << "\t\t\t\tReferencedMaterial = " << mb.getReferencedMaterial ().toAscii() << endl;
-	    ss << "\t\t\t\tName = " << mb.getName () << endl;
+	    ss << prefix << "\t\tMaterialId = " << mb.getMaterialId () << endl;
+	    ss << prefix << "\t\tReferencedMaterial = " << mb.getReferencedMaterial ().toAscii() << endl;
+	    ss << prefix << "\t\tName = " << mb.getName () << endl;
 	    const InstanceGeometry::TextureCoordinateBindingArray& tcbarray = mb.getTextureCoordinateBindingArray ();
 	    for ( int k=0; k<tcbarray.getCount(); k++ )
 	    {
 		const InstanceGeometry::TextureCoordinateBinding& tcb = tcbarray[k];
-		ss << "\t\t\t\t\ttextureMapId = " << tcb.textureMapId << endl;
-		ss << "\t\t\t\t\tsetIndex = " << tcb.setIndex << endl;
+		ss << prefix << "\t\t\ttextureMapId = " << tcb.textureMapId << endl;
+		ss << prefix << "\t\t\tsetIndex = " << tcb.setIndex << endl;
 	    }
 	}
     }
 
     const InstanceNodePointerArray& nparray = node->getInstanceNodes ();
-    if ( gparray.getCount() != 0 )
-	ss << "\t\tInstanceNodes : " << endl;
+    if ( nparray.getCount() != 0 )
+	ss << prefix << "InstanceNodes : " << endl;
     for ( int i=0; i<nparray.getCount(); i++ )
     {
 	const InstanceNode* n = nparray[i];
-	ss << "\t\t\tName = " << n->getName() << endl;
-	ss << "\t\t\tInstanciatedObjectId = " << n->getInstanciatedObjectId().toAscii() << endl;
+	ss << prefix << "\tName = " << n->getName() << endl;
+	ss << prefix << "\tInstanciatedObjectId = " << n->getInstanciatedObjectId().toAscii() << endl;
     }
 	
     const InstanceCameraPointerArray& cpa = node->getInstanceCameras ();
     if ( cpa.getCount() != 0 )
-	ss << "\t\tInstanceCameras : " << endl;
+	ss << prefix << "InstanceCameras : " << endl;
     for ( int i=0; i<cpa.getCount(); i++ )
     {
 	const InstanceCamera* c = cpa[i];
-	ss << "\t\t\tName = " << c->getName() << endl;
-	ss << "\t\t\tInstanciatedObjectId = " << c->getInstanciatedObjectId().toAscii() << endl;
+	ss << prefix << "\tName = " << c->getName() << endl;
+	ss << prefix << "\tInstanciatedObjectId = " << c->getInstanciatedObjectId().toAscii() << endl;
     }
 
     const InstanceLightPointerArray& lpa = node->getInstanceLights ();
     if ( lpa.getCount() != 0 )
-	ss << "\t\tInstanceLights : " << endl;
+	ss << prefix << "InstanceLights : " << endl;
     for ( int i=0; i<lpa.getCount(); i++ )
     {
 	const InstanceLight* l = lpa[i];
-	ss << "\t\t\tName = " << l->getName() << endl;
-	ss << "\t\t\tInstanciatedObjectId = " << l->getInstanciatedObjectId().toAscii() << endl;
+	ss << prefix << "\tName = " << l->getName() << endl;
+	ss << prefix << "\tInstanciatedObjectId = " << l->getInstanciatedObjectId().toAscii() << endl;
     }
 
 // todo
@@ -195,29 +206,26 @@ string SLCImporter::writeNode ( const COLLADAFW::Node* node )
 
     const NodePointerArray& npa = node->getChildNodes();
     if ( npa.getCount() != 0 )
-	ss << "\t\tNodes : " << endl;
+	ss << prefix << "Nodes : " << endl;
     for ( int i=0; i<npa.getCount(); i++ )
-	ss << writeNode ( npa[i] );
-
-    COLLADABU::Math::Matrix4 mat = node->getTransformationMatrix();
-    ss << "\t\tmat = ";
-    for ( int i=0; i<16; i++ )
-	ss << mat.getElement( i ) << ", ";
-    ss << endl;
+	ss << writeNode ( npa[i], prefix + "\t" );
 	
     return ss.str();
 }
 
 bool SLCImporter::writeVisualScene ( const VisualScene* visualScene )
 {
+//    _visualSceneMap.insert ( pair<COLLADAFW::UniqueId, COLLADAFW::VisualScene>( visualScene->getUniqueId (), *visualScene) );
     stringstream ss;
     ss << "writeVisualScene" << endl;
+    ss << "\tUniqueId = " << visualScene->getUniqueId ().toAscii() << endl;
     ss << "\tName = " << visualScene->getName() << endl;
     const NodePointerArray& array = visualScene->getRootNodes ();
-    if ( array.getCount() != 0 )
-	ss << "\tNodes : " << endl;
-    for ( int i=0; i<array.getCount(); i++ )
-	ss << writeNode ( array[i] );
+
+    for ( int i=0; i<array.getCount(); i++ ) {
+	ss << "\tNode : " << i << endl;
+	ss << writeNode ( array[i], "\t\t" );
+    }
 
     cout << ss.str();
     return true;
@@ -230,10 +238,49 @@ bool SLCImporter::writeLibraryNodes ( const LibraryNodes* libraryNodes )
     return true;
 }
 
-bool SLCImporter::writeGeometry ( const Geometry* geometry )
+string writeMeshVertexData ( const MeshVertexData& mvd, const string& prefix )
 {
     stringstream ss;
+    ss << prefix << ".ValuesCount = " << mvd.getValuesCount () << endl;
+    switch ( mvd.getType () )
+    {
+    case FloatOrDoubleArray::DATA_TYPE_FLOAT:
+    {
+	ss << prefix << "DataType = DATA_TYPE_FLOAT" << endl;
+	const FloatArray* farray = mvd.getFloatValues();
+	if ( mvd.getValuesCount() != 0 ) {
+	    ss << prefix << "DataValues = ";
+	    for ( int i=0; i<mvd.getValuesCount(); i++ )
+		ss << (*farray)[i] << ' ';
+	    ss << endl;
+	}
+	break;
+    }
+    case FloatOrDoubleArray::DATA_TYPE_DOUBLE:
+    {
+	ss << prefix << "DataType = DATA_TYPE_DOUBLE" << endl;
+	const DoubleArray* farray = mvd.getDoubleValues();
+	if ( mvd.getValuesCount() != 0 ) {
+	    ss << prefix << "DataValues = ";
+	    for ( int i=0; i<mvd.getValuesCount(); i++ )
+		ss << (*farray)[i] << ' ';
+	    ss << endl;
+	}
+	break;
+    }
+    case FloatOrDoubleArray::DATA_TYPE_UNKNOWN:
+	ss << prefix << "DataType = DATA_TYPE_UNKNOWN" << endl;
+	break;		
+    }
+    return ss.str();
+}
+
+bool SLCImporter::writeGeometry ( const Geometry* geometry )
+{
+//    _geometryMap.insert(pair<COLLADAFW::UniqueId, COLLADAFW::Geometry>(geometry->getUniqueId (), *geometry));
+    stringstream ss;
     ss << "writeGeometry" << endl;
+    ss << "\tUniqueId = " << geometry->getUniqueId ().toAscii() << endl;
     ss << "\tOriginalId = " << geometry->getOriginalId () << endl;
     ss << "\tName = " << geometry->getName () << endl;
     switch ( geometry->getType () )
@@ -251,6 +298,116 @@ bool SLCImporter::writeGeometry ( const Geometry* geometry )
 	ss << "\tType = GEO_TYPE_UNKNOWN" << endl;
 	break;
     }
+
+    if ( Geometry::GEO_TYPE_MESH == geometry->getType ())
+    {
+	const Mesh* mesh = dynamic_cast<const Mesh*>(geometry);
+	if ( mesh )
+	{
+	    ss << writeMeshVertexData ( mesh->getPositions (), "\tPositions" );
+	    ss << writeMeshVertexData ( mesh->getNormals (), "\tNormals" );
+	    ss << writeMeshVertexData ( mesh->getColors (), "\tColors" );
+	    ss << writeMeshVertexData ( mesh->getUVCoords (), "\tUVCoords" );
+
+	    const MeshPrimitiveArray& mparray = mesh->getMeshPrimitives ();
+	    for ( int i=0; i<mparray.getCount(); i++)
+	    {
+		const MeshPrimitive* p = mparray[i];
+		ss << "\tMeshPrimitive" << i << " : " << endl;
+		switch ( p->getPrimitiveType() )
+		{
+		case MeshPrimitive::LINES:
+		    ss << "\t\tPrimitiveType = LINES" << endl;
+		    break;
+		case MeshPrimitive::LINE_STRIPS:
+		    ss << "\t\tPrimitiveType = LINE_STRIPS" << endl;
+		    break;
+		case MeshPrimitive::POLYGONS:
+		    ss << "\t\tPrimitiveType = POLYGONS" << endl;
+		    break;
+		case MeshPrimitive::POLYLIST:
+		    ss << "\t\tPrimitiveType = POLYLIST" << endl;
+		    break;
+		case MeshPrimitive::TRIANGLES:
+		    ss << "\t\tPrimitiveType = TRIANGLES" << endl;
+		    break;
+		case MeshPrimitive::TRIANGLE_FANS:
+		    ss << "\t\tPrimitiveType = TRIANGLE_FANS" << endl;
+		    break;
+		case MeshPrimitive::TRIANGLE_STRIPS:
+		    ss << "\t\tPrimitiveType = TRIANGLE_STRIPS" << endl;
+		    break;
+		case MeshPrimitive::POINTS:
+		    ss << "\t\tPrimitiveType = POINTS" << endl;
+		    break;
+		case MeshPrimitive::UNDEFINED_PRIMITIVE_TYPE:
+		    ss << "\t\tPrimitiveType = UNDEFINED_PRIMITIVE_TYPE" << endl;
+		    break;
+		}
+		ss << "\t\tFaceCount = " << p->getFaceCount () << endl;
+		ss << "\t\tMaterial = " << p->getMaterial () << endl;
+		const UIntValuesArray& pindices = p->getPositionIndices ();
+		if ( pindices.getCount() != 0 ) {
+		    ss << "\t\tPositionIndices = ";
+		    for ( int j=0; j<pindices.getCount(); j++ )
+			ss << pindices[j] << ' ';
+		    ss << endl;
+		}
+
+		const UIntValuesArray& nindices = p->getNormalIndices ();
+		if ( nindices.getCount() != 0 ) {
+		    ss << "\t\tNormalIndices = ";
+		    for ( int j=0; j<nindices.getCount(); j++ )
+			ss << nindices[j] << ' ';
+		    ss << endl;
+		}
+
+		const IndexListArray& ciarray = p->getColorIndicesArray ();
+		if ( ciarray.getCount() != 0 ) {
+		    for ( int j=0; j<ciarray.getCount(); j++ ) {
+			ss << "\t\tColorIndexList" << j << " = ";
+			const IndexList* il = ciarray[j];
+			const UIntValuesArray& nindices = il->getIndices ();
+			if ( nindices.getCount() != 0 ) {
+			    ss << "\t\t\tIndices = ";
+			    for ( int k=0; k<nindices.getCount(); k++ )
+				ss << nindices[k] << ' ';
+			    ss << endl;
+			}
+			ss << "\t\t\tStride = " << il->getStride () << endl;
+			ss << "\t\t\tName = " << il->getName () << endl;
+			ss << "\t\t\tInitialIndex = " << il->getInitialIndex () << endl;
+		    }
+		}
+
+		const IndexListArray& uvarray = p->getUVCoordIndicesArray ();
+		if ( uvarray.getCount() != 0 ) {
+		    for ( int j=0; j<uvarray.getCount(); j++ ) {
+			ss << "\t\tUVCoordIndexList" << j << " : " << endl;
+			const IndexList* il = uvarray[j];
+			const UIntValuesArray& nindices = il->getIndices ();
+			if ( nindices.getCount() != 0 ) {
+			    ss << "\t\t\tIndices = ";
+			    for ( int k=0; k<nindices.getCount(); k++ )
+				ss << nindices[k] << ' ';
+			    ss << endl;
+			}
+			ss << "\t\t\tStride = " << il->getStride () << endl;
+			ss << "\t\t\tName = " << il->getName () << endl;
+			ss << "\t\t\tInitialIndex = " << il->getInitialIndex () << endl;
+		    }
+		}
+		
+		ss << "\t\tMaterialId = " << p->getMaterialId() << endl;
+		ss << "\t\tGroupedVertexElementsCount = " << p->getGroupedVertexElementsCount () << endl;
+	    }
+
+//	    ss << "\tPrimitiveCount = " << mesh->getPrimitiveCount () << endl;
+	    ss << "\tFacesCount = " << mesh->getFacesCount () << endl;
+//	    getMeshPrimitiveCount ().
+	}
+    }
+
     cout << ss.str();
     
     return true;
@@ -258,20 +415,24 @@ bool SLCImporter::writeGeometry ( const Geometry* geometry )
 
 bool SLCImporter::writeMaterial( const Material* material )
 {
+    _materialMap.insert(pair<UniqueId, Material>(material->getUniqueId(), *material));
     stringstream ss;
     ss << "writeMaterial" << endl;
+    ss << "\tUniqueId = " << material->getUniqueId().toAscii() << endl;
     ss << "\tOriginalId = " << material->getOriginalId () << endl;
     ss << "\tName       = " << material->getName () << endl;
     const UniqueId& uid = material->getInstantiatedEffect();
-    ss << "\tUniqueId   = " << uid.toAscii() << endl;
+    ss << "\tInstantiatedEffect.UID = " << uid.toAscii() << endl;
     cout << ss.str();
     return true;
 }
 
 bool SLCImporter::writeEffect( const Effect* effect )
 {
+//    _effectMap.insert(pair<COLLADAFW::UniqueId, COLLADAFW::Effect>(effect->getUniqueId (),*effect));
     stringstream ss;
     ss << "writeEffect" << endl;
+    ss << "\tUniqueId = " << effect->getUniqueId ().toAscii() << endl;
     ss << "\tOriginalId = " << effect->getOriginalId () << endl;
     ss << "\tName = " << effect->getName () << endl;
     const Color& c = effect->getStandardColor();
@@ -339,8 +500,10 @@ bool SLCImporter::writeEffect( const Effect* effect )
 
 bool SLCImporter::writeCamera( const Camera* camera )
 {
+//     _cameraMap.insert(pair<COLLADAFW::UniqueId, COLLADAFW::Camera>(camera->getUniqueId (), *camera));
     stringstream ss;
     ss << "writeCamera" << endl;
+    ss << "\tUniqueId = " << camera->getUniqueId ().toAscii() << endl;
     ss << "\tOriginalId = " << camera->getOriginalId () << endl;
     ss << "\tName = " << camera->getName() << endl;
     switch ( camera->getCameraType() )
@@ -390,8 +553,10 @@ bool SLCImporter::writeCamera( const Camera* camera )
 
 bool SLCImporter::writeImage( const Image* image )
 {
+//     _imageMap.insert(pair<COLLADAFW::UniqueId, COLLADAFW::Image>(image->getUniqueId(), *image));
     stringstream ss;
     ss << "writeImage" << endl;
+    ss << "\tUniqueId = " << image->getUniqueId().toAscii() << endl;
     ss << "\tOriginalId = " << image->getOriginalId () << endl;
     ss << "\tSourceType = ";
     switch ( image->getSourceType ())
@@ -418,8 +583,10 @@ bool SLCImporter::writeImage( const Image* image )
 
 bool SLCImporter::writeLight( const Light* light )
 {
+//     _lightMap.insert(pair<COLLADAFW::UniqueId, COLLADAFW::Light>(light->getUniqueId(), *light));
     stringstream ss;
     ss << "writeLight" << endl;
+    ss << "\tUniqueId = " << light->getUniqueId().toAscii() << endl;
     ss << "\tOriginalId = " << light->getOriginalId () << endl;
     ss << "\tName = " << light->getName() << endl;
     switch ( light->getLightType() )

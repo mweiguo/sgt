@@ -15,6 +15,12 @@ using namespace std;
  */
 int main ( int argc, char* argv[] )
 {
+    if ( argc != 2 )
+    {
+	cout << "usage : " << argv[0] << " slcFileName" << endl;
+	cout << argv[0] << " will generate a slc file & idx files" << endl;
+	return 0;
+    }
     list<SLCNode*> nodes;
     SLCSceneNode scene ("test_scene");
 
@@ -24,7 +30,7 @@ int main ( int argc, char* argv[] )
     mat_layer->linetype = SLCMaterial::LINETYPE_SOLID;
     mat_layer->linewidth = 0;
     SLCMaterial* mat = new SLCMaterial ( "mat" );
-    mat->foreground_color = vec3i(55, 0, 0);
+    mat->foreground_color = vec3i(155, 0, 0);
     mat->background_color = vec3i(0, 44, 155);
     mat->linetype = SLCMaterial::LINETYPE_DASH;
     mat->linewidth = 1;
@@ -38,7 +44,13 @@ int main ( int argc, char* argv[] )
     int y = 0;
     for ( int i=0; i<20e4; i++ )
     {
-	SLCRectNode* rc1 = new SLCRectNode ( mat );
+	SLCMaterial* tmpMaterial;
+	if ( i%2 == 0 )
+	    tmpMaterial = mat_layer;
+	else
+	    tmpMaterial = mat;
+
+	SLCRectNode* rc1 = new SLCRectNode ( tmpMaterial );
 	rc1->pnts[0] = vec2f (x,   y  );
 	rc1->pnts[1] = vec2f (x+1, y  );
 	rc1->pnts[2] = vec2f (x+1, y+1);
@@ -72,7 +84,7 @@ int main ( int argc, char* argv[] )
 //     o1.close ();
     // ********************************************************************************
     SLCNode2LC node2lc ( &scene );
-    node2lc.convert ( "geos.slc" );
+    node2lc.convert ( argv[1] );
 
     for ( list<SLCNode*>::iterator pp=nodes.begin(); pp!=nodes.end(); ++pp )
         delete *pp;
