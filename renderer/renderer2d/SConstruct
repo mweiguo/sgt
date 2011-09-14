@@ -1,0 +1,17 @@
+import os
+
+env = Environment()
+
+env.Program ( target="test_nodes", source=["test_nodes.cpp","sgr_nodes.cpp"])
+env.Program ( target="test_node2lc", source=["test_node2lc.cpp","sgr_node2lc.cpp","sgr_lc.cpp","sgr_lcreport.cpp","sgr_nodes.cpp","sgr_lc2kdtree.cpp","sgr_bboxupdater.cpp"])
+env.Program ( target="test_vfculler", source=["test_vfculler.cpp","sgr_vfculler.cpp","sgr_lc.cpp","sgr_lcreport.cpp","../../graphbase/sgr_math.cpp"])
+env.Program ( target="test_statesetbuilder", source=["test_statesetbuilder.cpp","sgr_statesetbuilder.cpp","sgr_vfculler.cpp","sgr_stateset.cpp","../../graphbase/sgr_math.cpp","sgr_font.cpp","sgr_lc.cpp","sgr_lcreport.cpp","sgr_bboxupdater.cpp"])
+dynamiclibrary = env.SharedLibrary(target = ['sgrender'] , source = ['sgr_lc.cpp', 'sgr_vfculler.cpp', 'sgr_render2d.cpp', 'sgr_renderer.cpp', '../../graphbase/sgr_math.cpp', 'sgr_statesetbuilder.cpp', 'sgr_stateset.cpp', 'sgr_font.cpp'])
+env.Append(CPPPATH = ['../../graphbase/','../../build/include'])
+env.Append(LIBPATH=['../../build/lib'])
+#env.Append(LIBS=['opengl32.lib', 'freetype246MT_D.lib', 'glu32.lib'])
+env.Append(LIBS=['opengl32', 'freetype246MT_D.lib', 'glu32'])
+
+env.Install(dir = "../../build/bin", source = dynamiclibrary)
+env.Alias('install', ['../../build/bin'])
+
