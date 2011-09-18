@@ -12,10 +12,10 @@
 
 // ********************************************************************************
 
-class KdTreeTextTestCase1 : public ::testing::Test
+class KdTreeText1 : public ::testing::Test
 {
 protected:
-    KdTreeTextTestCase1 ()
+    KdTreeText1 ()
     {
 	// build scene data
 	list<SLCNode*> nodes;
@@ -38,7 +38,7 @@ protected:
 	lodpage->imposter = true;
 	SLCTextNode* txt = new SLCTextNode ( mat );
 	txt->text = "中";
-	txt->pos.xy ( 10, 5 );
+	txt->pos.xy ( 0, 0 );
 	SLCLODPageNode* lodpage2 = new SLCLODPageNode();
 	lodpage2->delayloading = true;
 	lodpage2->imposter = false;
@@ -84,7 +84,7 @@ protected:
 	_kdt = new KdTree<int>();
 	_kdt->load ( "test.idx" );
     }
-    ~KdTreeTextTestCase1 ()
+    ~KdTreeText1 ()
     {
 	node2lc->freeLC ( _lc );
 	delete node2lc;
@@ -104,32 +104,397 @@ protected:
 
 // ================================================================================
 
-TEST_F ( KdTreeTextTestCase1, getMinMax ) {
+TEST_F ( KdTreeText1, getMinMax ) {
     float minmax[4];
     _kdt->getMinMax ( minmax );
-    EXPECT_EQ ( 10, minmax[0] );
-    EXPECT_EQ ( 5, minmax[1] );
-    EXPECT_EQ ( 13, minmax[2] );
-    EXPECT_EQ ( 6, minmax[3] );
-//     wstring b= L"国";
-//     EXPECT_EQ ( 1u, b.size() );
+    EXPECT_EQ ( 0, minmax[0] );
+    EXPECT_EQ ( 0, minmax[1] );
+    EXPECT_EQ ( 1, minmax[2] );
+    EXPECT_EQ ( 1, minmax[3] );
 }
 
 // ================================================================================
 
-// TEST_F ( KdTreeTextTestCase1, IntersectRow1Col1 ) {
-
-//     vector<int> out;
-//     { 
-// 	float box[] = { -2, -2, -1, -1 }; 
-// 	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
-// 	EXPECT_EQ ( false, isHit );
-//     }
-// }
+TEST_F ( KdTreeText1, IntersectRow1Col1 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, -2, -1, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -2, 0, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -2, 0.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, -2, 1, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, -2, 1.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, -2, 2, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5 , -2, 2, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
 
 // ================================================================================
 
-TEST_F ( KdTreeTextTestCase1, clear ) {
+TEST_F ( KdTreeText1, IntersectRow1Col2 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, -1, -1, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -1, 0, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -1, 0.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, -1, 1, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, -1, 1.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, -1, 2, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5 , -1, 2, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, IntersectRow1Col3 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, -0.5, -1, 0.5 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -0.5, 0, 0.5 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, -0.5, 0.5, 0.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, -0.5, 1, 0.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, -0.5, 1.5, 0.5 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, -0.5, 2, 0.5 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5, -0.5, 2, 0.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, IntersectRow1Col4 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, 0, -1, 1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 0, 0, 1 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 0, 0.5, 1 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, 0, 1, 1 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, 0, 1.5, 1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, 0, 2, 1 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5, 0, 2, 1 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, IntersectRow1Col5 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, 0.5, -1, 1.5 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 0.5, 0, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 0.5, 0.5, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, 0.5, 1, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, 0.5, 1.5, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, 0.5, 2, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5, 0.5, 2, 1.5 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, IntersectRow1Col6 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, 1, -1, 2 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 1, 0, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 1, 0.5, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, 1, 1, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, 1, 1.5, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, 1, 2, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5, 1, 2, 2 };
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, IntersectRow1Col7 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, 2, -1, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 2, 0, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { -1, 2, 0.5, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0, 2, 1, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 0.5, 2, 1.5, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1, 2, 2, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    { 
+	vector<int> out;
+	float box[] = { 1.5 , 2, 2, 3 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeText1, clear ) {
     _kdt->clear();
     EXPECT_EQ ( 0u, _kdt->_primitives.size() );
     EXPECT_EQ ( 0u, _kdt->_nodes.size() );

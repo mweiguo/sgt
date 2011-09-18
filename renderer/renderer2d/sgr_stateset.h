@@ -24,6 +24,7 @@ public:
     State ( StateType t, float value, StateFlag f );
     State ( StateType t, vec3i value, StateFlag f );
     State ( const State& rhs );
+    void applyState ();
     StateFlag flag;
     StateType type;
     int intValue;
@@ -31,6 +32,7 @@ public:
     vec3i vec3iValue;
 };
 
+class LC;
 struct MaterialRecord;
 class StateSet
 {
@@ -48,8 +50,12 @@ public:
     State* getInheritState ( State::StateType type );
 
     void addChild ( StateSet* ss );
-
     string toXML () const;
+
+    void pushAttributes ();
+    void popAttributes ();
+    void applyStates ();
+    void render ( LC* lc );
 };
 
 

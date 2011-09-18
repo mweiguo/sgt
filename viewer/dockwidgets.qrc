@@ -5,5 +5,10 @@
     <file>images/save.png</file>
     <file>images/open.png</file>
     <file>images/undo.png</file>
+    <file>images/zoomin.png</file>
+    <file>images/zoomout.png</file>
+    <file>images/hand.png</file>
+    <file>images/hand2.png</file>
+    <file>images/home_32.png</file>
 </qresource>
 </RCC>

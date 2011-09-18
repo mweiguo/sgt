@@ -18,6 +18,7 @@ LCReport::LCReport ( LC& lc, bool dumpTree ) : _dumpTree(dumpTree)
     cline  = 0;
     ctri   = 0;
     cquad  = 0;
+    ctext  = 0;
 
     _lc = &lc;
     lc.toElement ( ROOT );
@@ -41,6 +42,7 @@ void LCReport::printCounter ()
     cout << "SLC_LINE     count = " << cline << endl;
     cout << "SLC_TRIANGLE count = " << ctri << endl;
     cout << "SLC_QUAD     count = " << cquad << endl;
+    cout << "SLC_TEXT     count = " << ctext << endl;
     cout << "================== memory =======================" << endl;
     cout << "globalLCEntry count = " << _lc->globalLCEntry->LCLen << ", size = " << _lc->globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) << "(Byte)" << endl;
     int levelLCEntriesSize = 0;
@@ -85,6 +87,9 @@ void LCReport::counter ( int type )
         break;
     case SLC_RECT:
         cquad++;
+        break;
+    case SLC_TEXT:
+        ctext++;
         break;
     case SLC_MATERIAL:
         cmat++;
@@ -139,7 +144,14 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
 	   << ", imposter : " << lc.lodpageEntry->LCRecords[idx].imposter;
         break;
     case SLC_PLINE:
+    {
+	PLineRecord& pline = lc.plineEntry->LCRecords[idx];
+	for ( int i=pline.start; i<pline.end; i++ ) {
+	    vec2f& v = lc.plineBufferEntry->LCRecords[i];
+	    ss << v.x() << ' ' << v.y() << ' ';
+	}
         break;
+    }
     case SLC_POLY:
         break;
     case SLC_LINE:
@@ -176,6 +188,13 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
             p3.x() << ", " << p3.y() << ")";
         break;
     }
+    case SLC_TEXT:
+    {
+        TextRecord& text = lc.textEntry->LCRecords[idx];
+        ss << "pos (" << text.pos.x() << ", " << text.pos.y() << "), scale=" << text.scale <<
+	    ", rotz=" << text.rotz << ", content=" << lc.textBufferEntry->LCRecords + text.start << endl;
+        break;
+    }
     case SLC_MATERIAL:
     {
         MaterialRecord& mr = lc.materialEntry->LCRecords[idx];
@@ -192,6 +211,7 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
             ss << "dash";
             break;
         }
+	ss << ", font=" << mr.fontfile;
         break;
     }
     default:

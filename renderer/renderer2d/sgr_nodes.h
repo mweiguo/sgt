@@ -28,7 +28,7 @@ public:
     SLCSceneNode ( const char* gname );
     virtual int getType() { return SLC_SCENE; }
     virtual string toXML () const;
-    char name[32];
+    string name;
 };
 
 class SLCMaterial : public SLCNode
@@ -46,6 +46,7 @@ public:
     vec3i background_color;
     int linetype;
     float linewidth;
+    string fontfilename;
 };
 
 class SLCLayerNode : public SLCNode
@@ -54,7 +55,7 @@ public:
     SLCLayerNode ( const char* lname, SLCMaterial* bindmat );
     virtual int getType() { return SLC_LAYER; }
     virtual string toXML () const;
-    char name[32];
+    string name;
     int flags;
     SLCMaterial* bindmat;
 };
@@ -109,10 +110,31 @@ public:
 class SLCRectNode : public SLCPrimitiveNode
 {
 public:
-    SLCRectNode (SLCMaterial* mat) : SLCPrimitiveNode (mat) {}
+    SLCRectNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat) {}
     virtual int getType () { return SLC_RECT; }
     virtual string toXML () const;
     vec2f pnts[4];
+};
+
+class SLCTextNode : public SLCPrimitiveNode
+{
+public:
+    SLCTextNode ( SLCMaterial* mat );
+    virtual int getType () { return SLC_TEXT; }
+    virtual string toXML () const;
+    vec2f pos;
+    float scale;
+    float rotz;
+    string text;
+};
+
+class SLCPLineNode : public SLCPrimitiveNode
+{
+public:
+    SLCPLineNode ( SLCMaterial* mat );
+    virtual int getType () { return SLC_PLINE; }
+    virtual string toXML () const;
+    vector<vec2f> pnts;
 };
 
 #endif

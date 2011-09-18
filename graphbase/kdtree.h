@@ -171,11 +171,35 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 	 
     if ( node.first >= 0 ) // if node is not leaf
     {
-	if ( false == intersect ( lc, minmax, out, node.first) )
-	    return false;
-
-	if ( false == intersect ( lc, minmax, out, node.second ) )
-	    return false;
+	if ( true == is_inside ( node.minmax, minmax ) )
+	{
+	    // find most left leaf node
+	    KdNode* leftnode = &node;
+	    KdNode* rightnode = &node;
+	    do {
+		leftnode = &(_nodes[leftnode->first]); 
+	    } while ( leftnode->first >= 0 );
+	    
+	    // find most right leaf node
+	    do {
+		rightnode = &(_nodes[rightnode->second]); 
+	    } while ( rightnode->first >= 0 );
+	    
+	    int istart = -rightnode->first-1;
+	    int iend = istart + rightnode->second;
+	    istart = -leftnode->first-1;
+	    for ( int i=istart; i!=iend; i++ ) 
+		*out++ = _primitives[i];
+	}
+	else
+	{
+	    bool isHit = false;
+	    if ( true == intersect ( lc, minmax, out, node.first) )
+		isHit = true;
+	    if ( true == intersect ( lc, minmax, out, node.second ) )
+		isHit = true;
+	    return isHit;
+	}
     }
     else   // if node is leaf 
     {
@@ -195,6 +219,18 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 			*out++ = _primitives[i];
 		    break;
 		}
+		case SLC_PLINE:
+		{
+		    PLineRecord& pline = lc->plineEntry->LCRecords[grd.value];
+		    for ( int ii=pline.start; ii<pline.end; ii++ )
+		    {
+			if ( false == line_outside ( (float*)(lc->plineBufferEntry->LCRecords + ii), minmax ) ) {
+			    *out++ = _primitives[i];
+			    break;
+			}
+		    }
+		    break;
+		}
 		case SLC_TRIANGLE:
 		{
 		    TriangleRecord& trd = lc->triangleEntry->LCRecords[grd.value];
@@ -206,6 +242,14 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		{
 		    RectRecord& rrd = lc->rectEntry->LCRecords[grd.value];
 		    if ( false == rect_outside ( (float*)rrd.data, minmax ) )
+			*out++ = _primitives[i];
+		    break;
+		}
+		case SLC_TEXT:
+		{
+		    TextRecord& text = lc->textEntry->LCRecords[grd.value];
+		    if ( false == poly_outside ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
+						 text.silhouetteEnd - text.silhouetteStart , minmax ) )
 			*out++ = _primitives[i];
 		    break;
 		}
@@ -240,25 +284,27 @@ void KdTree<T>::save ( const char* filename )
     ofstream out;
     out.open ( filename , ofstream::binary );
     int size = _primitives.size();
+/*     cout << "_primitives.size = " << size << endl; */
     out.write ( (const char*)&size, sizeof(int) );
-    for ( typename vector<T>::iterator pp=_primitives.begin();
-	  pp!=_primitives.end();
-	  ++pp )
-	out.write ( (const char*)&(*pp), sizeof(T) );
+    out.write ( (const char*)&(_primitives[0]), sizeof(T) * size );
+//     for ( typename vector<T>::iterator pp=_primitives.begin();
+// 	  pp!=_primitives.end();
+// 	  ++pp )
+// 	out.write ( (const char*)&(*pp), sizeof(T) );
     
     size = _nodes.size();
     out.write ( (const char*)&size, sizeof(int) );
-    for ( typename vector<KdNode>::iterator pp=_nodes.begin();
-	  pp!=_nodes.end();
-	  ++pp )
-    {
-	out.write ( (const char*)&(pp->first), sizeof(pp->first) );
-	out.write ( (const char*)&(pp->second), sizeof(pp->second) );
-	out.write ( (const char*)&(pp->minmax[0]), sizeof(pp->minmax[0]) );
-	out.write ( (const char*)&(pp->minmax[1]), sizeof(pp->minmax[1]) );
-	out.write ( (const char*)&(pp->minmax[2]), sizeof(pp->minmax[2]) );
-	out.write ( (const char*)&(pp->minmax[3]), sizeof(pp->minmax[3]) );
-    }
+    out.write ( (const char*)&(_nodes[0]), size * sizeof(KdNode) );
+/*     cout << "_nodes.size = " << size << endl; */
+//     for ( typename vector<KdNode>::iterator pp=_nodes.begin(); pp!=_nodes.end(); ++pp )
+//     {
+// 	out.write ( (const char*)&(pp->first), sizeof(pp->first) );
+// 	out.write ( (const char*)&(pp->second), sizeof(pp->second) );
+// 	out.write ( (const char*)&(pp->minmax[0]), sizeof(pp->minmax[0]) );
+// 	out.write ( (const char*)&(pp->minmax[1]), sizeof(pp->minmax[1]) );
+// 	out.write ( (const char*)&(pp->minmax[2]), sizeof(pp->minmax[2]) );
+// 	out.write ( (const char*)&(pp->minmax[3]), sizeof(pp->minmax[3]) );
+//     }
 
     out.close ();
 }
@@ -275,24 +321,31 @@ void KdTree<T>::load ( const char* filename )
     in.open ( filename , ifstream::binary );
     int size;
     in.read ( (char*)&size, sizeof(int) );
+/*     cout << "load primitive.size = " << size << endl; */
     _primitives.reserve ( size );
-    T tmp;
-    for ( int i=0; i<size; i++ ) {
-	in.read ( (char*)&tmp, sizeof(T) );
-	_primitives.push_back ( tmp );
-    }
+    in.read ( (char*)&(_primitives[0]), sizeof(T) * size );
+
+//     _primitives.reserve ( size );
+//     T tmp;
+//     for ( int i=0; i<size; i++ ) {
+// 	in.read ( (char*)&tmp, sizeof(T) );
+// 	_primitives.push_back ( tmp );
+//     }
     in.read ( (char*)&size, sizeof(int) );
+//    cout << "load nodes.size = " << size << endl; 
     _nodes.reserve ( size );
-    for ( int i=0; i<size; i++ ) {
-	KdNode node;
-	in.read ( (char*)&node.first, sizeof(node.first) );
-	in.read ( (char*)&node.second, sizeof(node.second) );
-	in.read ( (char*)&node.minmax[0], sizeof(node.minmax[0]) );
-	in.read ( (char*)&node.minmax[1], sizeof(node.minmax[1]) );
-	in.read ( (char*)&node.minmax[2], sizeof(node.minmax[2]) );
-	in.read ( (char*)&node.minmax[3], sizeof(node.minmax[3]) );
-	_nodes.push_back ( node );
-    }
+    _nodes.resize ( size );
+    in.read ( (char*)&(_nodes[0]), sizeof(KdNode) * size );
+//     for ( int i=0; i<size; i++ ) {
+// 	KdNode node;
+// 	in.read ( (char*)&node.first, sizeof(node.first) );
+// 	in.read ( (char*)&node.second, sizeof(node.second) );
+// 	in.read ( (char*)&node.minmax[0], sizeof(node.minmax[0]) );
+// 	in.read ( (char*)&node.minmax[1], sizeof(node.minmax[1]) );
+// 	in.read ( (char*)&node.minmax[2], sizeof(node.minmax[2]) );
+// 	in.read ( (char*)&node.minmax[3], sizeof(node.minmax[3]) );
+// 	_nodes.push_back ( node );
+//     }
     in.close ();
 }
 
@@ -441,6 +494,7 @@ template< class T1, class T2 >
 void KdTree<T>::BuildKdTree<T1,T2>::getMinMax ( int istart, int iend, float* minmax )
 {
     _opt.getPrimitiveMinMax ( _kdtree->_primitives[_objindices[istart]], minmax );
+/*     cout << 0 << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl; */
 
     float tmp[4];
     for ( int i=istart+1; i<iend; i++ )
@@ -450,6 +504,7 @@ void KdTree<T>::BuildKdTree<T1,T2>::getMinMax ( int istart, int iend, float* min
 	minmax[1] = minmax[1] < tmp[1] ? minmax[1] : tmp[1];
 	minmax[2] = minmax[2] > tmp[2] ? minmax[2] : tmp[2];
 	minmax[3] = minmax[3] > tmp[3] ? minmax[3] : tmp[3];
+/* 	cout << i << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl; */
     }
 }
 

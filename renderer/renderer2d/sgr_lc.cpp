@@ -5,8 +5,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <string>
 #include "bbox2d.h"
+#include "mat4.h"
+#include "vec4.h"
 #include "kdtree.h"
+#include "sgr_font.h"
+#include <ctime>
 using namespace std;
 
 GlobalLCRecord::GlobalLCRecord ()
@@ -34,9 +39,11 @@ MaterialRecord::MaterialRecord ()
     foreground_color.xyz ( 0.2, 0.2, 0.2 );
     linewidth = 0;
     linetype = LINETYPE_SOLID;
+    memset  ( fontfile,  0, 32 * sizeof(char) ); 
+    fontIdx = -1;
 }
 
-MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt )
+MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt, const char* fontfilename )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
@@ -44,6 +51,9 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& f
     foreground_color = fg;
     linewidth = lw;
     linetype  = lt;
+    memset  ( fontfile,  0, 32 * sizeof(char) ); 
+    strncpy ( fontfile, fontfilename, 32 ); 
+    fontIdx = -1;
 }
 
 // --------------------------------------------------------------------------------
@@ -83,7 +93,7 @@ DrawableRecord::DrawableRecord ( int matidx ) : materialIdx(matidx)
 
 // --------------------------------------------------------------------------------
 
-RectRecord::RectRecord () : DrawableRecord(-1)
+RectRecord::RectRecord ()
 {
     data[0].xy ( 0.0f, 0.0f );
     data[1].xy ( 0.0f, 0.0f );
@@ -100,6 +110,55 @@ RectRecord::RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, cons
     data[3] = p3; 
 }
 
+// --------------------------------------------------------------------------------
+
+// LineRecord::LineRecord ()
+// {
+//     data[0].xy ( 0.0f, 0.0f );
+//     data[1].xy ( 0.0f, 0.0f );
+// }
+
+// LineRecord::LineRecord ( const vec2f& p0, const vec2f& p1, int matidx )
+//     : DrawableRecord(matidx)
+// {
+//     data[0] = p0;
+//     data[1] = p1;
+// }
+
+
+// --------------------------------------------------------------------------------
+
+TextRecord::TextRecord ()
+{
+    start = -1;
+    scale = 1;
+    rotz  = 0;
+    silhouetteStart = silhouetteEnd = -1;
+}
+
+TextRecord::TextRecord ( int b, const vec2f& offset, float s, float r, int sstart, int send, int matidx )
+    : DrawableRecord(matidx)
+{
+    start = b;
+    pos = offset;
+    scale = s;
+    rotz = r;
+    silhouetteStart = sstart;
+    silhouetteEnd = send;
+}
+
+// --------------------------------------------------------------------------------
+
+PLineRecord::PLineRecord()
+{
+}
+
+PLineRecord::PLineRecord ( int s, int e, int matidx )
+    : DrawableRecord(matidx)
+{
+    start = s;
+    end = e;
+}
 
 // --------------------------------------------------------------------------------
 
@@ -112,7 +171,12 @@ LC::LC ()
     layerEntry         = 0;
     lineEntry          = 0;
     triangleEntry      = 0;
+    textEntry          = 0;
     rectEntry          = 0;
+    plineEntry         = 0;
+    textBufferEntry    = 0;
+    textSilhouetteBufferEntry = 0;
+    plineBufferEntry   = 0;
     cursorDepth = 0;
     memset ( cursor, 0, sizeof(int)*256);
 }
@@ -166,6 +230,35 @@ void LC::save ( const char* filename )
         RectEntry tmp; out.write ( (char*)&tmp, sizeof(RectEntry) );
     } else
         out.write ( (char*)rectEntry, rectEntry->LCLen * sizeof(RectRecord) + sizeof(int) );
+    // write pline data
+    if ( NULL==plineEntry || 0==plineEntry->LCLen ) {
+        PLineEntry tmp; out.write ( (char*)&tmp, sizeof(PLineEntry) );
+    } else
+        out.write ( (char*)plineEntry, plineEntry->LCLen * sizeof(PLineRecord) + sizeof(int) );
+    // write text data
+    if ( NULL==textEntry || 0==textEntry->LCLen ) {
+        TextEntry tmp; out.write ( (char*)&tmp, sizeof(TextEntry) );
+    } else
+        out.write ( (char*)textEntry, textEntry->LCLen * sizeof(TextRecord) + sizeof(int) );
+    // write text buffer data
+    if ( NULL==textBufferEntry || 0==textBufferEntry->LCLen ) {
+        TextBufferEntry tmp;
+	out.write ( (char*)&tmp, sizeof(TextBufferEntry) );
+    } else
+        out.write ( (char*)textBufferEntry, textBufferEntry->LCLen * sizeof(char) + sizeof(int) );
+    // write text silhouette buffer data
+    if ( NULL==textSilhouetteBufferEntry || 0==textSilhouetteBufferEntry->LCLen ) {
+        TextSilhouetteBufferEntry tmp;
+	out.write ( (char*)&tmp, sizeof(TextSilhouetteBufferEntry) );
+    } else
+        out.write ( (char*)textSilhouetteBufferEntry, textSilhouetteBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
+    // write pline buffer data
+    if ( NULL==plineBufferEntry || 0==plineBufferEntry->LCLen ) {
+        PLineBufferEntry tmp;
+	out.write ( (char*)&tmp, sizeof(PLineBufferEntry) );
+    } else {
+        out.write ( (char*)plineBufferEntry, plineBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
+    }
 
     // write globalLCEntry
     out.write ( (char*)globalLCEntry, globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) );
@@ -186,10 +279,22 @@ void LC::save ( const char* filename )
 // build location cache
 bool LC::load ( const char* filename )
 {
+    string path = filename;
+    size_t pos = path.find_last_of ( "/" );
+    if ( pos != string::npos )
+	path = path.substr ( 0, pos+1 );
+    else
+    {
+	pos = path.find_last_of ( "\\" );
+	if ( pos != string::npos )
+	    path = path.substr ( 0, pos+1 );
+	else
+	    path = "";
+    }
     ifstream in;
     in.open ( filename, ifstream::binary );
     if ( in.is_open () == false ) {
-        cout << "open file " << filename << " error" << endl;
+        cerr << "open file " << filename << " error" << endl;
         return false;
     }
     in.seekg (0, ios::end);
@@ -209,6 +314,27 @@ bool LC::load ( const char* filename )
     materialEntry = (MaterialEntry*)malloc ( sizeof(int) + sz );
     materialEntry->LCLen = length;
     in.read ( (char*)materialEntry->LCRecords, sz );
+      // process fonts
+    for ( int ii=0; ii<materialEntry->LCLen; ii++ )
+    {
+	Font* ft = 0;
+	MaterialRecord& mr = materialEntry->LCRecords[ii];
+	for ( size_t jj=0; jj<fonts.size(); jj++ )
+	{
+	    if ( fonts[jj]->fontfilename == mr.fontfile ) {
+		ft = fonts[jj];
+		mr.fontIdx = jj;
+		break;
+	    }
+	}
+
+	if ( NULL == ft ) {
+	    ft = new Font ( mr.fontfile );
+	    mr.fontIdx = fonts.size();
+	    fonts.push_back ( ft );
+	}
+    }
+    
     // read layer data
     in.read ( (char*)&length, sizeof(int) );
     sz = length==0 ? sizeof(LayerRecord) : sizeof(LayerRecord) * length;
@@ -245,9 +371,43 @@ bool LC::load ( const char* filename )
     rectEntry = (RectEntry*)malloc ( sizeof(int) + sz );
     rectEntry->LCLen = length;
     in.read ( (char*)rectEntry->LCRecords, sz );
+    // read pline data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(PLineRecord) : sizeof(PLineRecord) * length;
+    plineEntry = (PLineEntry*)malloc ( sizeof(int) + sz );
+    plineEntry->LCLen = length;
+    in.read ( (char*)plineEntry->LCRecords, sz );
+    // read text data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(TextRecord) : sizeof(TextRecord) * length;
+    textEntry = (TextEntry*)malloc ( sizeof(int) + sz );
+    textEntry->LCLen = length;
+    in.read ( (char*)textEntry->LCRecords, sz );
+//     for ( int i=0; i<length; i++ )
+// 	textSilhouettes.push_back ( TextSilhouetteRecord() );
+    // read text buffer data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(TextBufferEntry) : (sizeof(int) + sizeof(char) * length);
+    textBufferEntry = (TextBufferEntry*)malloc ( sz );
+    textBufferEntry->LCLen = length;
+    in.read ( (char*)textBufferEntry->LCRecords, sz-sizeof(int) );
+    // read text silhouette buffer data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(TextSilhouetteBufferEntry) : (sizeof(int) + sizeof(vec2f) * length);
+    textSilhouetteBufferEntry = (TextSilhouetteBufferEntry*)malloc ( sz );
+    textSilhouetteBufferEntry->LCLen = length;
+    in.read ( (char*)textSilhouetteBufferEntry->LCRecords, sz-sizeof(int) );
+    // read pline buffer data
+//    cout << "read pline buffer data" << endl;
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(PLineBufferEntry) : (sizeof(int) + sizeof(vec2f) * length);
+    plineBufferEntry = (PLineBufferEntry*)malloc ( sz );
+    plineBufferEntry->LCLen = length;
+    in.read ( (char*)plineBufferEntry->LCRecords, sz-sizeof(int) );
 
     // read GlobalLCEntry
     in.read ( (char*)&length, sizeof(int) );
+//    cout << "sz = " << sz << ',' << length << endl;
     sz = length==0 ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * length;
     globalLCEntry = (GlobalLCEntry*)malloc ( sizeof(int) + sz );
     globalLCEntry->LCLen = length;
@@ -270,9 +430,13 @@ bool LC::load ( const char* filename )
     {
 	LODPageRecord& lodpage = lodpageEntry->LCRecords[i];
 	if ( 0 != strcmp ( "", lodpage.kdtreepath ) ) {
-	    
+	    string tmp;
+	    tmp.assign ( lodpage.kdtreepath, lodpage.kdtreepath + strlen(lodpage.kdtreepath) );
+	    string kdfilepath = path + tmp;
 	    kdtrees.push_back ( new KdTree<int>() );
-	    kdtrees.back ()->load ( lodpage.kdtreepath );
+	    clock_t t = clock ();
+	    kdtrees.back ()->load ( kdfilepath.c_str() );
+	    cout << "load kdtree " << kdfilepath << " ok, ellapse " << clock() - t << endl;
 	    lodpage.kdtree = kdtrees.size()-1;
 	}
     }
@@ -290,6 +454,11 @@ void LC::free ()
     ::free ( lineEntry );
     ::free ( triangleEntry );
     ::free ( rectEntry );
+    ::free ( plineEntry );
+    ::free ( textEntry );
+    ::free ( textBufferEntry );
+    ::free ( textSilhouetteBufferEntry );
+    ::free ( plineBufferEntry );
     ::free ( globalLCEntry );
     for ( int i=0; i<256; i++ )
     {
@@ -308,6 +477,11 @@ void LC::free ()
     lineEntry = 0;
     triangleEntry = 0;
     rectEntry = 0;
+    plineEntry = 0;
+    textEntry = 0;
+    textBufferEntry = 0;
+    textSilhouetteBufferEntry = 0;
+    plineBufferEntry = 0;
     globalLCEntry = 0;
 }
 
@@ -451,6 +625,8 @@ string LC::getTypeStr ()
         return "TriangleNode";
     case SLC_RECT:
         return "RectNode";
+    case SLC_TEXT:
+        return "TextNode";
     default:
         return "Unknown Type";
     }
@@ -495,6 +671,37 @@ void LC::setMinMax ( float minx, float miny, float maxx, float maxy )
     grecord.minmax[3] = maxy;
 }
 
+/**
+ * 0x00 - 0x7F: 1 byte
+ * 0xC0 - 0xDF: 2 bytes
+ * 0xE0 - 0xEF: 3 bytes
+ * 0xF0 - 0xFF: 4 bytes
+ */
+unsigned int utf8_strlen ( const char* str )
+{
+    const char* p = str;
+    unsigned int cnt = 0;
+    while ( *p )
+    {
+	switch ( *p & 0xF0 )
+	{
+	case 0xD0:
+	    p += 2;
+	    break;
+	case 0xE0:
+	    p += 3;
+	    break;
+	case 0xF0:
+	    p += 4;
+	    break;
+	default:
+	    p++;
+	}
+	cnt ++;
+    };
+    return cnt;
+}
+
 void LC::updateMinMax ()
 {
     int offset = cursor[cursorDepth];
@@ -503,6 +710,19 @@ void LC::updateMinMax ()
     BBox2d bbox;
     switch ( grecord.type )
     {
+    case SLC_PLINE:
+    {
+	PLineRecord& pline = plineEntry->LCRecords[grecord.value];
+	if ( pline.start < pline.end )
+	{
+	    bbox.init ( plineBufferEntry->LCRecords[pline.start] );
+	    for ( int i=pline.start; i<pline.end; i++ )
+	    {
+		bbox.expandby ( plineBufferEntry->LCRecords[i] );
+	    }
+	}
+	break;
+    }
     case SLC_LINE:
     {
         LineRecord& line = lineEntry->LCRecords[grecord.value];
@@ -534,6 +754,47 @@ void LC::updateMinMax ()
         bbox.expandby ( p1 );
         bbox.expandby ( p2 );
         bbox.expandby ( p3 );
+        break;
+    }
+    case SLC_TEXT:
+    {
+        TextRecord& text = textEntry->LCRecords[grecord.value];
+	MaterialRecord& mat = materialEntry->LCRecords[text.materialIdx];
+	Font* font = fonts[mat.fontIdx];
+	vec2f& v0 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart];
+	vec2f& v1 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+1];
+	vec2f& v2 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+2];
+	vec2f& v3 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+3];
+//	TextSilhouetteRecord& silhouette = textSilhouettes[grecord.value];
+	
+	string content = textBufferEntry->LCRecords + text.start;
+	
+	bbox.init ( text.pos );
+	float w=0, h=0;
+	font->getSize (content.c_str(), w, h );
+// 	unsigned int strcnt = utf8_strlen ( content.c_str() );
+	bbox.expandby ( text.pos + vec2f(w, h ) );
+	mat4f m;
+	m *= mat4f::translate_matrix ( text.pos.x(), text.pos.y(), 0 );
+	m *= mat4f::rotate_matrix ( text.rotz, 2 );
+	m *= mat4f::scale_matrix ( text.scale, text.scale, text.scale );
+
+	// set bbox & silhouette
+	vec4f tmp = m * vec4f(0, 0, 0, h);
+	v0 = tmp.xy();
+	bbox.init ( v0 );
+
+	tmp = m * vec4f ( w, 0, 0, h );
+	v1 = tmp.xy();
+	bbox.expandby ( v1 );
+
+	tmp = m * vec4f ( w, h, 0, h);
+	v2 = tmp.xy();
+	bbox.expandby ( v2 );
+
+	tmp = m * vec4f ( 0, h, 0, h );
+	v3 = tmp.xy();
+	bbox.expandby ( v3 );
         break;
     }
     }

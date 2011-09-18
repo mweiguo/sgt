@@ -19,7 +19,7 @@ int main ( int argc, char* argv[] )
     t = clock();
     vfculler vfc;
     vec2f min = vec2f ( -1, -1 );
-    vec2f max = vec2f (  100, 1000 );
+    vec2f max = vec2f ( 100, 1000 );
     lc.toElement ( ROOT );
     vfc.cull ( lc, BBox2d(min, max) );
     cout << "view frustum culling ok, elapse " << clock() - t << "(ms), render object count = " << vfc.renderObjects.size() << endl;

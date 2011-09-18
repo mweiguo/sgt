@@ -9,6 +9,7 @@
 #define SLC_LINE            5
 #define SLC_TRIANGLE        6
 #define SLC_RECT            7
+#define SLC_TEXT            8
 
 #define SLC_MODEL           100
 #define SLC_APPEARANCE      110

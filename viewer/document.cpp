@@ -1,5 +1,10 @@
 #include "document.h"
 #include <sgr_render2d.h>
+#include <ctime>
+#include <iostream>
+using namespace std;
+
+
 
 Document::Document()
 {
@@ -8,7 +13,9 @@ Document::Document()
 
 void Document::openScene ( const char* filename )
 {
+    clock_t t = clock();
     sceneid = r2d_load_scene ( filename );
+    cout << "load finished, ellapse " << clock() - t << endl;
 }
 
 void Document::closeScene ()

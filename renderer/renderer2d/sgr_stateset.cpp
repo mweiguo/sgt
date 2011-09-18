@@ -1,6 +1,11 @@
 #include "sgr_stateset.h"
 #include "sgr_lc.h"
+#include "sgr_nodetypes.h"
 #include <sstream>
+#include <algorithm>
+#include <windows.h>
+#include <GL/gl.h>
+#include "sgr_font.h"
 
 //================================================================================
 
@@ -43,10 +48,33 @@ State::State ( const State& rhs )
 
 //================================================================================
 
+void State::applyState ()
+{
+    switch ( type )
+    {
+    case FOREGROUND_COLOR:
+// 	cout << "State::applyState, FOREGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.x() << ", " << vec3iValue.z() << endl;
+	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
+	break;
+    case BACKGROUND_COLOR:
+// 	cout << "State::applyState, BACKGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.x() << ", " << vec3iValue.z() << endl;
+	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
+	break;
+    case LINE_TYPE:
+	break;
+    case LINE_WIDTH:
+	break;
+    }
+}
+
+//================================================================================
+
 StateSet::StateSet ()
 {
     parent = NULL;
 }
+
+//================================================================================
 
 /**
  * if return NULL, stateset not matched
@@ -190,6 +218,14 @@ State* StateSet::getInheritState ( State::StateType type )
 
 //================================================================================
 
+void StateSet::addChild ( StateSet* ss )
+{
+    children.push_back ( ss );
+    ss->parent = this;
+}
+
+//================================================================================
+
 string StateSet::toXML () const
 {
     stringstream ss;
@@ -232,26 +268,109 @@ string StateSet::toXML () const
 
 //================================================================================
 
-void StateSet::addChild ( StateSet* ss )
+void StateSet::pushAttributes ()
 {
-//     // do state inherit 
-//     for ( size_t i=0; i<states.size(); i++ )
-//     {	
-// 	State& lhs = states[i];
-// 	if ( lhs.flag == State::INHERIT )
-// 	{
-// 	    State* rhs = ss->getState ( lhs.type );
-// 	    if ( rhs == NULL )
-// 		ss->addState ( lhs );
-// 	    else {
-// 		if ( rhs->flag != State::OVERWRITE ) {
-// 		    rhs->intValue = lhs.intValue;
-// 		    rhs->floatValue = lhs.floatValue;
-// 		    rhs->vec3iValue = lhs.vec3iValue;
-// 		}
-// 	    }
-// 	}
-//     }
-    children.push_back ( ss );
-    ss->parent = this;
+    if ( parent == NULL )
+	return;
+//    cout << "StateSet::pushAttributes" << endl;
+    glPushAttrib ( GL_CURRENT_BIT | GL_LINE_BIT );
 }
+
+//================================================================================
+
+void StateSet::popAttributes ()
+{
+    if ( parent == NULL )
+	return;
+//    cout << "StateSet::popAttributes" << endl;
+    glPopAttrib ();
+}
+
+//================================================================================
+
+void StateSet::applyStates ()
+{
+    if ( parent == NULL )
+	return;
+//    cout << "StateSet::applyStates" << endl;
+    for ( vector<State>::iterator pp=states.begin(); pp!=states.end(); ++pp )
+	pp->applyState ();
+}
+
+//================================================================================
+
+void StateSet::render ( LC* lc )
+{
+    vector<float> rects;
+    vector<float> plines;
+    vector<TextRecord*> texts;
+    for ( vector<int>::iterator pp=renderObjects.begin(); pp!=renderObjects.end(); ++pp )
+    {
+	// get primitive
+	GlobalLCRecord& g = lc->globalLCEntry->LCRecords[*pp];
+//	cout << *pp << ' ';
+	switch ( g.type )
+	{ 
+
+	case SLC_RECT:
+	{
+	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
+	    float* begin = (float*)&(r.data[0]);
+	    float* end   = begin + 8;
+	    copy ( begin, end, back_inserter(rects) );
+	    break;
+	}
+	case SLC_TEXT:
+	{
+	    texts.push_back ( &lc->textEntry->LCRecords[g.value] );
+	    break;
+	}
+	case SLC_PLINE:
+	{
+	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
+	    float* begin = (float*)(lc->plineBufferEntry->LCRecords + pline.start);
+	    float* end   = (float*)(lc->plineBufferEntry->LCRecords + pline.end);
+	    copy ( begin, end, back_inserter(plines) );
+	    break;
+	}
+	}
+    }
+//    cout << endl;
+
+    // draw rects
+    if ( false == rects.empty() ) {
+	glDisable ( GL_TEXTURE_2D );
+	glVertexPointer ( 2, GL_FLOAT, 0, &(rects[0]) );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/2 );
+	glEnable ( GL_TEXTURE_2D );
+    }
+
+    // draw pline
+    if ( false == plines.empty() ) {
+	glDisable ( GL_TEXTURE_2D );
+	glVertexPointer ( 2, GL_FLOAT, 0, &(plines[0]) );
+	glDrawArrays ( GL_LINE_STRIP, 0, plines.size()/2 );
+	glEnable ( GL_TEXTURE_2D );
+    }
+
+    // draw text
+    for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
+    {
+	TextRecord* tr = *pp;
+	glPushMatrix ();
+	glRotatef ( tr->rotz, 0, 0, 1 );
+	glScalef ( tr->scale, tr->scale, tr->scale );
+	glTranslatef ( tr->pos.x(), tr->pos.y(), 0 );
+	// get material
+//	cout << "material index = " << tr->materialIdx << endl;
+	MaterialRecord& mr = lc->materialEntry->LCRecords[ tr->materialIdx ];
+//	cout << "font index = " << mr.fontIdx << endl;
+	// get font
+	Font* font = lc->fonts[ mr.fontIdx ];
+//	cout << "-----------------++++++++++++++++++++" << lc->textBufferEntry->LCRecords + tr->start << endl;
+	font->drawText ( lc->textBufferEntry->LCRecords + tr->start );
+	glPopMatrix ();
+    }
+}
+
+//================================================================================

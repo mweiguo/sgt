@@ -4,13 +4,28 @@
 #include "kdtree.h"
 #include <cstring>
 
+list<int> vfculler::renderObjects;
+BBox2d vfculler::vfbbox2d;
+
+//================================================================================
+
 void vfculler::cull ( LC& lc, const BBox2d& vfbbox )
 {
     vfbbox2d = vfbbox;
     
-    if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED )
+    if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED ) {
         traverse ( lc );
+    }
 }
+
+//================================================================================
+
+void vfculler::clear ()
+{
+    renderObjects.clear();
+}
+
+//================================================================================
 
 /**
  * return true if object culled, else return false
@@ -28,20 +43,20 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
         if ( is_outside (*nodeBBox, vfbbox2d ) )
             return CHILD_CULLED;
-        else {
+        else
             return CHILD_NOT_CULLED;
-        }
     }
     case SLC_PLINE:
     case SLC_POLY:
     case SLC_LINE:
     case SLC_TRIANGLE:
     case SLC_RECT:
+    case SLC_TEXT:
     {
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
-        if ( is_outside (*nodeBBox, vfbbox2d ) )
+        if ( is_outside (*nodeBBox, vfbbox2d ) ) {
             return CHILD_CULLED;
-        else {
+        } else {
             renderObjects.push_back ( gIdx );
             return CHILD_NOT_CULLED;
         }
@@ -65,7 +80,6 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
                 bool isHit = kdt->intersect ( &lc, (float*)&vfbbox2d, back_inserter(out) );
                 copy ( out.begin(), out.end(), back_inserter(renderObjects) );
 		cout << "intersect_cnt : " << kdt->intersect_cnt << endl;
-//              kdtree.cull ();
                 return CHILDREN_CULLTEST_FINISHED;
             }
         }
@@ -76,6 +90,8 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
     }
     return NONE;
 }
+
+//================================================================================
 
 void vfculler::traverse ( LC& lc )
 {
@@ -89,4 +105,6 @@ void vfculler::traverse ( LC& lc )
         lc.toElement ( PARENT );
     }
 }
+
+//================================================================================
 

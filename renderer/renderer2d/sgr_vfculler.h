@@ -15,12 +15,13 @@ public:
 	CHILDREN_CULLTEST_FINISHED,
 	NONE
     };
-    void cull ( LC& lc, const BBox2d& vfbbox );
-    list<int> renderObjects;
+    static void cull ( LC& lc, const BBox2d& vfbbox );
+    static void clear ();
+    static list<int> renderObjects;
 private:
-    int cull_test ( int type, int idx, LC& lc );
-    void traverse ( LC& lc );
-    BBox2d vfbbox2d;
+    static int cull_test ( int type, int idx, LC& lc );
+    static void traverse ( LC& lc );
+    static BBox2d vfbbox2d;
 };
 
 

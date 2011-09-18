@@ -23,6 +23,7 @@ private:
     int cline;
     int ctri;
     int cquad;
+    int ctext;
 
     LC* _lc;
     bool _dumpTree;

@@ -23,6 +23,11 @@ public:
     vector<LineRecord>     	linedata;
     vector<TriangleRecord> 	tridata;
     vector<RectRecord>     	quaddata;
+    vector<PLineRecord>     	plinedata;
+    vector<TextRecord>     	textdata;
+    vector<char>                textbuffer;
+    vector<vec2f>               textsilhouettebuffer;
+    vector<vec2f>               plinebuffer;
     map<string, int>            materialMap;
 
 private:
@@ -36,6 +41,8 @@ private:
     int lineIdx;
     int triIdx;
     int rectIdx;
+    int plineIdx;
+    int textIdx;
     int matIdx;
 };
 #endif// _NODE2LC_H_

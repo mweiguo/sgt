@@ -12,6 +12,7 @@ BBox2d BBox2dUpdater::traverse ( LC& lc )
 
 	lc.toElement ( PARENT );
 
+	lc.updateMinMax ();
 	BBox2d* tmp = (BBox2d*)(lc.getMinMax());
 	bbox2d += *tmp;
 	lc.setMinMax ( bbox2d.minvec().x(), bbox2d.minvec().y(), bbox2d.maxvec().x(), bbox2d.maxvec().y() );

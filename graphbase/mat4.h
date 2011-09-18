@@ -1,7 +1,8 @@
 #ifndef _MATRIX_4_H_
 #define _MATRIX_4_H_
 #include <cstring>
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 // column-major
 template < class T >
 class Mat4
@@ -12,9 +13,12 @@ public:
     Mat4 ( T* v );
     void loadIdentity ();
     Mat4<T>& operator *= ( const Mat4<T>& rhs );
+    template < class Vec4 >
+    Vec4 operator * ( const Vec4& rhs );
 
     static Mat4<T> translate_matrix ( T x, T y, T z );
     static Mat4<T> scale_matrix ( T sx, T sy, T sz );
+    static Mat4<T> rotate_matrix ( float angle, int axis );
     
     T data[16];
 };
@@ -25,7 +29,7 @@ template < class T >
 Mat4<T>::Mat4 ()
 {
     memset ( data, 0, sizeof(float)*16 );
-    data[0] = data[5] = data[10] = data[15] = 0;
+    data[0] = data[5] = data[10] = data[15] = 1;
 }
 
 //============================================================
@@ -101,6 +105,19 @@ Mat4<T>& Mat4<T>::operator *= ( const Mat4<T>& rhs )
 //============================================================
 
 template < class T >
+template < class Vec4 >
+Vec4 Mat4<T>::operator * ( const Vec4& rhs )
+{
+    typename Vec4::value_type t  = data[0]*rhs[0] + data[4]*rhs[1] + data[8]*rhs[2] + data[12]*rhs[3];
+    typename Vec4::value_type t1 = data[1]*rhs[0] + data[5]*rhs[1] + data[9]*rhs[2] + data[13]*rhs[3];
+    typename Vec4::value_type t2 = data[2]*rhs[0] + data[6]*rhs[1] + data[10]*rhs[2] + data[14]*rhs[3];
+    typename Vec4::value_type t3 = data[3]*rhs[0] + data[7]*rhs[1] + data[11]*rhs[2] + data[15]*rhs[3];
+    return Vec4 ( t, t1, t2, t3 );
+}
+
+//============================================================
+
+template < class T >
 Mat4<T> Mat4<T>::translate_matrix ( T dx, T dy, T dz )
 {
     return Mat4<T> (   1,   0,   0,  0, 
@@ -119,6 +136,32 @@ Mat4<T> Mat4<T>::scale_matrix ( T sx, T sy, T sz )
                      0,  sy, 0,  0, 
                      0,  0,  sz, 0,
                      0,  0,  0,  1);
+}
+
+//============================================================
+
+template < class T >
+Mat4<T> Mat4<T>::rotate_matrix ( float angle, int axis )
+{
+    float alpha = angle * M_PI / 180;
+    switch ( axis ) {
+    case 0:
+        return Mat4<T> ( 1, 0,           0,           0,
+                                 0, cos(alpha),  sin(alpha),  0,
+                                 0, -sin(alpha), cos(alpha),  0, 
+                                 0, 0,           0,           1 );
+    case 1:
+        return Mat4<T> ( cos(alpha),  0, -sin(alpha),  0,
+                                 0,           1, 0,           0,
+                                 sin(alpha),  0, cos(alpha),  0, 
+                                 0,           0, 0,           1 );
+    case 2:
+        return Mat4<T> ( cos(alpha),  sin(alpha),  0, 0,
+                                 -sin(alpha), cos(alpha),  0, 0,
+                                 0,           0,           1, 0, 
+                                 0,           0,           0, 1 );
+    }
+    return Mat4<T>();
 }
 
 //============================================================

@@ -2,6 +2,7 @@
 #include "sgr_nodes.h"
 #include "sgr_lc2kdtree.h"
 #include "sgr_bboxupdater.h"
+#include "sgr_font.h"
 
 #include <list>
 #include <cstring>
@@ -17,6 +18,8 @@ SLCNode2LC::SLCNode2LC ( SLCNode* node )
     lineIdx = 0;
     triIdx = 0;
     rectIdx = 0;
+    plineIdx = 0;
+    textIdx = 0;
     matIdx = 0;
 
     collectNodeRecord ( node );
@@ -36,14 +39,14 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     case SLC_SCENE:
     {
         SLCSceneNode* group = dynamic_cast<SLCSceneNode*>(node);
-        scenedata.push_back ( SceneRecord(group->name) );
+        scenedata.push_back ( SceneRecord(group->name.c_str()) );
         ii = sceneIdx++; break;
     }
     case SLC_MATERIAL:
     {
         SLCMaterial* material = dynamic_cast<SLCMaterial*>(node);
         materialMap.insert ( pair<string,int>(material->name, materialdata.size() ));
-        materialdata.push_back ( MaterialRecord ( material->name.c_str(), material->foreground_color, material->background_color, material->linewidth, material->linetype ) );
+        materialdata.push_back ( MaterialRecord ( material->name.c_str(), material->foreground_color, material->background_color, material->linewidth, material->linetype, material->fontfilename.c_str() ) );
         ii = matIdx++; break;
     }
     case SLC_LAYER:
@@ -51,7 +54,7 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCLayerNode* layer = dynamic_cast<SLCLayerNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( layer->bindmat->name );
         if ( pp!=materialMap.end() )
-            layerdata.push_back ( LayerRecord(layer->name, layer->flags, pp->second ) );
+            layerdata.push_back ( LayerRecord(layer->name.c_str(), layer->flags, pp->second ) );
         ii = layerIdx++; break;
     }
     case SLC_LOD:
@@ -89,9 +92,36 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( rc->bindmat->name );
         if ( pp!=materialMap.end() )
 	    quaddata.push_back ( RectRecord(rc->pnts[0], rc->pnts[1], rc->pnts[2], rc->pnts[3], pp->second ) );
-	
         ii = rectIdx++; break;
     }
+    case SLC_PLINE:
+    {
+        SLCPLineNode* pline = dynamic_cast<SLCPLineNode*>(node);
+        map<string, int>::iterator pp = materialMap.find ( pline->bindmat->name );
+        if ( pp!=materialMap.end() ) {
+	    size_t istart = plinebuffer.size();
+	    copy ( pline->pnts.begin(), pline->pnts.end(), back_inserter(plinebuffer) );
+	    plinedata.push_back ( PLineRecord(istart, pline->pnts.size()+istart, pp->second) );
+	}
+        ii = plineIdx++; break;
+    }
+    case SLC_TEXT:
+    {
+        SLCTextNode* tc = dynamic_cast<SLCTextNode*>(node);
+        map<string, int>::iterator pp = materialMap.find ( tc->bindmat->name );
+        if ( pp!=materialMap.end() ) {
+	    size_t istart = textbuffer.size();
+	    copy ( tc->text.begin(), tc->text.end(), back_inserter(textbuffer) );
+	    textbuffer.push_back ( 0 );
+	    int sstart = textsilhouettebuffer.size();
+	    textsilhouettebuffer.resize ( textsilhouettebuffer.size() + 4 );
+	    int send = textsilhouettebuffer.size();
+	    textdata.push_back ( TextRecord(istart, tc->pos, tc->scale, tc->rotz, sstart, send, pp->second ) );
+	}
+	
+        ii = textIdx++; break;
+    }
+    
     }
     grecord.value  = ii;
     globalRecords.push_back ( grecord );
@@ -111,15 +141,20 @@ LC* SLCNode2LC::generateLC ()
 {
     // alloc memory
     LC *lc = new LC();
-    lc->globalLCEntry = (GlobalLCEntry*) malloc( sizeof(int) + ( globalRecords.empty() ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * globalRecords.size() ));
-    lc->sceneEntry    = (SceneEntry*)    malloc( sizeof(int) + ( scenedata.empty() ? sizeof(SceneRecord) : sizeof(SceneRecord) * scenedata.size() ));
-    lc->materialEntry = (MaterialEntry*) malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : sizeof(MaterialRecord) * materialdata.size() ));
-    lc->layerEntry    = (LayerEntry*)    malloc( sizeof(int) + ( layerdata.empty() ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerdata.size() ));
-    lc->lodEntry      = (LODEntry*)      malloc( sizeof(int) + ( loddata.empty() ? sizeof(LODRecord) : sizeof(LODRecord) * loddata.size() ));
-    lc->lodpageEntry  = (LODPageEntry*)  malloc( sizeof(int) + ( lodpagedata.empty() ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpagedata.size() ));
-    lc->lineEntry     = (LineEntry*)     malloc( sizeof(int) + ( linedata.empty() ? sizeof(LineRecord) : sizeof(LineRecord) * linedata.size() ));
-    lc->triangleEntry = (TriangleEntry*) malloc( sizeof(int) + ( tridata.empty() ? sizeof(TriangleRecord) : sizeof(TriangleRecord) * tridata.size() ));
-    lc->rectEntry     = (RectEntry*)     malloc( sizeof(int) + ( quaddata.empty() ? sizeof(RectRecord) : sizeof(RectRecord) * quaddata.size() ));
+    lc->globalLCEntry 	 = (GlobalLCEntry*)    malloc( sizeof(int) + ( globalRecords.empty() ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * globalRecords.size() ));
+    lc->sceneEntry    	 = (SceneEntry*)       malloc( sizeof(int) + ( scenedata.empty() ? sizeof(SceneRecord) : sizeof(SceneRecord) * scenedata.size() ));
+    lc->materialEntry 	 = (MaterialEntry*)    malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : sizeof(MaterialRecord) * materialdata.size() ));
+    lc->layerEntry    	 = (LayerEntry*)       malloc( sizeof(int) + ( layerdata.empty() ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerdata.size() ));
+    lc->lodEntry      	 = (LODEntry*)         malloc( sizeof(int) + ( loddata.empty() ? sizeof(LODRecord) : sizeof(LODRecord) * loddata.size() ));
+    lc->lodpageEntry  	 = (LODPageEntry*)     malloc( sizeof(int) + ( lodpagedata.empty() ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpagedata.size() ));
+    lc->lineEntry     	 = (LineEntry*)        malloc( sizeof(int) + ( linedata.empty() ? sizeof(LineRecord) : sizeof(LineRecord) * linedata.size() ));
+    lc->triangleEntry 	 = (TriangleEntry*)    malloc( sizeof(int) + ( tridata.empty() ? sizeof(TriangleRecord) : sizeof(TriangleRecord) * tridata.size() ));
+    lc->rectEntry     	 = (RectEntry*)        malloc( sizeof(int) + ( quaddata.empty() ? sizeof(RectRecord) : sizeof(RectRecord) * quaddata.size() ));
+    lc->plineEntry     	 = (PLineEntry*)       malloc( sizeof(int) + ( plinedata.empty() ? sizeof(PLineRecord) : sizeof(PLineRecord) * plinedata.size() ));
+    lc->textEntry     	 = (TextEntry*)        malloc( sizeof(int) + ( textdata.empty() ? sizeof(TextRecord) : sizeof(TextRecord) * textdata.size() ));
+    lc->textBufferEntry  = (TextBufferEntry*)  malloc( sizeof(int) + ( textbuffer.empty() ? sizeof(char) : sizeof(char) * textbuffer.size() ));
+    lc->textSilhouetteBufferEntry  = (TextSilhouetteBufferEntry*)  malloc( sizeof(int) + ( textsilhouettebuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * textsilhouettebuffer.size() ));
+    lc->plineBufferEntry = (PLineBufferEntry*) malloc( sizeof(int) + ( plinebuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * plinebuffer.size() ));
 
     // fill data
     lc->globalLCEntry->LCLen = globalRecords.size();
@@ -133,6 +168,28 @@ LC* SLCNode2LC::generateLC ()
     lc->materialEntry->LCLen = materialdata.size();
     if ( lc->materialEntry->LCLen > 0 )
         memcpy ( lc->materialEntry->LCRecords, &(materialdata[0]), sizeof(MaterialRecord) * materialdata.size() );
+
+    // fonts
+    for ( int ii=0; ii<lc->materialEntry->LCLen; ii++ )
+    {
+	Font* ft = 0;
+	MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
+	for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
+	{
+	    if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
+		ft = lc->fonts[jj];
+		mr.fontIdx = jj;
+		break;
+	    }
+	}
+
+	if ( NULL == ft ) {
+	    ft = new Font ( mr.fontfile );
+	    mr.fontIdx = lc->fonts.size();
+	    lc->fonts.push_back ( ft );
+	}
+    }
+
 
     lc->layerEntry->LCLen = layerdata.size();
     if ( lc->layerEntry->LCLen > 0 )
@@ -158,6 +215,26 @@ LC* SLCNode2LC::generateLC ()
     if ( lc->rectEntry->LCLen > 0 )
         memcpy ( lc->rectEntry->LCRecords, &(quaddata[0]), sizeof(RectRecord) * quaddata.size() );
 
+    lc->plineEntry->LCLen = plinedata.size();
+    if ( lc->plineEntry->LCLen > 0 )
+        memcpy ( lc->plineEntry->LCRecords, &(plinedata[0]), sizeof(PLineRecord) * plinedata.size() );
+
+    lc->textEntry->LCLen = textdata.size();
+    if ( lc->textEntry->LCLen > 0 )
+        memcpy ( lc->textEntry->LCRecords, &(textdata[0]), sizeof(TextRecord) * textdata.size() );
+
+    lc->textBufferEntry->LCLen = textbuffer.size();
+    if ( lc->textBufferEntry->LCLen > 0 )
+        memcpy ( lc->textBufferEntry->LCRecords, &(textbuffer[0]), sizeof(char) * textbuffer.size() );
+
+    lc->textSilhouetteBufferEntry->LCLen = textsilhouettebuffer.size();
+    if ( lc->textSilhouetteBufferEntry->LCLen > 0 )
+        memcpy ( lc->textSilhouetteBufferEntry->LCRecords, &(textsilhouettebuffer[0]), sizeof(vec2f) * textsilhouettebuffer.size() );
+
+    lc->plineBufferEntry->LCLen = plinebuffer.size();
+    if ( lc->plineBufferEntry->LCLen > 0 )
+        memcpy ( lc->plineBufferEntry->LCRecords, &(plinebuffer[0]), sizeof(vec2f) * plinebuffer.size() );
+
     // build level data
     lc->buildLevelLC ();
 
@@ -175,6 +252,11 @@ void SLCNode2LC::freeLC ( LC* lc )
     free ( lc->lineEntry );
     free ( lc->triangleEntry );
     free ( lc->rectEntry );
+    free ( lc->plineEntry );
+    free ( lc->textEntry );
+    free ( lc->textBufferEntry );
+    free ( lc->textSilhouetteBufferEntry );
+    free ( lc->plineBufferEntry );
     lc->freeLevelLC ();
     delete lc;
 }
@@ -182,10 +264,10 @@ void SLCNode2LC::freeLC ( LC* lc )
 void SLCNode2LC::convert ( const char* filename )
 {
     LC* lc = generateLC();
-    lc->save ( filename );
-
     // update bbox
     BBox2dUpdater::forward_update ( *lc );
+
+    lc->save ( filename );
 
     // save kdt, if there have
     LC2KDT::buildKDTs ( *lc );

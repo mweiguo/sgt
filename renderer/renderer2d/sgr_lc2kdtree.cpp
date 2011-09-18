@@ -17,7 +17,7 @@ void LC2KDT::buildKDT ( LC& lc, KdTree<int>& kdtree )
     getPrimitiveMinMax.init ( &lc );
     typedef KdTree<int>::BuildKdTree<GetPrimitiveCenter, GetPrimitiveMinMax> BuildLCKdTree;
     typedef BuildKdTreeOption<GetPrimitiveCenter, GetPrimitiveMinMax> BuildLCKdTreeOption;
-    BuildLCKdTreeOption option;
+    BuildLCKdTreeOption option ( 8, 32 );
     option.getPrimitiveCenter = getPrimitiveCenter;
     option.getPrimitiveMinMax = getPrimitiveMinMax;
     BuildLCKdTree buildkdt ( kdtree, option );
@@ -51,6 +51,7 @@ void LC2KDT::collectPrimitive ( int type, int gidx, KdTree<int>& kdtree )
     case SLC_LINE:
     case SLC_TRIANGLE:
     case SLC_RECT:
+    case SLC_TEXT:
 	kdtree._primitives.push_back ( gidx );
         break;
     default:
@@ -119,6 +120,7 @@ bool LC2KDT::collectPrimitive2 ( LC& lc  )
     {
     case SLC_LODPAGE:
     {
+	// check lodpage's kdtree member, if exist, build a new kdtree
         string path = lc.lodpageEntry->LCRecords[idx].kdtreepath;
 	if ( path != "" )
 	{
@@ -126,7 +128,6 @@ bool LC2KDT::collectPrimitive2 ( LC& lc  )
 	    curKDT = &(kdtreemap[path]);
 	    return true;
 	}
-	// check lodpage's kdtree member, if exist, build a new kdtree
         break;
     }
     case SLC_PLINE:
@@ -134,6 +135,7 @@ bool LC2KDT::collectPrimitive2 ( LC& lc  )
     case SLC_LINE:
     case SLC_TRIANGLE:
     case SLC_RECT:
+    case SLC_TEXT:
 	if ( curKDT )
 	    curKDT->_primitives.push_back ( gidx );
         break;

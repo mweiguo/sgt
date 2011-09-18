@@ -4,6 +4,7 @@
 #include "sgr_lc.h"
 #include "sgr_stateset.h"
 
+#include <map>
 #include <list>
 using namespace std;
 
@@ -11,8 +12,10 @@ class StateSetBuilder
 {
 public:
     static void build ( LC* lc, list<int>& input );
-    static void freeStateSets ( StateSet* root );
+    static void clear ();
     static StateSet* root;
+private:
+    static map<StateSet*,StateSet*> _nodes;
 };
 
 #endif// _SGR_STATESETBUILDER_H_

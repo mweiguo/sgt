@@ -211,9 +211,9 @@ TEST_F ( BuildKdTreeTestCase2, divide ) {
 
 TEST_F ( BuildKdTreeTestCase2, build ) {
     _buildkdt->build ();
-    KdTree<int> kdt;
-    _buildkdt->_kdtree->save ( "BuildKdTreeTestCase2.idx" );
-    kdt.load ( "BuildKdTreeTestCase2.idx" );
+    KdTree<int>& kdt = *_buildkdt->_kdtree;
+//     _buildkdt->_kdtree->save ( "BuildKdTreeTestCase2.idx" );
+//     kdt.load ( "BuildKdTreeTestCase2.idx" );
     // should check _buildkdt->_primitives & _nodes
     EXPECT_EQ ( 4u, kdt._primitives.size() );
     EXPECT_EQ ( 9,  kdt._primitives[0] );

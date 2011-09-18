@@ -129,7 +129,7 @@ TEST_F ( KdTreeRectTestCase, getMinMax ) {
 
 // ================================================================================
 
-TEST_F ( KdTreeRectTestCase, IntersectRow1 ) {
+TEST_F ( KdTreeRectTestCase, IntersectRow1Col1 ) {
 
     vector<int> out;
     { 
@@ -192,7 +192,118 @@ TEST_F ( KdTreeRectTestCase, IntersectRow1 ) {
 
 // ================================================================================
 
-TEST_F ( KdTreeRectTestCase, IntersectRow2 ) {
+TEST_F ( KdTreeRectTestCase, IntersectRow1Col2 ) {
+
+    vector<int> out;
+    {
+	float box[] = { 0, -2, 0.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 1, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 1.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 2, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 2.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 3, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 3.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 4, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 4.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase, IntersectRow1Col3 ) {
+
+    vector<int> out;
+    {
+	float box[] = { 1, -2, 1.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 2, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 2.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 3, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 3.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 4, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 4.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase, IntersectRow1Col4 ) {
+    {
+	vector<int> out;
+	float box[] = { 4, -2, 4.5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 4.5, -2, 5, -1 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase, IntersectRow2Col1 ) {
 
     { 
 	vector<int> out;
@@ -203,12 +314,10 @@ TEST_F ( KdTreeRectTestCase, IntersectRow2 ) {
     {
 	vector<int> out;
 	float box[] = { -2, -1, 0, 0 }; 
-	_kdt->intersect_cnt = 0;
 	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
 	EXPECT_EQ ( true, isHit );
 	EXPECT_EQ ( 1u, out.size() );
 	EXPECT_EQ ( 9, out[0] );
-	cout << "intersect_cnt : " << _kdt->intersect_cnt << endl;
     }
     {
 	vector<int> out;
@@ -292,6 +401,103 @@ TEST_F ( KdTreeRectTestCase, IntersectRow2 ) {
     {
 	vector<int> out;
 	float box[] = { -2, -1, 4.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 4u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+	EXPECT_EQ ( 6, out[3] );
+    }
+
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase, IntersectRow2Col2 ) {
+
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 0.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 2u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 2u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 2, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 3u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 2.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 3u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 3, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 4u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+	EXPECT_EQ ( 6, out[3] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 3.5, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 4u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+	EXPECT_EQ ( 6, out[3] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 4, 0 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 4u, out.size() );
+	EXPECT_EQ ( 9, out[0] );
+	EXPECT_EQ ( 8, out[1] );
+	EXPECT_EQ ( 7, out[2] );
+	EXPECT_EQ ( 6, out[3] );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 4.5, 0 }; 
 	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
 	EXPECT_EQ ( true, isHit );
 	EXPECT_EQ ( 4u, out.size() );

@@ -27,10 +27,8 @@ void SLCNode::addChild ( SLCNode* node )
 
 // --------------------------------------------------------------------------------
 
-SLCSceneNode::SLCSceneNode ( const char* gname ) : SLCNode()
+SLCSceneNode::SLCSceneNode ( const char* gname ) : SLCNode(), name(gname)
 {
-    memset ( name, 0, sizeof(char)*32 );
-    strncpy ( name, gname, 32 );
 }
 
 string SLCSceneNode::toXML () const
@@ -47,11 +45,42 @@ string SLCSceneNode::toXML () const
 
 // --------------------------------------------------------------------------------
 
-SLCLayerNode::SLCLayerNode ( const char* lname, SLCMaterial* bindmaterial ) : SLCNode()
+SLCMaterial::SLCMaterial ( const char* nm ) : SLCNode()
 {
-    memset ( name, 0, sizeof(char)*32 );
-    strncpy ( name, lname, 32 );
-    bindmat = bindmaterial;
+    name = nm;
+    foreground_color = vec3i ( 0, 0, 0 );
+    background_color = vec3i ( 0, 0, 0 );
+    linetype = LINETYPE_SOLID;
+    linewidth = 0;
+    fontfilename = "";
+}
+
+string SLCMaterial::toXML () const
+{
+    stringstream ss;
+    ss << "<material id=\"" << name << "\">" << endl;
+    ss << "<color foregroud_color=\"" << foreground_color.x() << ' ' << foreground_color.y() << ' ' << foreground_color.z() << "\" background_color=\"" << background_color.x() << ' ' << background_color.y() << ' ' << background_color.z() << "\"/>" << endl;
+    ss << "<line type=\"";
+    switch ( linetype )
+    {
+    case LINETYPE_SOLID:
+	ss << "SOLID";
+	break;
+    case LINETYPE_DASH:
+	ss << "DASH";
+	break;
+    }
+    ss << "\" width=\"" << linewidth << "\"/>" << endl;
+    if ( fontfilename != "" )
+	ss << "<font path=\"" << fontfilename << "\"/>" << endl;
+    ss << "</material>" << endl;
+    return ss.str();
+}
+
+// --------------------------------------------------------------------------------
+
+SLCLayerNode::SLCLayerNode ( const char* lname, SLCMaterial* bindmaterial ) : SLCNode(), name(lname), bindmat(bindmaterial)
+{
 }
 
 string SLCLayerNode::toXML () const
@@ -161,33 +190,39 @@ string SLCRectNode::toXML () const
 
 // --------------------------------------------------------------------------------
 
-SLCMaterial::SLCMaterial ( const char* nm ) : SLCNode()
+SLCTextNode::SLCTextNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
 {
-    name = nm;
-    foreground_color = vec3i ( 0, 0, 0 );
-    background_color = vec3i ( 0, 0, 0 );
-    linetype = LINETYPE_SOLID;
-    linewidth = 0;
+    pos.xy(0, 0);
+    scale = 1;
+    rotz = 0;
+    text = "";
 }
 
-string SLCMaterial::toXML () const
+string SLCTextNode::toXML () const
 {
     stringstream ss;
-    ss << "<material id=\"" << name << "\">" << endl;
-    ss << "<color foregroud_color=\"" << foreground_color.x() << ' ' << foreground_color.y() << ' ' << foreground_color.z() << "\" background_color=\"" << background_color.x() << ' ' << background_color.y() << ' ' << background_color.z() << "\"/>" << endl;
-    ss << "<line type=\"";
-    switch ( linetype )
-    {
-    case LINETYPE_SOLID:
-	ss << "SOLID";
-	break;
-    case LINETYPE_DASH:
-	ss << "DASH";
-	break;
-    }
-    ss << "\" width=\"" << linewidth << "\"/>" << endl;
-    ss << "</material>" << endl;
+    ss << "<primitive type=\"text\" bindmaterial=\"" << bindmat->name << "\" pos=\"" << 
+	pos.x() << ' ' << pos.y() << "\" scale=\"" << scale << "\" rotz=\"" << rotz <<
+	"\">" << text << "</primitive>" << endl;
     return ss.str();
 }
 
 // --------------------------------------------------------------------------------
+
+SLCPLineNode::SLCPLineNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
+{
+}
+
+string SLCPLineNode::toXML () const
+{
+    stringstream ss;
+    ss << "<primitive type=\"pline\" bindmaterial=\"" << bindmat->name << "\">";
+    
+    for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
+	ss << pp->x() << ' ' << pp->y() << ' ';
+    ss <<"</primitive>" << endl;
+    return ss.str();
+}
+
+// --------------------------------------------------------------------------------
+

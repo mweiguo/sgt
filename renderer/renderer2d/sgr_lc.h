@@ -11,6 +11,7 @@ using namespace std;
 
 template < class T>
 class KdTree;
+class Font;
 // types
 struct GlobalLCRecord
 {
@@ -40,12 +41,14 @@ struct MaterialRecord
         LINETYPE_DASH
     };
     MaterialRecord ();
-    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype );
+    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype, const char* fontfilename );
     char name[32];
     vec3i background_color;
     vec3i foreground_color;
     float linewidth;
     int linetype;
+    char fontfile[32];
+    int fontIdx;
 };
 
 struct LayerRecord
@@ -106,7 +109,7 @@ struct DataGroup4
 
 struct DrawableRecord
 {
-    DrawableRecord ( int matidx );
+    DrawableRecord ( int matidx=-1 );
     int materialIdx;
 };
 
@@ -117,9 +120,34 @@ struct RectRecord : public DrawableRecord
     vec2f data[4];
 };
 
-typedef DataGroup2<vec2f> LineRecord;
+/* struct LineRecord : public DrawableRecord */
+/* { */
+/*     LineRecord (); */
+/*     LineRecord ( const vec2f& p0, const vec2f& p1, int matidx ); */
+/*     vec2f data[2]; */
+/* }; */
+
 typedef DataGroup3<vec2f> TriangleRecord;
+typedef DataGroup2<vec2f> LineRecord;
 //typedef DataGroup4<vec2f> RectRecord;
+
+struct TextRecord : public DrawableRecord
+{
+    TextRecord ();
+    TextRecord ( int b, const vec2f& offset, float s, float r, int sstart, int send, int matidx );
+    int start;
+    vec2f pos;
+    float scale;
+    float rotz;
+    int silhouetteStart, silhouetteEnd;
+};
+
+struct PLineRecord : public DrawableRecord
+{
+    PLineRecord ();
+    PLineRecord ( int s, int e, int matidx );
+    int start, end;
+};
 
 typedef DataGroup1<vec3f> VertexRecord;
 
@@ -131,17 +159,29 @@ struct LCEntry
     RecType LCRecords[1];
 };
 
-typedef LCEntry<GlobalLCRecord>      GlobalLCEntry;
-typedef LCEntry<LevelLCRecord>       LevelLCEntry;
-typedef LCEntry<SceneRecord>         SceneEntry;
-typedef LCEntry<MaterialRecord>      MaterialEntry;
-typedef LCEntry<LayerRecord>         LayerEntry;
-typedef LCEntry<LODRecord>           LODEntry;
-typedef LCEntry<LODPageRecord>       LODPageEntry;
-typedef LCEntry<LineRecord>          LineEntry;
-typedef LCEntry<TriangleRecord>      TriangleEntry;
-typedef LCEntry<RectRecord>          RectEntry;
-typedef LCEntry<VertexRecord>        VertexEntry;
+typedef LCEntry<GlobalLCRecord>       GlobalLCEntry;
+typedef LCEntry<LevelLCRecord>        LevelLCEntry;
+typedef LCEntry<SceneRecord>          SceneEntry;
+typedef LCEntry<MaterialRecord>       MaterialEntry;
+typedef LCEntry<LayerRecord>          LayerEntry;
+typedef LCEntry<LODRecord>            LODEntry;
+typedef LCEntry<LODPageRecord>        LODPageEntry;
+typedef LCEntry<LineRecord>           LineEntry;
+typedef LCEntry<TriangleRecord>       TriangleEntry;
+typedef LCEntry<TextRecord>           TextEntry;
+typedef LCEntry<RectRecord>           RectEntry;
+typedef LCEntry<PLineRecord>          PLineEntry;
+typedef LCEntry<VertexRecord>         VertexEntry;
+typedef LCEntry<char>                 TextBufferEntry;
+typedef LCEntry<vec2f>                TextSilhouetteBufferEntry;
+typedef LCEntry<vec2f>                PLineBufferEntry;
+
+struct TextSilhouetteRecord
+{
+    TextSilhouetteRecord () : isDirty(true) {}
+    vector<vec2f> silhouette;
+    bool isDirty;
+};
 
 // modify
 struct ModifyCommand
@@ -189,10 +229,18 @@ public:
     LODPageEntry         *lodpageEntry;
     LineEntry            *lineEntry;
     TriangleEntry        *triangleEntry;
+    TextEntry            *textEntry;
     RectEntry            *rectEntry;
+    PLineEntry           *plineEntry;
+    TextBufferEntry      *textBufferEntry;
+    TextSilhouetteBufferEntry *textSilhouetteBufferEntry;
+    PLineBufferEntry     *plineBufferEntry;
 
     // kdtree support
     vector< KdTree<int>* > kdtrees;
+    // auxiliary infomation
+    vector< Font* > fonts;
+/*     vector< TextSilhouetteRecord > textSilhouettes; */
 protected:
     // navigation
     int cursorDepth;  // base from 0

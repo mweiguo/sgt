@@ -36,8 +36,8 @@ protected:
 	lodpage->delayloading = false;
 	lodpage->imposter = true;
 	SLCRectNode* rc1 = new SLCRectNode ( mat );
-	rc1->pnts[0] = vec2f (0, 0); rc1->pnts[1] = vec2f (1, 0);
-	rc1->pnts[2] = vec2f (1, 1); rc1->pnts[3] = vec2f (0, 1);
+	rc1->pnts[0] = vec2f (0.0f, 0.0f); rc1->pnts[1] = vec2f (1.0f, 0.0f);
+	rc1->pnts[2] = vec2f (1.0f, 1.0f); rc1->pnts[3] = vec2f (0.0f, 1.0f);
 	SLCLODPageNode* lodpage2 = new SLCLODPageNode();
 	lodpage2->delayloading = true;
 	lodpage2->imposter = false;
@@ -79,9 +79,11 @@ protected:
 	_buildkdt = new BuildLCKdTree ( tmpkdt, option );
 	_buildkdt->build ();
 
+// 	cout << "tmpkdt._nodes.size = " << tmpkdt._nodes.size() << endl;
 	tmpkdt.save ( "test.idx" );
 	_kdt = new KdTree<int>();
 	_kdt->load ( "test.idx" );
+// 	cout << "_kdt->_nodes.size = " << _kdt->_nodes.size() << endl;
     }
     ~KdTreeRectTestCase1 ()
     {
@@ -105,11 +107,13 @@ protected:
 
 TEST_F ( KdTreeRectTestCase1, getMinMax ) {
     float minmax[4];
+    minmax[0] = minmax[1] = minmax[2] = minmax[3] = 0.0f;
+//     cout << "_nodes.size = " << _kdt->_nodes.size() << endl;
     _kdt->getMinMax ( minmax );
-    EXPECT_EQ ( 0, minmax[0] );
-    EXPECT_EQ ( 0, minmax[1] );
-    EXPECT_EQ ( 1, minmax[2] );
-    EXPECT_EQ ( 1, minmax[3] );
+    EXPECT_FLOAT_EQ ( 0, minmax[0] );
+    EXPECT_FLOAT_EQ ( 0, minmax[1] );
+    EXPECT_FLOAT_EQ ( 1, minmax[2] );
+    EXPECT_FLOAT_EQ ( 1, minmax[3] );
 }
 
 // ================================================================================

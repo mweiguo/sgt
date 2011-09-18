@@ -22,27 +22,29 @@ int main ( int argc, char* argv[] )
 	return 0;
     }
     list<SLCNode*> nodes;
-    SLCSceneNode scene ("test_scene");
+    SLCSceneNode scene ( "test_scene");
 
-    SLCMaterial* mat_layer = new SLCMaterial ("layer_material");
+    SLCMaterial* mat_layer = new SLCMaterial ( "layer_material");
     mat_layer->foreground_color = vec3i(155, 0, 0);
     mat_layer->background_color = vec3i(0, 0, 155);
     mat_layer->linetype = SLCMaterial::LINETYPE_SOLID;
     mat_layer->linewidth = 0;
+    mat_layer->fontfilename = "simsun.ttc";
     SLCMaterial* mat = new SLCMaterial ( "mat" );
-    mat->foreground_color = vec3i(155, 0, 0);
-    mat->background_color = vec3i(0, 44, 155);
+    mat->foreground_color = vec3i(155, 144, 0);
+    mat->background_color = vec3i(55, 44, 155);
     mat->linetype = SLCMaterial::LINETYPE_DASH;
     mat->linewidth = 1;
+    mat->fontfilename = "simhei.ttf";
     SLCLayerNode* layer = new SLCLayerNode ( "layer1", mat_layer );
     SLCLODNode* lod = new SLCLODNode();
     SLCLODPageNode* lodpage = new SLCLODPageNode();
     lodpage->delayloading = false;
-    lodpage->kdtree = "./lodpage1.idx";
+    lodpage->kdtree = "lodpage1.idx";
     lodpage->imposter = true;
     int x = 0;
     int y = 0;
-    for ( int i=0; i<20e4; i++ )
+    for ( int i=0; i<1; i++ )
     {
 	SLCMaterial* tmpMaterial;
 	if ( i%2 == 0 )
@@ -57,12 +59,29 @@ int main ( int argc, char* argv[] )
 	rc1->pnts[3] = vec2f (x,   y+1);
 	nodes.push_back ( rc1 );
 	lodpage->addChild ( rc1 );
-	x += 1;
-	if ( (i%9==0) && (i != 0) ) {
-	    y += 1;
+	x += 2;
+	if ( (i%179==0) && (i != 0) ) {
+	    y += 2;
 	    x = 0;
 	}
     }
+    SLCTextNode* txt = new SLCTextNode ( mat );
+    txt->pos.xy ( 0, -1 );
+    txt->scale = 1;
+    txt->rotz = 0;
+    txt->text = "`1234567890-=~!@#$%^&*()_+qwertyuiop[]\\asdfghjkl;'zxcvbnm,.QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
+//    txt->text = "1234567890";
+    nodes.push_back ( txt );
+    lodpage->addChild ( txt );
+
+    SLCPLineNode* pline = new SLCPLineNode ( mat );
+    pline->pnts.push_back ( vec2f(0,-2) );
+    pline->pnts.push_back ( vec2f(1,-2) );
+    pline->pnts.push_back ( vec2f(1,-1) );
+    pline->pnts.push_back ( vec2f(2,-1) );
+    pline->pnts.push_back ( vec2f(2,-3) );
+    nodes.push_back ( pline );
+    lodpage->addChild ( pline );
 
     scene.addChild ( mat_layer );
     scene.addChild ( mat );
@@ -77,11 +96,6 @@ int main ( int argc, char* argv[] )
     nodes.push_back ( lod );
     nodes.push_back ( lodpage );
 
-//     string t = scene.toXML();
-//     ofstream o1;
-//     o1.open ( "scene.xml" );
-//     o1 << t;
-//     o1.close ();
     // ********************************************************************************
     SLCNode2LC node2lc ( &scene );
     node2lc.convert ( argv[1] );
@@ -91,11 +105,11 @@ int main ( int argc, char* argv[] )
     
     LC nlc;
     clock_t t = clock();
-    nlc.load ( "geos.slc" );
+    nlc.load ( argv[1] );
     cout << "parse finished, elapse " << clock() - t << "(ms), kdtreesize = " << nlc.kdtrees.size() << endl;
 
     t = clock();
-    LCReport rpt ( nlc );
+    LCReport rpt ( nlc, 1 );
     rpt.printCounter ();
     cout << "traverse finished, elapse " << clock() - t << "(ms)" << endl;
 

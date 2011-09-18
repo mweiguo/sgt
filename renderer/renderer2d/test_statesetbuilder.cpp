@@ -4,9 +4,10 @@
 #include <ctime>
 #include "sgr_vfculler.h"
 #include "sgr_lcreport.h"
+#include "sgr_bboxupdater.h"
+#include "sgr_statesetbuilder.h"
 
 using namespace std;
-#include "sgr_statesetbuilder.h"
 
 int main ( int argc, char* argv[] )
 {
@@ -20,7 +21,10 @@ int main ( int argc, char* argv[] )
     clock_t t = clock();
     lc.load ( argv[1] );
     cout << "load LC ok, elapse " << clock() - t << "(ms)" << endl;
-
+    // update bbox
+    lc.toElement ( ROOT );
+    BBox2dUpdater::forward_update ( lc );
+    
     t = clock();
     vfculler vfc;
     vec2f min = vec2f ( -1, -1 );
@@ -37,7 +41,7 @@ int main ( int argc, char* argv[] )
     o.open ( argv[2] );
     o << xml;
     o.close ();
-    StateSetBuilder::freeStateSets ( StateSetBuilder::root );
+    StateSetBuilder::clear();
 
     LCReport rpt ( lc );
     rpt.printCounter();

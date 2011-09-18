@@ -21,14 +21,16 @@ USER_DIR = ../renderer/renderer2d
 USER_DIR2 = ../graphbase
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include -I$(USER_DIR) -I$(USER_DIR2)
+CPPFLAGS += -I$(GTEST_DIR)/include -I$(USER_DIR) -I$(USER_DIR2) -I../thirdparty/utf8_v2_3_1/source/
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra
 
+LINKFLAGS += -lfreetype -lpthread -lopengl32
+
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = tst_bboxupdater tst_buildkdtreecase1 tst_buildkdtreecase2 tst_kdtreecase2 tst_math
+TESTS = tst_bboxupdater tst_buildkdtreecase1 tst_buildkdtreecase2 tst_kdtreerect1 tst_kdtreecase2 tst_kdtreetext1 tst_math
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -42,12 +44,14 @@ all : $(TESTS)
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o *.idx *.exe
 
-run : 
+run : all
 	./tst_math
 	./tst_bboxupdater
 	./tst_buildkdtreecase1
 	./tst_buildkdtreecase2
+	./tst_kdtreerect1
 	./tst_kdtreecase2
+	./tst_kdtreetext1
 # Builds gtest.a and gtest_main.a.
 
 # Usually you shouldn't tweak such internal variables, indicated by a
@@ -88,12 +92,21 @@ tst_buildkdtreecase1.o : tst_buildkdtreecase1.cpp $(GTEST_HEADERS)
 tst_buildkdtreecase2.o : tst_buildkdtreecase2.cpp $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_buildkdtreecase2.cpp
 
+tst_kdtreerect1.o : tst_kdtreerect1.cpp $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_kdtreerect1.cpp
+
 tst_kdtreecase2.o : tst_kdtreecase2.cpp $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_kdtreecase2.cpp
+
+tst_kdtreetext1.o : tst_kdtreetext1.cpp $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_kdtreetext1.cpp
 
 ########################## user code ############################
 sgr_lc.o : $(USER_DIR)/sgr_lc.h $(USER_DIR)/sgr_lc.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_lc.cpp
+
+sgr_font.o : $(USER_DIR)/sgr_font.h $(USER_DIR)/sgr_font.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_font.cpp
 
 sgr_node2lc.o : $(USER_DIR)/sgr_node2lc.h $(USER_DIR)/sgr_node2lc.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_node2lc.cpp
@@ -111,16 +124,22 @@ sgr_math.o : $(USER_DIR2)/sgr_math.h $(USER_DIR2)/sgr_math.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/sgr_math.cpp
 
 tst_math : gtest_main.a tst_math.o sgr_math.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_buildkdtreecase1 : gtest_main.a tst_buildkdtreecase1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+tst_buildkdtreecase1 : gtest_main.a tst_buildkdtreecase1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_buildkdtreecase2 : gtest_main.a tst_buildkdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+tst_buildkdtreecase2 : gtest_main.a tst_buildkdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_kdtreecase2 : gtest_main.a tst_kdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+tst_kdtreerect1 : gtest_main.a tst_kdtreerect1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+tst_kdtreecase2 : gtest_main.a tst_kdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
+
+tst_kdtreetext1 : gtest_main.a tst_kdtreetext1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
+
+tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o sgr_font.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)

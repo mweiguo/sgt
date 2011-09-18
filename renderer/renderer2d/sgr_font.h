@@ -1,20 +1,22 @@
-#ifndef _FONT_LIB_H_
-#define _FONT_LIB_H_
+#ifndef _FONT_H_
+#define _FONT_H_
 
-#include <map>
+#include <vector>
 #include <string>
-#include <GL/gl.h>
-class FontLib
+
+class Font
 {
 public:
-    FontLib ( const char* filename );
-    void displayText ( const std::wstring& str );    
+    Font ( const char* filename );
+    void drawText ( const char* str );    
+    void getSize ( const char* str, float& w, float& h );
+    std::string fontfilename;
+    std::vector<float> widths;
+    std::vector<float> heights;
 private:
-    GLuint list_base;
-    GLuint texture_base[256];
-    int char_num;
-    static const std::wstring charset;
-    std::map<wchar_t, unsigned int> charmap;
+    unsigned int list_base;
+    unsigned int texture_base[128];
+    unsigned int chnum;
 };
 
-#endif // _FONT_LIB_H_
+#endif // _FONT_H_
