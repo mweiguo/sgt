@@ -102,16 +102,16 @@ bool rect_outside ( float* rc, const BBox2d& rhs )
 
 bool poly_outside ( float* poly, int pntcnt, const BBox2d& rhs )
 {
-    cout << "pntcnt = " << pntcnt << endl;
+//    cout << "pntcnt = " << pntcnt << endl;
     pntcnt--;
     for ( int i=0; i<pntcnt; i++ )
     {
-	cout << *(poly+i) << ' ' << *(poly+i+1) << ' ' << *(poly+i+2) << ' ' << *(poly+i+3) << ' ' << endl;
+//	cout << *(poly+i) << ' ' << *(poly+i+1) << ' ' << *(poly+i+2) << ' ' << *(poly+i+3) << ' ' << endl;
         if ( false == line_outside ( poly+i, rhs ) ){
-	    cout << "return false" << endl;
+//	    cout << "return false" << endl;
 	    return false;
 	}
     }
-    cout << "return true" << endl;
+//    cout << "return true" << endl;
     return true;
 }

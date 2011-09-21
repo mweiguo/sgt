@@ -47,6 +47,7 @@ public:
     int linetype;
     float linewidth;
     string fontfilename;
+    string texturefilename;
 };
 
 class SLCLayerNode : public SLCNode
@@ -89,6 +90,20 @@ public:
     SLCMaterial* bindmat;
 };
 
+class SLCFillablePrimitiveNode : public SLCPrimitiveNode
+{
+public:
+    SLCFillablePrimitiveNode ( SLCMaterial* mat ) : SLCPrimitiveNode(mat) { 
+	textureScale = 0;
+	textureAngle = 0;
+	filltexture = false;
+    }
+    virtual string toXML () const;
+    float textureScale;
+    float textureAngle;
+    bool filltexture;
+};
+
 class SLCLineNode : public SLCNode
 {
 public:
@@ -107,10 +122,10 @@ public:
     vec3f pnts[3];
 };
 
-class SLCRectNode : public SLCPrimitiveNode
+class SLCRectNode : public SLCFillablePrimitiveNode
 {
 public:
-    SLCRectNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat) {}
+    SLCRectNode ( SLCMaterial* mat );
     virtual int getType () { return SLC_RECT; }
     virtual string toXML () const;
     vec2f pnts[4];
@@ -133,6 +148,15 @@ class SLCPLineNode : public SLCPrimitiveNode
 public:
     SLCPLineNode ( SLCMaterial* mat );
     virtual int getType () { return SLC_PLINE; }
+    virtual string toXML () const;
+    vector<vec2f> pnts;
+};
+
+class SLCPolyNode : public SLCFillablePrimitiveNode
+{
+public:
+    SLCPolyNode ( SLCMaterial* mat );
+    virtual int getType () { return SLC_POLY; }
     virtual string toXML () const;
     vector<vec2f> pnts;
 };

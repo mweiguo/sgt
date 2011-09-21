@@ -24,10 +24,13 @@ public:
     vector<TriangleRecord> 	tridata;
     vector<RectRecord>     	quaddata;
     vector<PLineRecord>     	plinedata;
+    vector<PolyRecord>     	polydata;
     vector<TextRecord>     	textdata;
     vector<char>                textbuffer;
     vector<vec2f>               textsilhouettebuffer;
     vector<vec2f>               plinebuffer;
+    vector<vec2f>               polytessellationbuffer;
+    vector<vec2f>               texturecoordbuffer;
     map<string, int>            materialMap;
 
 private:
@@ -42,6 +45,7 @@ private:
     int triIdx;
     int rectIdx;
     int plineIdx;
+    int polyIdx;
     int textIdx;
     int matIdx;
 };

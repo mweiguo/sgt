@@ -18,7 +18,8 @@ public:
 	FOREGROUND_COLOR,
 	BACKGROUND_COLOR,
 	LINE_TYPE,
-	LINE_WIDTH
+	LINE_WIDTH,
+	TEXTURE
     };
     State ( StateType t, int value, StateFlag f );
     State ( StateType t, float value, StateFlag f );
@@ -43,7 +44,7 @@ public:
     vector<int> renderObjects;
 
     StateSet ();
-    StateSet* CreateOrReuseStateSet ( MaterialRecord* mat );
+    StateSet* CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat );
     int getMatchCount ( MaterialRecord* mat );    
     void addState ( const State& rhs );
     State* getState ( State::StateType type );

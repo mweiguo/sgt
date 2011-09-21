@@ -1,4 +1,5 @@
 #include "sgr_font.h"
+#include "sgr_texture.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <iostream>

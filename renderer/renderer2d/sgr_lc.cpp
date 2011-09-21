@@ -11,6 +11,7 @@
 #include "vec4.h"
 #include "kdtree.h"
 #include "sgr_font.h"
+#include "sgr_texture.h"
 #include <ctime>
 using namespace std;
 
@@ -41,9 +42,10 @@ MaterialRecord::MaterialRecord ()
     linetype = LINETYPE_SOLID;
     memset  ( fontfile,  0, 32 * sizeof(char) ); 
     fontIdx = -1;
+    memset  ( texturefile,  0, 32 * sizeof(char) ); 
 }
 
-MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt, const char* fontfilename )
+MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt, const char* fontfilename, const char* texfilename )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
@@ -54,6 +56,8 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& f
     memset  ( fontfile,  0, 32 * sizeof(char) ); 
     strncpy ( fontfile, fontfilename, 32 ); 
     fontIdx = -1;
+    memset  ( texturefile,  0, 32 * sizeof(char) ); 
+    strncpy ( texturefile, texfilename, 32 ); 
 }
 
 // --------------------------------------------------------------------------------
@@ -93,6 +97,15 @@ DrawableRecord::DrawableRecord ( int matidx ) : materialIdx(matidx)
 
 // --------------------------------------------------------------------------------
 
+FillableRecord::FillableRecord ( bool isFillTexture, float texang, float texscale, int matidx )
+    : DrawableRecord(matidx)
+{
+    filltexture = isFillTexture;
+    textureAngle = texang;
+    textureScale = texscale;
+}
+
+// --------------------------------------------------------------------------------
 RectRecord::RectRecord ()
 {
     data[0].xy ( 0.0f, 0.0f );
@@ -101,8 +114,8 @@ RectRecord::RectRecord ()
     data[3].xy ( 0.0f, 0.0f );
 }
 
-RectRecord::RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, int matidx )
-    : DrawableRecord(matidx)
+RectRecord::RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, bool isFillTexture, float texang, float texscale, int matidx )
+    : FillableRecord ( isFillTexture, texang, texscale, matidx)
 {
     data[0] = p0;
     data[1] = p1;
@@ -151,6 +164,7 @@ TextRecord::TextRecord ( int b, const vec2f& offset, float s, float r, int sstar
 
 PLineRecord::PLineRecord()
 {
+    start = end = -1;
 }
 
 PLineRecord::PLineRecord ( int s, int e, int matidx )
@@ -158,6 +172,24 @@ PLineRecord::PLineRecord ( int s, int e, int matidx )
 {
     start = s;
     end = e;
+}
+
+// --------------------------------------------------------------------------------
+
+PolyRecord::PolyRecord ()
+{
+    start = end = texcoordstart = texcoordend = tessellationstart = tessellationend = -1; 
+}
+
+PolyRecord::PolyRecord ( int s, int e, int ts, int te, int tessStart, int tessEnd, bool isFillTexture, float texang, float texscale, int matidx )
+    : FillableRecord( isFillTexture, texang, texscale, matidx )
+{
+    start = s;
+    end = e;
+    texcoordstart = ts;
+    texcoordend = te;
+    tessellationstart = tessStart;
+    tessellationend = tessEnd;
 }
 
 // --------------------------------------------------------------------------------
@@ -174,9 +206,13 @@ LC::LC ()
     textEntry          = 0;
     rectEntry          = 0;
     plineEntry         = 0;
+    polyEntry          = 0;
     textBufferEntry    = 0;
     textSilhouetteBufferEntry = 0;
     plineBufferEntry   = 0;
+    polyTessellationBufferEntry = 0;
+    texCoordBufferEntry = 0;
+
     cursorDepth = 0;
     memset ( cursor, 0, sizeof(int)*256);
 }
@@ -235,6 +271,11 @@ void LC::save ( const char* filename )
         PLineEntry tmp; out.write ( (char*)&tmp, sizeof(PLineEntry) );
     } else
         out.write ( (char*)plineEntry, plineEntry->LCLen * sizeof(PLineRecord) + sizeof(int) );
+    // write poly data
+    if ( NULL==polyEntry || 0==polyEntry->LCLen ) {
+        PolyEntry tmp; out.write ( (char*)&tmp, sizeof(PolyEntry) );
+    } else
+        out.write ( (char*)polyEntry, polyEntry->LCLen * sizeof(PolyRecord) + sizeof(int) );
     // write text data
     if ( NULL==textEntry || 0==textEntry->LCLen ) {
         TextEntry tmp; out.write ( (char*)&tmp, sizeof(TextEntry) );
@@ -258,6 +299,20 @@ void LC::save ( const char* filename )
 	out.write ( (char*)&tmp, sizeof(PLineBufferEntry) );
     } else {
         out.write ( (char*)plineBufferEntry, plineBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
+    }
+    // write poly tessellation buffer data
+    if ( NULL==polyTessellationBufferEntry || 0==polyTessellationBufferEntry->LCLen ) {
+	PolyTessellationBufferEntry tmp;
+	out.write ( (char*)&tmp, sizeof(PolyTessellationBufferEntry) );
+    } else {
+        out.write ( (char*)polyTessellationBufferEntry, polyTessellationBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
+    }
+    // write texcoord buffer data
+    if ( NULL==texCoordBufferEntry || 0==texCoordBufferEntry->LCLen ) {
+	TexCoordBufferEntry tmp;
+	out.write ( (char*)&tmp, sizeof(TexCoordBufferEntry) );
+    } else {
+        out.write ( (char*)texCoordBufferEntry, texCoordBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
     }
 
     // write globalLCEntry
@@ -334,6 +389,27 @@ bool LC::load ( const char* filename )
 	    fonts.push_back ( ft );
 	}
     }
+      // process textures
+    for ( int ii=0; ii<materialEntry->LCLen; ii++ )
+    {
+	Texture* tex = 0;
+	MaterialRecord& mr = materialEntry->LCRecords[ii];
+	for ( size_t jj=0; jj<textures.size(); jj++ )
+	{
+	    if ( textures[jj]->texturefilename == mr.texturefile ) {
+		tex = textures[jj];
+		mr.textureIdx = jj;
+		break;
+	    }
+	}
+	if ( NULL == tex ) {
+ 	    tex = new Texture ( mr.texturefile );
+	    if ( tex->texture == 0 )
+		cerr << "load texture '" << mr.texturefile << "' failed" << endl;
+	    mr.textureIdx = textures.size();
+	    textures.push_back ( tex );
+	}
+    }
     
     // read layer data
     in.read ( (char*)&length, sizeof(int) );
@@ -377,6 +453,12 @@ bool LC::load ( const char* filename )
     plineEntry = (PLineEntry*)malloc ( sizeof(int) + sz );
     plineEntry->LCLen = length;
     in.read ( (char*)plineEntry->LCRecords, sz );
+    // read poly data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(PolyRecord) : sizeof(PolyRecord) * length;
+    polyEntry = (PolyEntry*)malloc ( sizeof(int) + sz );
+    polyEntry->LCLen = length;
+    in.read ( (char*)polyEntry->LCRecords, sz );
     // read text data
     in.read ( (char*)&length, sizeof(int) );
     sz = length==0 ? sizeof(TextRecord) : sizeof(TextRecord) * length;
@@ -398,12 +480,23 @@ bool LC::load ( const char* filename )
     textSilhouetteBufferEntry->LCLen = length;
     in.read ( (char*)textSilhouetteBufferEntry->LCRecords, sz-sizeof(int) );
     // read pline buffer data
-//    cout << "read pline buffer data" << endl;
     in.read ( (char*)&length, sizeof(int) );
     sz = length==0 ? sizeof(PLineBufferEntry) : (sizeof(int) + sizeof(vec2f) * length);
     plineBufferEntry = (PLineBufferEntry*)malloc ( sz );
     plineBufferEntry->LCLen = length;
     in.read ( (char*)plineBufferEntry->LCRecords, sz-sizeof(int) );
+    // read poly tessellation buffer data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(PolyTessellationBufferEntry) : (sizeof(int) + sizeof(vec2f) * length);
+    polyTessellationBufferEntry = (PolyTessellationBufferEntry*)malloc ( sz );
+    polyTessellationBufferEntry->LCLen = length;
+    in.read ( (char*)polyTessellationBufferEntry->LCRecords, sz-sizeof(int) );
+    // read texcoord buffer data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(TexCoordBufferEntry) : (sizeof(int) + sizeof(vec2f) * length);
+    texCoordBufferEntry = (TexCoordBufferEntry*)malloc ( sz );
+    texCoordBufferEntry->LCLen = length;
+    in.read ( (char*)texCoordBufferEntry->LCRecords, sz-sizeof(int) );
 
     // read GlobalLCEntry
     in.read ( (char*)&length, sizeof(int) );
@@ -455,10 +548,13 @@ void LC::free ()
     ::free ( triangleEntry );
     ::free ( rectEntry );
     ::free ( plineEntry );
+    ::free ( polyEntry );
     ::free ( textEntry );
     ::free ( textBufferEntry );
     ::free ( textSilhouetteBufferEntry );
     ::free ( plineBufferEntry );
+    ::free ( polyTessellationBufferEntry );
+    ::free ( texCoordBufferEntry );
     ::free ( globalLCEntry );
     for ( int i=0; i<256; i++ )
     {
@@ -478,10 +574,13 @@ void LC::free ()
     triangleEntry = 0;
     rectEntry = 0;
     plineEntry = 0;
+    polyEntry = 0;
     textEntry = 0;
     textBufferEntry = 0;
     textSilhouetteBufferEntry = 0;
     plineBufferEntry = 0;
+    polyTessellationBufferEntry = 0;
+    texCoordBufferEntry = 0;
     globalLCEntry = 0;
 }
 
@@ -721,6 +820,30 @@ void LC::updateMinMax ()
 		bbox.expandby ( plineBufferEntry->LCRecords[i] );
 	    }
 	}
+	break;
+    }
+    case SLC_POLY:
+    {
+//	vector<vec2f> input, output;
+	// update minmax
+	PolyRecord& poly = polyEntry->LCRecords[grecord.value];
+	if ( poly.start < poly.end )
+	{
+	    bbox.init ( plineBufferEntry->LCRecords[poly.start] );
+//	    input.push_back ( plineBufferEntry->LCRecords[poly.start] );
+	    for ( int i=poly.start; i<poly.end; i++ )
+	    {
+		bbox.expandby ( plineBufferEntry->LCRecords[i] );
+//		input.push_back ( plineBufferEntry->LCRecords[i] );
+	    }
+	}
+// 	// update tessellation points
+// 	Triangulate::Process ( input, back_inserter(output) );
+// 	int j = 0;
+// 	for ( int i=poly.tessellationstart; i!=poly.tessellationend; i++ )
+// 	{
+// 	    polyTessellationBufferEntry->LCRecords[i] = output[j++];
+// 	}
 	break;
     }
     case SLC_LINE:

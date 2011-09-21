@@ -190,6 +190,7 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 	    istart = -leftnode->first-1;
 	    for ( int i=istart; i!=iend; i++ ) 
 		*out++ = _primitives[i];
+	    return true;
 	}
 	else
 	{
@@ -207,6 +208,7 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 	{
 	    int istart = -node.first-1;
 	    int iend = istart + node.second;
+	    bool isHit = false;
 	    for ( int i=istart; i!=iend; i++ ) 
 	    {
 		GlobalLCRecord& grd = lc->globalLCEntry->LCRecords[ _primitives[i] ];
@@ -215,8 +217,10 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		case SLC_LINE:
 		{
 		    LineRecord& lrd = lc->lineEntry->LCRecords[grd.value];
-		    if ( false == line_outside ( (float*)lrd.data, minmax ) )
+		    if ( false == line_outside ( (float*)lrd.data, minmax ) ) {
 			*out++ = _primitives[i];
+			isHit = true;
+		    }
 		    break;
 		}
 		case SLC_PLINE:
@@ -226,6 +230,20 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		    {
 			if ( false == line_outside ( (float*)(lc->plineBufferEntry->LCRecords + ii), minmax ) ) {
 			    *out++ = _primitives[i];
+			    isHit = true;
+			    break;
+			}
+		    }
+		    break;
+		}
+		case SLC_POLY:
+		{
+		    PolyRecord& poly = lc->polyEntry->LCRecords[grd.value];
+		    for ( int ii=poly.start; ii<poly.end; ii++ )
+		    {
+			if ( false == line_outside ( (float*)(lc->plineBufferEntry->LCRecords + ii), minmax ) ) {
+			    *out++ = _primitives[i];
+			    isHit = true;
 			    break;
 			}
 		    }
@@ -234,27 +252,36 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		case SLC_TRIANGLE:
 		{
 		    TriangleRecord& trd = lc->triangleEntry->LCRecords[grd.value];
-		    if ( false == tri_outside ( (float*)trd.data, minmax ) )
+		    if ( false == tri_outside ( (float*)trd.data, minmax ) ) {
 			*out++ = _primitives[i];
+			isHit = true;
+		    }
 		    break;
 		}
 		case SLC_RECT:
 		{
 		    RectRecord& rrd = lc->rectEntry->LCRecords[grd.value];
-		    if ( false == rect_outside ( (float*)rrd.data, minmax ) )
+		    if ( false == rect_outside ( (float*)rrd.data, minmax ) ) {
 			*out++ = _primitives[i];
+			isHit = true;
+		    }
 		    break;
 		}
 		case SLC_TEXT:
 		{
 		    TextRecord& text = lc->textEntry->LCRecords[grd.value];
 		    if ( false == poly_outside ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
-						 text.silhouetteEnd - text.silhouetteStart , minmax ) )
+						 text.silhouetteEnd - text.silhouetteStart , minmax ) ) {
 			*out++ = _primitives[i];
+			isHit = true;
+		    }
 		    break;
 		}
+		default:
+		    break;
 		}
 	    }
+	    return isHit;
 	}
     }
 

@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <GL/gl.h>
 #include "sgr_font.h"
+#include "sgr_texture.h"
 
 //================================================================================
 
@@ -53,16 +54,20 @@ void State::applyState ()
     switch ( type )
     {
     case FOREGROUND_COLOR:
-// 	cout << "State::applyState, FOREGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.x() << ", " << vec3iValue.z() << endl;
-	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
+//  	cout << "State::applyState, FOREGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
+// 	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
-// 	cout << "State::applyState, BACKGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.x() << ", " << vec3iValue.z() << endl;
-	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
+ 	cout << "State::applyState, BACKGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
+	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.y()/255.0f, vec3iValue.z()/255.0f );
 	break;
     case LINE_TYPE:
 	break;
     case LINE_WIDTH:
+	break;
+    case TEXTURE:
+	cout << "bind texture : " << intValue << endl;
+	glBindTexture ( GL_TEXTURE_2D, intValue );
 	break;
     }
 }
@@ -80,13 +85,13 @@ StateSet::StateSet ()
  * if return NULL, stateset not matched
  * else return a stateset
  */
-StateSet* StateSet::CreateOrReuseStateSet ( MaterialRecord* mat )
+StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 {
     if ( parent == NULL ) // root
     {
 	for ( int i=0; i<children.size(); i++ )
 	{
-	    StateSet* t = children[i]->CreateOrReuseStateSet ( mat );
+	    StateSet* t = children[i]->CreateOrReuseStateSet ( lc, mat );
 	    if ( t != NULL )
 		return t;
 	} 
@@ -96,6 +101,8 @@ StateSet* StateSet::CreateOrReuseStateSet ( MaterialRecord* mat )
 	tss->addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::INHERIT) );
 	tss->addState ( State(State::LINE_TYPE, mat->linetype,   State::INHERIT) );
 	tss->addState ( State(State::LINE_WIDTH, mat->linewidth, State::INHERIT) );
+	Texture* tex = lc->textures[mat->textureIdx];
+	tss->addState ( State(State::TEXTURE, (int)tex->texture, State::INHERIT) );
 	addChild ( tss );
 	return tss;
     }
@@ -107,8 +114,8 @@ StateSet* StateSet::CreateOrReuseStateSet ( MaterialRecord* mat )
 
 	/**
 	 * matchCount == 0        create new StateSet as this's sibling
-	 * matchCount < max(4)    create a new StateSet(nss) as this's descendant
-	 * matchCount = max(4)    just return this
+	 * matchCount < max(5)    create a new StateSet(nss) as this's descendant
+	 * matchCount = max(5)    just return this
 	 */
 
 	// calculate match count
@@ -136,19 +143,26 @@ StateSet* StateSet::CreateOrReuseStateSet ( MaterialRecord* mat )
 	    else
 		cnt ++;
 	}
+	if ( (state=getState ( State::TEXTURE )) != NULL ) {
+	    Texture* tex = lc->textures[mat->textureIdx];
+	    if ( state->intValue != tex->texture )
+		nss.addState ( State(State::TEXTURE, (int)tex->texture, State::OVERWRITE) );
+	    else
+		cnt ++;
+	}
 
 	if ( cnt == 0 ) {
 	    return NULL;
-	} else if ( cnt == 4 ) {
+	} else if ( cnt == 5 ) {
 	    return this;
-	} else if ( cnt < 4 ) {
+	} else if ( cnt < 5 ) {
 	    if ( cnt < parent->getMatchCount(mat) )
 		return NULL;
 
 	    // if this node not leaf
 	    for ( int i=0; i<children.size(); i++ )
 	    {
-		StateSet* t = children[i]->CreateOrReuseStateSet ( mat );
+		StateSet* t = children[i]->CreateOrReuseStateSet ( lc, mat );
 		if ( t != NULL )
 		    return t;
 	    }
@@ -272,7 +286,6 @@ void StateSet::pushAttributes ()
 {
     if ( parent == NULL )
 	return;
-//    cout << "StateSet::pushAttributes" << endl;
     glPushAttrib ( GL_CURRENT_BIT | GL_LINE_BIT );
 }
 
@@ -282,7 +295,6 @@ void StateSet::popAttributes ()
 {
     if ( parent == NULL )
 	return;
-//    cout << "StateSet::popAttributes" << endl;
     glPopAttrib ();
 }
 
@@ -292,7 +304,6 @@ void StateSet::applyStates ()
 {
     if ( parent == NULL )
 	return;
-//    cout << "StateSet::applyStates" << endl;
     for ( vector<State>::iterator pp=states.begin(); pp!=states.end(); ++pp )
 	pp->applyState ();
 }
@@ -302,16 +313,14 @@ void StateSet::applyStates ()
 void StateSet::render ( LC* lc )
 {
     vector<float> rects;
-    vector<float> plines;
+    vector<float> polys;
     vector<TextRecord*> texts;
     for ( vector<int>::iterator pp=renderObjects.begin(); pp!=renderObjects.end(); ++pp )
     {
 	// get primitive
 	GlobalLCRecord& g = lc->globalLCEntry->LCRecords[*pp];
-//	cout << *pp << ' ';
 	switch ( g.type )
 	{ 
-
 	case SLC_RECT:
 	{
 	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
@@ -327,47 +336,52 @@ void StateSet::render ( LC* lc )
 	}
 	case SLC_PLINE:
 	{
+	    cout << "draw pline" << endl;
+	    glDisable ( GL_TEXTURE_2D );
 	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
-	    float* begin = (float*)(lc->plineBufferEntry->LCRecords + pline.start);
-	    float* end   = (float*)(lc->plineBufferEntry->LCRecords + pline.end);
-	    copy ( begin, end, back_inserter(plines) );
+	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
+	    glDrawArrays ( GL_LINE_STRIP, 0, pline.end - pline.start );
+	    glEnable ( GL_TEXTURE_2D );
+	    break;
+	}
+	case SLC_POLY:
+	{
+	    glDisable ( GL_TEXTURE_2D );
+	    cout << "draw poly" << endl;
+//	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+	    PolyRecord& poly = lc->polyEntry->LCRecords[g.value];
+	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
+//	    glTexCoordPointer ( 2, GL_FLOAT, 0, (float*)(lc->texCoordBufferEntry->LCRecords + poly.texcoordstart) );
+	    glDrawArrays ( GL_TRIANGLES, 0, poly.tessellationend - poly.tessellationstart );
+//	    glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
+	    glEnable ( GL_TEXTURE_2D );
 	    break;
 	}
 	}
     }
-//    cout << endl;
 
     // draw rects
     if ( false == rects.empty() ) {
+	cout << "draw rects" << endl;
 	glDisable ( GL_TEXTURE_2D );
 	glVertexPointer ( 2, GL_FLOAT, 0, &(rects[0]) );
 	glDrawArrays ( GL_QUADS, 0, rects.size()/2 );
 	glEnable ( GL_TEXTURE_2D );
     }
 
-    // draw pline
-    if ( false == plines.empty() ) {
-	glDisable ( GL_TEXTURE_2D );
-	glVertexPointer ( 2, GL_FLOAT, 0, &(plines[0]) );
-	glDrawArrays ( GL_LINE_STRIP, 0, plines.size()/2 );
-	glEnable ( GL_TEXTURE_2D );
-    }
-
     // draw text
     for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
     {
+	cout << "draw text" << endl;
 	TextRecord* tr = *pp;
 	glPushMatrix ();
 	glRotatef ( tr->rotz, 0, 0, 1 );
 	glScalef ( tr->scale, tr->scale, tr->scale );
 	glTranslatef ( tr->pos.x(), tr->pos.y(), 0 );
 	// get material
-//	cout << "material index = " << tr->materialIdx << endl;
 	MaterialRecord& mr = lc->materialEntry->LCRecords[ tr->materialIdx ];
-//	cout << "font index = " << mr.fontIdx << endl;
 	// get font
 	Font* font = lc->fonts[ mr.fontIdx ];
-//	cout << "-----------------++++++++++++++++++++" << lc->textBufferEntry->LCRecords + tr->start << endl;
 	font->drawText ( lc->textBufferEntry->LCRecords + tr->start );
 	glPopMatrix ();
     }

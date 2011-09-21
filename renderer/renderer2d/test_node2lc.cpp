@@ -6,6 +6,8 @@ using namespace std;
 #include "sgr_lc.h"
 #include "sgr_node2lc.h"
 #include "sgr_lcreport.h"
+#include <IL/il.h>
+#include <IL/ilut.h>
 
 /**
  * --builddata (-b)
@@ -21,21 +23,25 @@ int main ( int argc, char* argv[] )
 	cout << argv[0] << " will generate a slc file & idx files" << endl;
 	return 0;
     }
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
     list<SLCNode*> nodes;
     SLCSceneNode scene ( "test_scene");
 
     SLCMaterial* mat_layer = new SLCMaterial ( "layer_material");
     mat_layer->foreground_color = vec3i(155, 0, 0);
-    mat_layer->background_color = vec3i(0, 0, 155);
+    mat_layer->background_color = vec3i(155, 0, 155);
     mat_layer->linetype = SLCMaterial::LINETYPE_SOLID;
     mat_layer->linewidth = 0;
     mat_layer->fontfilename = "simsun.ttc";
+    mat_layer->texturefilename = "hands.jpg";
     SLCMaterial* mat = new SLCMaterial ( "mat" );
     mat->foreground_color = vec3i(155, 144, 0);
-    mat->background_color = vec3i(55, 44, 155);
+    mat->background_color = vec3i(44, 155, 155);
     mat->linetype = SLCMaterial::LINETYPE_DASH;
     mat->linewidth = 1;
     mat->fontfilename = "simhei.ttf";
+    mat->texturefilename = "hands.jpg";
     SLCLayerNode* layer = new SLCLayerNode ( "layer1", mat_layer );
     SLCLODNode* lod = new SLCLODNode();
     SLCLODPageNode* lodpage = new SLCLODPageNode();
@@ -65,7 +71,7 @@ int main ( int argc, char* argv[] )
 	    x = 0;
 	}
     }
-    SLCTextNode* txt = new SLCTextNode ( mat );
+    SLCTextNode* txt = new SLCTextNode ( mat_layer );
     txt->pos.xy ( 0, -1 );
     txt->scale = 1;
     txt->rotz = 0;
@@ -82,6 +88,27 @@ int main ( int argc, char* argv[] )
     pline->pnts.push_back ( vec2f(2,-3) );
     nodes.push_back ( pline );
     lodpage->addChild ( pline );
+
+    SLCPLineNode* pline2 = new SLCPLineNode ( mat );
+    pline2->pnts.push_back ( vec2f(3,0) );
+    pline2->pnts.push_back ( vec2f(4,0) );
+    pline2->pnts.push_back ( vec2f(4,1) );
+    pline2->pnts.push_back ( vec2f(5,1) );
+    pline2->pnts.push_back ( vec2f(5,-1) );
+    nodes.push_back ( pline2 );
+    lodpage->addChild ( pline2 );
+
+    SLCPolyNode* poly = new SLCPolyNode ( mat );
+    poly->textureScale = 2;
+    poly->textureAngle = 45;
+    poly->filltexture  = true;
+    poly->pnts.push_back ( vec2f(0,2) );
+    poly->pnts.push_back ( vec2f(1,2) );
+    poly->pnts.push_back ( vec2f(1,3) );
+    poly->pnts.push_back ( vec2f(2,3) );
+    poly->pnts.push_back ( vec2f(2,1) );
+    nodes.push_back ( poly );
+    lodpage->addChild ( poly );
 
     scene.addChild ( mat_layer );
     scene.addChild ( mat );

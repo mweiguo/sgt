@@ -6,6 +6,8 @@
 #include "sgr_lcreport.h"
 #include "sgr_bboxupdater.h"
 #include "sgr_statesetbuilder.h"
+#include <IL/il.h>
+#include <IL/ilut.h>
 
 using namespace std;
 
@@ -17,6 +19,8 @@ int main ( int argc, char* argv[] )
 	return 0;
     }
 
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
     LC lc;
     clock_t t = clock();
     lc.load ( argv[1] );

@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <ctime>
+#include <IL/il.h>
+#include <IL/ilut.h>
 using namespace std;
 int main ( int argc, char* argv[] )
 {
@@ -11,6 +13,8 @@ int main ( int argc, char* argv[] )
         cout << "usage : " << argv[0] << " slcFileName" << endl;
         return 0;
     }
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
     LC lc;
     clock_t t = clock();
     lc.load ( argv[1] );

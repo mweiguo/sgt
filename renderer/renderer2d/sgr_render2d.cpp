@@ -9,6 +9,8 @@
 #include <GL/glu.h>
 #include "mat4.h"
 #include <ctime>
+#include <IL/il.h>
+#include <IL/ilut.h>
 
 using namespace std;
 
@@ -17,16 +19,19 @@ mat4f mvmat;
 
 void r2d_init ()
 {
-    glClearColor ( 0.4, 0.0, 0.0, 0.0 );
+    glClearColor ( 1.0, 1.0, 1.0, 1.0 );
     glEnable ( GL_DEPTH_TEST );
     glEnable ( GL_TEXTURE_2D );
     glEnable ( GL_BLEND );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
-    glEnableClientState ( GL_VERTEX_ARRAY );
     glEnable ( GL_ALPHA_TEST );
     glAlphaFunc ( GL_GREATER, 0.01 );
 
+    glEnableClientState ( GL_VERTEX_ARRAY );
     mvmat.loadIdentity ();
+
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
 }
 
 // ================================================================================
@@ -80,12 +85,11 @@ void r2d_update_scenes ( int* ids, int length )
     viewfrustum_minmax[1] = obj0[1];
     viewfrustum_minmax[2] = obj1[0];
     viewfrustum_minmax[3] = obj1[1];
-//    cout << obj0[0] << ' ' << obj0[1] << ' ' << obj0[2] << ' ' << obj1[0] << ' ' << obj1[1] << ' ' << obj1[2] << endl;
-    glBegin( GL_LINES );
-    glVertex2f ( obj0[0], obj0[1] );
-    glVertex2f ( obj1[0], obj1[1] );
-    glEnd ();
-//    cout << viewfrustum_minmax[0] << ' ' << viewfrustum_minmax[1] << ' ' << viewfrustum_minmax[2] << ' ' << viewfrustum_minmax[3] << endl;
+
+//     glBegin( GL_LINES );
+//     glVertex2f ( obj0[0], obj0[1] );
+//     glVertex2f ( obj1[0], obj1[1] );
+//     glEnd ();
 
     for ( int i=0; i<length; i++ )
     {

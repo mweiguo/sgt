@@ -12,6 +12,7 @@ using namespace std;
 template < class T>
 class KdTree;
 class Font;
+class Texture;
 // types
 struct GlobalLCRecord
 {
@@ -41,7 +42,7 @@ struct MaterialRecord
         LINETYPE_DASH
     };
     MaterialRecord ();
-    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype, const char* fontfilename );
+    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype, const char* fontfilename, const char* texfilename );
     char name[32];
     vec3i background_color;
     vec3i foreground_color;
@@ -49,6 +50,8 @@ struct MaterialRecord
     int linetype;
     char fontfile[32];
     int fontIdx;
+    char texturefile[32];
+    int textureIdx;
 };
 
 struct LayerRecord
@@ -113,10 +116,18 @@ struct DrawableRecord
     int materialIdx;
 };
 
-struct RectRecord : public DrawableRecord
+struct FillableRecord : public DrawableRecord
+{
+    FillableRecord ( bool isFillTexture=false, float texang=0, float texscale=0, int matidx=-1 );
+    bool filltexture;
+    float textureAngle;
+    float textureScale;
+};
+
+struct RectRecord : public FillableRecord
 {
     RectRecord ();
-    RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, int matidx );
+    RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, bool isFillTexture, float texang, float texscale, int matidx );
     vec2f data[4];
 };
 
@@ -149,6 +160,14 @@ struct PLineRecord : public DrawableRecord
     int start, end;
 };
 
+struct PolyRecord : public FillableRecord
+{
+    PolyRecord ();
+    PolyRecord ( int s, int e, int ts, int te, int tessStart, int tessEnd, bool isFillTexture, float texang, float texscale, int matidx );
+    int start, end, texcoordstart, texcoordend;
+    int tessellationstart, tessellationend;
+};
+
 typedef DataGroup1<vec3f> VertexRecord;
 
 template < class RecType >
@@ -171,10 +190,13 @@ typedef LCEntry<TriangleRecord>       TriangleEntry;
 typedef LCEntry<TextRecord>           TextEntry;
 typedef LCEntry<RectRecord>           RectEntry;
 typedef LCEntry<PLineRecord>          PLineEntry;
+typedef LCEntry<PolyRecord>           PolyEntry;
 typedef LCEntry<VertexRecord>         VertexEntry;
 typedef LCEntry<char>                 TextBufferEntry;
 typedef LCEntry<vec2f>                TextSilhouetteBufferEntry;
 typedef LCEntry<vec2f>                PLineBufferEntry;
+typedef LCEntry<vec2f>                PolyTessellationBufferEntry;
+typedef LCEntry<vec2f>                TexCoordBufferEntry;
 
 struct TextSilhouetteRecord
 {
@@ -232,14 +254,17 @@ public:
     TextEntry            *textEntry;
     RectEntry            *rectEntry;
     PLineEntry           *plineEntry;
+    PolyEntry            *polyEntry;
     TextBufferEntry      *textBufferEntry;
     TextSilhouetteBufferEntry *textSilhouetteBufferEntry;
     PLineBufferEntry     *plineBufferEntry;
-
+    PolyTessellationBufferEntry *polyTessellationBufferEntry;
+    TexCoordBufferEntry  *texCoordBufferEntry;
     // kdtree support
     vector< KdTree<int>* > kdtrees;
     // auxiliary infomation
     vector< Font* > fonts;
+    vector< Texture* > textures;
 /*     vector< TextSilhouetteRecord > textSilhouettes; */
 protected:
     // navigation

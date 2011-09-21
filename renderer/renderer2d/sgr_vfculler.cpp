@@ -76,10 +76,10 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
             {
                 KdTree<int>* kdt = lc.kdtrees[kdtreeidx];
                 vector<int> out;
-		kdt->intersect_cnt = 0;
+//		kdt->intersect_cnt = 0;
                 bool isHit = kdt->intersect ( &lc, (float*)&vfbbox2d, back_inserter(out) );
                 copy ( out.begin(), out.end(), back_inserter(renderObjects) );
-		cout << "intersect_cnt : " << kdt->intersect_cnt << endl;
+//		cout << "intersect_cnt : " << kdt->intersect_cnt << endl;
                 return CHILDREN_CULLTEST_FINISHED;
             }
         }

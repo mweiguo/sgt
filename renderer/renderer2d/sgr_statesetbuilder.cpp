@@ -21,15 +21,49 @@ void StateSetBuilder::build ( LC* lc, list<int>& input )
 	switch ( grcd.type )
 	{
 	case SLC_RECT:
-	case SLC_TEXT:
-	case SLC_PLINE:
-	    DrawableRecord& drcd = lc->rectEntry->LCRecords[grcd.value];
+	{
+	    RectRecord& drcd = lc->rectEntry->LCRecords[grcd.value];
 	    MaterialRecord& mat = lc->materialEntry->LCRecords[drcd.materialIdx];
-	    StateSet* nss = root->CreateOrReuseStateSet ( &mat);
+	    StateSet* nss = root->CreateOrReuseStateSet ( lc, &mat);
 	    map<StateSet*,StateSet*>::iterator pp1 = _nodes.find ( nss );
 	    if ( pp1 == _nodes.end() )
 		_nodes.insert ( pair<StateSet*,StateSet*>(nss,nss) );
 	    nss->renderObjects.push_back ( *pp );
+	    break;
+	}
+	case SLC_TEXT:
+	{
+	    TextRecord& drcd = lc->textEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[drcd.materialIdx];
+	    StateSet* nss = root->CreateOrReuseStateSet ( lc, &mat);
+	    map<StateSet*,StateSet*>::iterator pp1 = _nodes.find ( nss );
+	    if ( pp1 == _nodes.end() )
+		_nodes.insert ( pair<StateSet*,StateSet*>(nss,nss) );
+	    nss->renderObjects.push_back ( *pp );
+	    break;
+	}
+	case SLC_PLINE:
+	{
+	    PLineRecord& drcd = lc->plineEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[drcd.materialIdx];
+	    StateSet* nss = root->CreateOrReuseStateSet ( lc, &mat);
+	    map<StateSet*,StateSet*>::iterator pp1 = _nodes.find ( nss );
+	    if ( pp1 == _nodes.end() )
+		_nodes.insert ( pair<StateSet*,StateSet*>(nss,nss) );
+	    nss->renderObjects.push_back ( *pp );
+	    break;
+	}
+	case SLC_POLY:
+	{
+	    PolyRecord& drcd = lc->polyEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[drcd.materialIdx];
+	    StateSet* nss = root->CreateOrReuseStateSet ( lc, &mat);
+	    map<StateSet*,StateSet*>::iterator pp1 = _nodes.find ( nss );
+	    if ( pp1 == _nodes.end() )
+		_nodes.insert ( pair<StateSet*,StateSet*>(nss,nss) );
+	    nss->renderObjects.push_back ( *pp );
+	    break;
+	}
 	}
     }
 }

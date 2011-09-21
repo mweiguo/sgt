@@ -146,6 +146,7 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
     case SLC_PLINE:
     {
 	PLineRecord& pline = lc.plineEntry->LCRecords[idx];
+	ss << "matidx = " << pline.materialIdx << "; ";
 	for ( int i=pline.start; i<pline.end; i++ ) {
 	    vec2f& v = lc.plineBufferEntry->LCRecords[i];
 	    ss << v.x() << ' ' << v.y() << ' ';
@@ -153,7 +154,24 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
         break;
     }
     case SLC_POLY:
+    {
+	PolyRecord& poly = lc.polyEntry->LCRecords[idx];
+	ss << "matidx = " << poly.materialIdx << "; ";
+	if ( poly.filltexture ) {
+	    ss << "angle = " << poly.textureAngle << ", scale = " << poly.textureScale << ", texcoords = (";
+	    for ( int i=poly.texcoordstart; i!=poly.texcoordend; i++ )
+	    {
+		vec2f& v = lc.texCoordBufferEntry->LCRecords[i];
+		ss << v.x() << ' ' << v.y() << ' ';
+	    }
+	    ss << ") ";
+	}
+	for ( int i=poly.start; i<poly.end; i++ ) {
+	    vec2f& v = lc.plineBufferEntry->LCRecords[i];
+	    ss << v.x() << ' ' << v.y() << ' ';
+	}
         break;
+    }
     case SLC_LINE:
     {
         LineRecord& line = lc.lineEntry->LCRecords[idx];
@@ -177,6 +195,9 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
     case SLC_RECT:
     {
         RectRecord& quad = lc.rectEntry->LCRecords[idx];
+	ss << "matidx = " << quad.materialIdx << "; ";
+	if ( quad.filltexture )
+	    ss << "angle = " << quad.textureAngle << ", scale = " << quad.textureScale << ", ";
         vec2f& p0 = quad.data[0];
         vec2f& p1 = quad.data[1];
         vec2f& p2 = quad.data[2];
@@ -191,8 +212,9 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
     case SLC_TEXT:
     {
         TextRecord& text = lc.textEntry->LCRecords[idx];
+	ss << "matidx = " << text.materialIdx << "; ";
         ss << "pos (" << text.pos.x() << ", " << text.pos.y() << "), scale=" << text.scale <<
-	    ", rotz=" << text.rotz << ", content=" << lc.textBufferEntry->LCRecords + text.start << endl;
+	    ", rotz=" << text.rotz << ", content=" << lc.textBufferEntry->LCRecords + text.start;
         break;
     }
     case SLC_MATERIAL:
@@ -201,17 +223,18 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
         ss << "name : " << mr.name <<
             ", background_color ( " << mr.background_color.x() << "," << mr.background_color.y() << "," << mr.background_color.z() <<
             " ), foreground_color ( " << mr.foreground_color.x() << "," << mr.foreground_color.y() << "," << mr.foreground_color.z() <<
-            " ), linewidth = " << mr.linewidth;
+            " ), linewidth = " << mr.linewidth << ", ";
         switch ( mr.linetype )
         {
         case MaterialRecord::LINETYPE_SOLID:
-            ss << "solid";
+            ss << "linetype = solid";
             break;
         case MaterialRecord::LINETYPE_DASH:
-            ss << "dash";
+            ss << "linetype = dash";
             break;
         }
 	ss << ", font=" << mr.fontfile;
+	ss << ", texfilename=" << mr.texturefile;
         break;
     }
     default:

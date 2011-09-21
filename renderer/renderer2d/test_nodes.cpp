@@ -53,6 +53,14 @@ int main ( int argc, char* argv[] )
 	pline->pnts.push_back ( vec2f(1,0) );
 	pline->pnts.push_back ( vec2f(1,1) );
 	pline->pnts.push_back ( vec2f(0,1) );
+	SLCPolyNode* poly = new SLCPolyNode ( mat_layer );
+	poly->textureScale = 2;
+	poly->textureAngle = 45;
+	poly->filltexture  = true;
+	poly->pnts.push_back ( vec2f(10,10) );
+	poly->pnts.push_back ( vec2f(11,10) );
+	poly->pnts.push_back ( vec2f(11,11) );
+	poly->pnts.push_back ( vec2f(10,11) );
 	SLCLODPageNode* lodpage2 = new SLCLODPageNode();
 	lodpage2->delayloading = true;
 	lodpage2->kdtree = "lodpage2.xml";
@@ -81,6 +89,7 @@ int main ( int argc, char* argv[] )
 	lodpage->addChild ( rc3 );
 	lodpage->addChild ( txt );
 	lodpage->addChild ( pline );
+	lodpage->addChild ( poly );
 
 	layer2->addChild ( lod2 );
 	lod2->addChild ( lodpage3 );
@@ -96,6 +105,7 @@ int main ( int argc, char* argv[] )
 	nodes.push_back ( rc3 );
 	nodes.push_back ( txt );
 	nodes.push_back ( pline );
+	nodes.push_back ( poly );
 	nodes.push_back ( lodpage2 );
 	nodes.push_back ( layer2 );
 	nodes.push_back ( lod2 );
