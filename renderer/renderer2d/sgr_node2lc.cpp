@@ -324,6 +324,8 @@ void SLCNode2LC::freeLC ( LC* lc )
     delete lc;
 }
 
+// #include "sgr_lcreport.h"
+
 void SLCNode2LC::convert ( const char* filename )
 {
     LC* lc = generateLC();
@@ -331,6 +333,8 @@ void SLCNode2LC::convert ( const char* filename )
     BBox2dUpdater::forward_update ( *lc );
 
     lc->save ( filename );
+//     LCReport rpt ( *lc, 1 );
+//     rpt.printCounter ();
 
     // save kdt, if there have
     LC2KDT::buildKDTs ( *lc );

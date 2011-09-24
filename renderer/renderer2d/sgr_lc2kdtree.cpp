@@ -4,6 +4,9 @@
 KdTree<int>* LC2KDT::curKDT = 0;
 map<string, KdTree<int> > LC2KDT::kdtreemap;
 
+#include <iostream>
+using namespace std;
+
 void LC2KDT::buildKDT ( LC& lc, KdTree<int>& kdtree )
 {
     // traverse lc to collect primitives
@@ -85,9 +88,8 @@ void LC2KDT::buildKDTs ( LC& lc )
 	option.getPrimitiveCenter = getPrimitiveCenter;
 	option.getPrimitiveMinMax = getPrimitiveMinMax;
 	BuildLCKdTree buildkdt ( pp->second, option );
-	buildkdt.build ();
-
-	pp->second.save ( pp->first.c_str() );
+	if ( buildkdt.build () )
+	    pp->second.save ( pp->first.c_str() );
     }
 }
 

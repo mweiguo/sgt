@@ -7,6 +7,7 @@
 #include <GL/gl.h>
 #include <vector>
 #include <utf8.h>
+#include <fstream>
 
 using namespace std;
 
@@ -18,16 +19,25 @@ inline int next_p2 (int a )
     return rval;
 }
 
-Font::Font ( const char* filename )
+Font::Font ( const char* fontfilename )
 {
-    fontfilename = filename;
+    string filename = fontfilename;
+
+    ifstream in;
+    in.open ( filename.c_str() );
+    if ( false == in.is_open () ) {
+	filename = "simhei.ttf";
+    }
+    in.close();
+    
+    cout << "load font '" << filename << "'" << endl;
     FT_Library  library;
     int error = FT_Init_FreeType( &library );
     if ( error )
 	cout << "FT_Init_FreeType failed" << endl;
 
     FT_Face face;
-    error = FT_New_Face( library, filename, 0, &face );
+    error = FT_New_Face( library, filename.c_str(), 0, &face );
     if ( error == FT_Err_Unknown_File_Format )
 	cout << "unsupported format" << endl;
     else if ( error )
@@ -39,7 +49,6 @@ Font::Font ( const char* filename )
     if ( error )
 	cout << "FT_Set_Char_Size error " << endl;
 
-//     cout << "filename = " << filename << endl;
     // generate display list
     chnum  = 128;
     list_base = glGenLists ( chnum );
@@ -123,8 +132,13 @@ void Font::getSize ( const char* str, float& w, float& h )
     {
 	h = 0;
 	for ( vector<int>::iterator pp=utf32result.begin(); pp!=utf32result.end(); ++pp ) {
-	    w += widths[*pp];
-	    h = h > heights[*pp] ? h : heights[*pp];
+	    if ( *pp < 0 || *pp>=widths.size() ) {
+		w += widths[65];
+		h = h > heights[65] ? h : heights[65];
+	    } else {
+		w += widths[*pp];
+		h = h > heights[*pp] ? h : heights[*pp];
+	    }
 	}
     }
 }

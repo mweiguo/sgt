@@ -298,6 +298,7 @@ struct GetPrimitiveMinMax
     }
     void operator() ( int gidx, float* minmax ) const
     {
+//	cout << "GetPrimitiveMinMax gidx=" << gidx << ", LCLen= " << _lc->globalLCEntry->LCLen << endl;
         memcpy ( minmax, _lc->globalLCEntry->LCRecords[gidx].minmax, sizeof(float)*4 );
     }
 private:

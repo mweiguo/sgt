@@ -5,6 +5,7 @@
 #include <map>
 using namespace std;
 
+class LC;
 class SLCNode;
 class SLCNode2LC
 {

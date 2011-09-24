@@ -411,6 +411,9 @@ template<class T>
 template< class T1, class T2 >
 bool KdTree<T>::BuildKdTree<T1,T2>::build ()
 {
+    if ( _kdtree->_primitives.empty() || _kdtree->_primitives.empty() )
+	return false;
+
     // generate object indices
     generate_n ( back_inserter(_objindices), _kdtree->_primitives.size(), Incr() );
     // pre alloc kdnode's room
@@ -516,12 +519,14 @@ void KdTree<T>::BuildKdTree<T1,T2>::divide ( int nodeidx, int level )
  * get minmax, 
  * caller should ensure iend - istart >= 1
  */
+#include <iostream>
 template<class T>
 template< class T1, class T2 >
 void KdTree<T>::BuildKdTree<T1,T2>::getMinMax ( int istart, int iend, float* minmax )
 {
+//    std::cout << "_objindices.size = " << _objindices.size() << ", _kdtree->_primitives.size = " << _kdtree->_primitives.size() << ", istart = " << istart << endl;
     _opt.getPrimitiveMinMax ( _kdtree->_primitives[_objindices[istart]], minmax );
-/*     cout << 0 << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl; */
+//    std::cout << 0 << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl;
 
     float tmp[4];
     for ( int i=istart+1; i<iend; i++ )
@@ -531,7 +536,7 @@ void KdTree<T>::BuildKdTree<T1,T2>::getMinMax ( int istart, int iend, float* min
 	minmax[1] = minmax[1] < tmp[1] ? minmax[1] : tmp[1];
 	minmax[2] = minmax[2] > tmp[2] ? minmax[2] : tmp[2];
 	minmax[3] = minmax[3] > tmp[3] ? minmax[3] : tmp[3];
-/* 	cout << i << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl; */
+//	std::cout << i << ' ' << minmax[0] << ' ' << minmax[1] << ' ' << minmax[2] << ' ' << minmax[3] << endl;
     }
 }
 

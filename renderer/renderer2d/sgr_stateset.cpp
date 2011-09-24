@@ -336,7 +336,7 @@ void StateSet::render ( LC* lc )
 	}
 	case SLC_PLINE:
 	{
-	    cout << "draw pline" << endl;
+//	    cout << "draw pline" << endl;
 	    glDisable ( GL_TEXTURE_2D );
 	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
 	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
@@ -347,7 +347,7 @@ void StateSet::render ( LC* lc )
 	case SLC_POLY:
 	{
 	    glDisable ( GL_TEXTURE_2D );
-	    cout << "draw poly" << endl;
+//	    cout << "draw poly" << endl;
 //	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
 	    PolyRecord& poly = lc->polyEntry->LCRecords[g.value];
 	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
@@ -362,7 +362,7 @@ void StateSet::render ( LC* lc )
 
     // draw rects
     if ( false == rects.empty() ) {
-	cout << "draw rects" << endl;
+//	cout << "draw rects" << endl;
 	glDisable ( GL_TEXTURE_2D );
 	glVertexPointer ( 2, GL_FLOAT, 0, &(rects[0]) );
 	glDrawArrays ( GL_QUADS, 0, rects.size()/2 );
@@ -372,7 +372,7 @@ void StateSet::render ( LC* lc )
     // draw text
     for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
     {
-	cout << "draw text" << endl;
+//	cout << "draw text" << endl;
 	TextRecord* tr = *pp;
 	glPushMatrix ();
 	glRotatef ( tr->rotz, 0, 0, 1 );

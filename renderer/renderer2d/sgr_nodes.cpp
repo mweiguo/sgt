@@ -76,6 +76,7 @@ string SLCMaterial::toXML () const
 	ss << "<font path=\"" << fontfilename << "\"/>" << endl;
     if ( texturefilename != "" )
 	ss << "<texture path=\"" << texturefilename << "\"/>" << endl;
+
     ss << "</material>" << endl;
     return ss.str();
 }
