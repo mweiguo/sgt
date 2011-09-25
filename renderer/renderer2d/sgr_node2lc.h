@@ -28,9 +28,9 @@ public:
     vector<PolyRecord>     	polydata;
     vector<TextRecord>     	textdata;
     vector<char>                textbuffer;
-    vector<vec2f>               textsilhouettebuffer;
-    vector<vec2f>               plinebuffer;
-    vector<vec2f>               polytessellationbuffer;
+    vector<vec3f>               textsilhouettebuffer;
+    vector<vec3f>               plinebuffer;
+    vector<vec3f>               polytessellationbuffer;
     vector<vec2f>               texturecoordbuffer;
     map<string, int>            materialMap;
 

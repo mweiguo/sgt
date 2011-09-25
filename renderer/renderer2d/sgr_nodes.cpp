@@ -194,16 +194,17 @@ string SLCTriNode::toXML () const
 SLCRectNode::SLCRectNode ( SLCMaterial* mat ) 
     : SLCFillablePrimitiveNode ( mat )
 {
+    z = 0.0f;
 }
 
 string SLCRectNode::toXML () const
 {
     stringstream ss;
     ss << "<primitive type=\"rect\" bindmaterial=\"" << bindmat->name << "\">" << 
-	pnts[0].x() << ' ' << pnts[0].y() << ' ' << 
-	pnts[1].x() << ' ' << pnts[1].y() << ' ' << 
-	pnts[2].x() << ' ' << pnts[2].y() << ' ' <<
-	pnts[3].x() << ' ' << pnts[3].y() << ' ' << "</primitive>" << endl;
+	pnts[0].x() << ' ' << pnts[0].y() << ' ' << z << ' ' <<
+	pnts[1].x() << ' ' << pnts[1].y() << ' ' << z << ' ' <<
+	pnts[2].x() << ' ' << pnts[2].y() << ' ' << z << ' ' <<
+	pnts[3].x() << ' ' << pnts[3].y() << ' ' << z << "</primitive>" << endl;
     return ss.str();
 }
 
@@ -211,7 +212,7 @@ string SLCRectNode::toXML () const
 
 SLCTextNode::SLCTextNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
 {
-    pos.xy(0, 0);
+    pos.xyz(0, 0, 0);
     scale = 1;
     rotz = 0;
     text = "";
@@ -221,7 +222,7 @@ string SLCTextNode::toXML () const
 {
     stringstream ss;
     ss << "<primitive type=\"text\" bindmaterial=\"" << bindmat->name << "\" pos=\"" << 
-	pos.x() << ' ' << pos.y() << "\" scale=\"" << scale << "\" rotz=\"" << rotz <<
+	pos.x() << ' ' << pos.y() << ' ' << pos.z() << "\" scale=\"" << scale << "\" rotz=\"" << rotz <<
 	"\">" << text << "</primitive>" << endl;
     return ss.str();
 }
@@ -230,6 +231,7 @@ string SLCTextNode::toXML () const
 
 SLCPLineNode::SLCPLineNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
 {
+    z = 0.0f;
 }
 
 string SLCPLineNode::toXML () const
@@ -238,7 +240,7 @@ string SLCPLineNode::toXML () const
     ss << "<primitive type=\"pline\" bindmaterial=\"" << bindmat->name << "\">";
     
     for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
-	ss << pp->x() << ' ' << pp->y() << ' ';
+	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
     ss <<"</primitive>" << endl;
     return ss.str();
 }
@@ -247,6 +249,7 @@ string SLCPLineNode::toXML () const
 
 SLCPolyNode::SLCPolyNode ( SLCMaterial* mat ) : SLCFillablePrimitiveNode (mat)
 {
+    z = 0.0f;
 }
 
 string SLCPolyNode::toXML () const
@@ -254,7 +257,7 @@ string SLCPolyNode::toXML () const
     stringstream ss;
     ss << "<primitive type=\"poly\" bindmaterial=\"" << bindmat->name << "\" " << SLCFillablePrimitiveNode::toXML () << ">";
     for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
-	ss << pp->x() << ' ' << pp->y() << ' ';
+	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
     ss <<"</primitive>" << endl;
     return ss.str();
 }

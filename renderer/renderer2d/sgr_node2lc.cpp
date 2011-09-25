@@ -95,10 +95,14 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( rc->bindmat->name );
         if ( pp!=materialMap.end() )
 	{
+	    vec3f p0 = vec3f ( rc->pnts[0].x(), rc->pnts[0].y(), rc->z );
+	    vec3f p1 = vec3f ( rc->pnts[1].x(), rc->pnts[1].y(), rc->z );
+	    vec3f p2 = vec3f ( rc->pnts[2].x(), rc->pnts[2].y(), rc->z );
+	    vec3f p3 = vec3f ( rc->pnts[3].x(), rc->pnts[3].y(), rc->z );
 	    if ( rc->filltexture )
-		quaddata.push_back ( RectRecord(rc->pnts[0], rc->pnts[1], rc->pnts[2], rc->pnts[3], true, rc->textureAngle, rc->textureScale, pp->second ) );
+		quaddata.push_back ( RectRecord( p0, p1, p2, p3, true, rc->textureAngle, rc->textureScale, pp->second ) );
 	    else
-		quaddata.push_back ( RectRecord(rc->pnts[0], rc->pnts[1], rc->pnts[2], rc->pnts[3], false, rc->textureAngle, rc->textureScale, pp->second ) );
+		quaddata.push_back ( RectRecord( p0, p1, p2, p3, false, rc->textureAngle, rc->textureScale, pp->second ) );
 	}
         ii = rectIdx++; break;
     }
@@ -108,7 +112,9 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( pline->bindmat->name );
         if ( pp!=materialMap.end() ) {
 	    size_t istart = plinebuffer.size();
-	    copy ( pline->pnts.begin(), pline->pnts.end(), back_inserter(plinebuffer) );
+	    for ( size_t ii=0; ii<pline->pnts.size(); ii++ )
+		plinebuffer.push_back ( vec3f( pline->pnts[ii].x(), pline->pnts[ii].y(), pline->z ) );
+//	    copy ( pline->pnts.begin(), pline->pnts.end(), back_inserter(plinebuffer) );
 	    plinedata.push_back ( PLineRecord(istart, pline->pnts.size()+istart, pp->second) );
 	}
         ii = plineIdx++; break;
@@ -119,10 +125,16 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( poly->bindmat->name );
         if ( pp!=materialMap.end() ) {
 	    size_t istart = plinebuffer.size();
-	    copy ( poly->pnts.begin(), poly->pnts.end(), back_inserter(plinebuffer) );
+	    for ( size_t ii=0; ii<poly->pnts.size(); ii++ )
+		plinebuffer.push_back ( vec3f( poly->pnts[ii].x(), poly->pnts[ii].y(), poly->z ) );
+//	    copy ( poly->pnts.begin(), poly->pnts.end(), back_inserter(plinebuffer) );
 	    // calculate tessellation
 	    int tessStart = polytessellationbuffer.size();
-	    Triangulate::Process ( poly->pnts, back_inserter(polytessellationbuffer) );
+	    vector<vec2f> tempout;
+	    Triangulate::Process ( poly->pnts, back_inserter(tempout) );
+	    for ( size_t ii=0; ii<tempout.size(); ii++ )
+		polytessellationbuffer.push_back ( vec3f(tempout[ii].x(), tempout[ii].y(), poly->z) );
+//	    Triangulate::Process ( poly->pnts, back_inserter(polytessellationbuffer) );
 	    int tessEnd = polytessellationbuffer.size();
 	    if ( poly->filltexture )
 	    {
@@ -133,7 +145,7 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
 		int texcoordStart = texturecoordbuffer.size();
 		for ( int i=tessStart; i!=tessEnd; i++ )
 		{
-		    vec2f& t = polytessellationbuffer[i];
+		    vec3f& t = polytessellationbuffer[i];
 		    float x = t.x() * cosalpha - t.y() * sinalpha;
 		    float y = t.x() * sinalpha + t.y() * cosalpha;
 		    vec2f texcoord;
@@ -198,9 +210,9 @@ LC* SLCNode2LC::generateLC ()
     lc->polyEntry     	 = (PolyEntry*)        malloc( sizeof(int) + ( polydata.empty() ? sizeof(PolyRecord) : sizeof(PolyRecord) * polydata.size() ));
     lc->textEntry     	 = (TextEntry*)        malloc( sizeof(int) + ( textdata.empty() ? sizeof(TextRecord) : sizeof(TextRecord) * textdata.size() ));
     lc->textBufferEntry  = (TextBufferEntry*)  malloc( sizeof(int) + ( textbuffer.empty() ? sizeof(char) : sizeof(char) * textbuffer.size() ));
-    lc->textSilhouetteBufferEntry  = (TextSilhouetteBufferEntry*)  malloc( sizeof(int) + ( textsilhouettebuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * textsilhouettebuffer.size() ));
-    lc->plineBufferEntry = (PLineBufferEntry*) malloc( sizeof(int) + ( plinebuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * plinebuffer.size() ));
-    lc->polyTessellationBufferEntry = (PolyTessellationBufferEntry*) malloc( sizeof(int) + ( polytessellationbuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * polytessellationbuffer.size() ));
+    lc->textSilhouetteBufferEntry  = (TextSilhouetteBufferEntry*)  malloc( sizeof(int) + ( textsilhouettebuffer.empty() ? sizeof(vec2f) : sizeof(vec3f) * textsilhouettebuffer.size() ));
+    lc->plineBufferEntry = (PLineBufferEntry*) malloc( sizeof(int) + ( plinebuffer.empty() ? sizeof(vec3f) : sizeof(vec3f) * plinebuffer.size() ));
+    lc->polyTessellationBufferEntry = (PolyTessellationBufferEntry*) malloc( sizeof(int) + ( polytessellationbuffer.empty() ? sizeof(vec3f) : sizeof(vec3f) * polytessellationbuffer.size() ));
     lc->texCoordBufferEntry = (TexCoordBufferEntry*) malloc( sizeof(int) + ( texturecoordbuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * texturecoordbuffer.size() ));
 
     // fill data
@@ -280,15 +292,15 @@ LC* SLCNode2LC::generateLC ()
 
     lc->textSilhouetteBufferEntry->LCLen = textsilhouettebuffer.size();
     if ( lc->textSilhouetteBufferEntry->LCLen > 0 )
-        memcpy ( lc->textSilhouetteBufferEntry->LCRecords, &(textsilhouettebuffer[0]), sizeof(vec2f) * textsilhouettebuffer.size() );
+        memcpy ( lc->textSilhouetteBufferEntry->LCRecords, &(textsilhouettebuffer[0]), sizeof(vec3f) * textsilhouettebuffer.size() );
 
     lc->plineBufferEntry->LCLen = plinebuffer.size();
     if ( lc->plineBufferEntry->LCLen > 0 )
-        memcpy ( lc->plineBufferEntry->LCRecords, &(plinebuffer[0]), sizeof(vec2f) * plinebuffer.size() );
+        memcpy ( lc->plineBufferEntry->LCRecords, &(plinebuffer[0]), sizeof(vec3f) * plinebuffer.size() );
 
     lc->polyTessellationBufferEntry->LCLen = polytessellationbuffer.size();
     if ( lc->polyTessellationBufferEntry->LCLen > 0 )
-        memcpy ( lc->polyTessellationBufferEntry->LCRecords, &(polytessellationbuffer[0]), sizeof(vec2f) * polytessellationbuffer.size() );
+        memcpy ( lc->polyTessellationBufferEntry->LCRecords, &(polytessellationbuffer[0]), sizeof(vec3f) * polytessellationbuffer.size() );
 
     lc->texCoordBufferEntry->LCLen = texturecoordbuffer.size();
     if ( lc->texCoordBufferEntry->LCLen > 0 )

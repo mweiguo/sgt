@@ -48,8 +48,8 @@ int main ( int argc, char* argv[] )
     lodpage->delayloading = false;
     lodpage->kdtree = "lodpage1.idx";
     lodpage->imposter = true;
-    int x = 0;
-    int y = 0;
+    int x = -2;
+    int y = -2;
     for ( int i=0; i<1; i++ )
     {
 	SLCMaterial* tmpMaterial;
@@ -60,9 +60,10 @@ int main ( int argc, char* argv[] )
 
 	SLCRectNode* rc1 = new SLCRectNode ( tmpMaterial );
 	rc1->pnts[0] = vec2f (x,   y  );
-	rc1->pnts[1] = vec2f (x+1, y  );
-	rc1->pnts[2] = vec2f (x+1, y+1);
-	rc1->pnts[3] = vec2f (x,   y+1);
+	rc1->pnts[1] = vec2f (x+4, y  );
+	rc1->pnts[2] = vec2f (x+4, y+2);
+	rc1->pnts[3] = vec2f (x,   y+2);
+	rc1->z = -1;
 	nodes.push_back ( rc1 );
 	lodpage->addChild ( rc1 );
 	x += 2;
@@ -72,7 +73,7 @@ int main ( int argc, char* argv[] )
 	}
     }
     SLCTextNode* txt = new SLCTextNode ( mat_layer );
-    txt->pos.xy ( 0, -1 );
+    txt->pos.xyz ( 0, -1, -10 );
     txt->scale = 1;
     txt->rotz = 0;
     txt->text = "`1234567890-=~!@#$%^&*()_+qwertyuiop[]\\asdfghjkl;'zxcvbnm,.QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
@@ -107,6 +108,7 @@ int main ( int argc, char* argv[] )
     poly->pnts.push_back ( vec2f(1,3) );
     poly->pnts.push_back ( vec2f(2,3) );
     poly->pnts.push_back ( vec2f(2,1) );
+    poly->z = -1;
     nodes.push_back ( poly );
     lodpage->addChild ( poly );
 

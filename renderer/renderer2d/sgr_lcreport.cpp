@@ -148,8 +148,8 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
 	PLineRecord& pline = lc.plineEntry->LCRecords[idx];
 	ss << "matidx = " << pline.materialIdx << "; ";
 	for ( int i=pline.start; i<pline.end; i++ ) {
-	    vec2f& v = lc.plineBufferEntry->LCRecords[i];
-	    ss << v.x() << ' ' << v.y() << ' ';
+	    vec3f& v = lc.plineBufferEntry->LCRecords[i];
+	    ss << v.x() << ' ' << v.y() << ' ' << v.z() << ", ";
 	}
         break;
     }
@@ -167,8 +167,8 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
 	    ss << ") ";
 	}
 	for ( int i=poly.start; i<poly.end; i++ ) {
-	    vec2f& v = lc.plineBufferEntry->LCRecords[i];
-	    ss << v.x() << ' ' << v.y() << ' ';
+	    vec3f& v = lc.plineBufferEntry->LCRecords[i];
+	    ss << v.x() << ' ' << v.y() << ' ' << v.z() << ", ";
 	}
         break;
     }
@@ -198,22 +198,22 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
 	ss << "matidx = " << quad.materialIdx << "; ";
 	if ( quad.filltexture )
 	    ss << "angle = " << quad.textureAngle << ", scale = " << quad.textureScale << ", ";
-        vec2f& p0 = quad.data[0];
-        vec2f& p1 = quad.data[1];
-        vec2f& p2 = quad.data[2];
-        vec2f& p3 = quad.data[3];
+        vec3f& p0 = quad.data[0];
+        vec3f& p1 = quad.data[1];
+        vec3f& p2 = quad.data[2];
+        vec3f& p3 = quad.data[3];
         ss << "rect : (" << 
-            p0.x() << ", " << p0.y() << ") (" <<
-            p1.x() << ", " << p1.y() << ") (" << 
-            p2.x() << ", " << p2.y() << ") (" << 
-            p3.x() << ", " << p3.y() << ")";
+            p0.x() << ", " << p0.y() << ", " << p0.z() << ") (" <<
+            p1.x() << ", " << p1.y() << ", " << p1.z() << ") (" << 
+            p2.x() << ", " << p2.y() << ", " << p2.z() << ") (" << 
+            p3.x() << ", " << p3.y() << ", " << p3.z() << ")";
         break;
     }
     case SLC_TEXT:
     {
         TextRecord& text = lc.textEntry->LCRecords[idx];
 	ss << "matidx = " << text.materialIdx << "; ";
-        ss << "pos (" << text.pos.x() << ", " << text.pos.y() << "), scale=" << text.scale <<
+        ss << "pos (" << text.pos.x() << ", " << text.pos.y() << ", " << text.pos.z() << "), scale=" << text.scale <<
 	    ", rotz=" << text.rotz << ", content=" << lc.textBufferEntry->LCRecords + text.start;
         break;
     }

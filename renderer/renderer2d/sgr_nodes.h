@@ -129,6 +129,7 @@ public:
     virtual int getType () { return SLC_RECT; }
     virtual string toXML () const;
     vec2f pnts[4];
+    float z;
 };
 
 class SLCTextNode : public SLCPrimitiveNode
@@ -137,7 +138,7 @@ public:
     SLCTextNode ( SLCMaterial* mat );
     virtual int getType () { return SLC_TEXT; }
     virtual string toXML () const;
-    vec2f pos;
+    vec3f pos;
     float scale;
     float rotz;
     string text;
@@ -150,6 +151,7 @@ public:
     virtual int getType () { return SLC_PLINE; }
     virtual string toXML () const;
     vector<vec2f> pnts;
+    float z;
 };
 
 class SLCPolyNode : public SLCFillablePrimitiveNode
@@ -159,6 +161,7 @@ public:
     virtual int getType () { return SLC_POLY; }
     virtual string toXML () const;
     vector<vec2f> pnts;
+    float z;
 };
 
 #endif

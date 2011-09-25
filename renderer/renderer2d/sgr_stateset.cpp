@@ -325,7 +325,7 @@ void StateSet::render ( LC* lc )
 	{
 	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
 	    float* begin = (float*)&(r.data[0]);
-	    float* end   = begin + 8;
+	    float* end   = begin + 12;
 	    copy ( begin, end, back_inserter(rects) );
 	    break;
 	}
@@ -339,7 +339,7 @@ void StateSet::render ( LC* lc )
 //	    cout << "draw pline" << endl;
 	    glDisable ( GL_TEXTURE_2D );
 	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
-	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
+	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
 	    glDrawArrays ( GL_LINE_STRIP, 0, pline.end - pline.start );
 	    glEnable ( GL_TEXTURE_2D );
 	    break;
@@ -350,7 +350,7 @@ void StateSet::render ( LC* lc )
 //	    cout << "draw poly" << endl;
 //	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
 	    PolyRecord& poly = lc->polyEntry->LCRecords[g.value];
-	    glVertexPointer ( 2, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
+	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
 //	    glTexCoordPointer ( 2, GL_FLOAT, 0, (float*)(lc->texCoordBufferEntry->LCRecords + poly.texcoordstart) );
 	    glDrawArrays ( GL_TRIANGLES, 0, poly.tessellationend - poly.tessellationstart );
 //	    glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
@@ -364,8 +364,8 @@ void StateSet::render ( LC* lc )
     if ( false == rects.empty() ) {
 //	cout << "draw rects" << endl;
 	glDisable ( GL_TEXTURE_2D );
-	glVertexPointer ( 2, GL_FLOAT, 0, &(rects[0]) );
-	glDrawArrays ( GL_QUADS, 0, rects.size()/2 );
+	glVertexPointer ( 3, GL_FLOAT, 0, &(rects[0]) );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
 	glEnable ( GL_TEXTURE_2D );
     }
 
@@ -377,7 +377,7 @@ void StateSet::render ( LC* lc )
 	glPushMatrix ();
 	glRotatef ( tr->rotz, 0, 0, 1 );
 	glScalef ( tr->scale, tr->scale, tr->scale );
-	glTranslatef ( tr->pos.x(), tr->pos.y(), 0 );
+	glTranslatef ( tr->pos.x(), tr->pos.y(), tr->pos.z() );
 	// get material
 	MaterialRecord& mr = lc->materialEntry->LCRecords[ tr->materialIdx ];
 	// get font

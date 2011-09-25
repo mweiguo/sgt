@@ -75,6 +75,49 @@ bool line_outside ( float* line, const BBox2d& rhs )
         return true;
 }
 
+bool line_outside25 ( float* line, const BBox2d& rhs )
+{
+    BBox2d lbbox;
+    lbbox.init ( vec2f(line) );
+    lbbox.expandby ( vec2f(line+3) );
+
+    if ( is_outside ( lbbox, rhs ) == true )
+        return true;
+
+    // second do line_outside test
+    vec2f p1 ( line ), p2 ( line+3 );
+    vec2f pp = p2 - p1;
+    if ( pp.x() == 0 || pp.y() == 0 )
+        return false;
+
+    vec2f Normal[4];  // left, right, bottom, top
+    Normal[0].xy (  1,  0 );
+    Normal[1].xy ( -1,  0 );
+    Normal[2].xy (  0,  1 );
+    Normal[3].xy (  0, -1 );
+
+    float tl=0, tu=1;
+
+    // left, right, bottom, top
+    float t[4] = { ( rhs.minvec().x() - p1.x() ) / pp.x(),
+                   ( rhs.maxvec().x() - p1.x() ) / pp.x(),
+                   ( rhs.minvec().y() - p1.y() ) / pp.y(),
+                   ( rhs.maxvec().y() - p1.y() ) / pp.y() };
+
+    for ( int i=0; i<4; i++ )
+    {
+        if ( Normal[i].dot(pp) > 0 )
+            tl = tl > t[i] ? tl : t[i];
+        else
+            tu = tu < t[i] ? tu : t[i];
+    }
+
+    if ( tl <= tu )
+        return false;
+    else
+        return true;
+}
+
 bool tri_outside ( float* tri, const BBox2d& rhs )
 {
     // 1. do box_outside test
@@ -100,18 +143,41 @@ bool rect_outside ( float* rc, const BBox2d& rhs )
     return false;
 }
 
+bool rect_outside25 ( float* rc, const BBox2d& rhs )
+{
+    // 1. do box_outside test
+    // 2. for each tri.edge do line_outside test
+    float tmp[4] = { rc[9], rc[10], rc[0], rc[1] };
+    if ( line_outside25 ( rc, rhs ) &&
+         line_outside25 ( rc+3, rhs ) &&
+         line_outside25 ( rc+6, rhs ) &&
+         line_outside25 ( tmp, rhs ) )
+        return true;
+    return false;
+}
+
 bool poly_outside ( float* poly, int pntcnt, const BBox2d& rhs )
 {
-//    cout << "pntcnt = " << pntcnt << endl;
-    pntcnt--;
-    for ( int i=0; i<pntcnt; i++ )
+    int cnt = pntcnt * 2;
+//    pntcnt--;
+    for ( int i=0; i<cnt; i+=2 )
     {
-//	cout << *(poly+i) << ' ' << *(poly+i+1) << ' ' << *(poly+i+2) << ' ' << *(poly+i+3) << ' ' << endl;
         if ( false == line_outside ( poly+i, rhs ) ){
-//	    cout << "return false" << endl;
 	    return false;
 	}
     }
-//    cout << "return true" << endl;
+    return true;
+}
+
+bool poly_outside25 ( float* poly, int pntcnt, const BBox2d& rhs )
+{
+    int cnt = pntcnt * 2;
+//    pntcnt--;
+    for ( int i=0; i<cnt; i+=3 )
+    {
+        if ( false == line_outside25 ( poly+i, rhs ) ){
+	    return false;
+	}
+    }
     return true;
 }

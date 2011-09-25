@@ -127,8 +127,8 @@ struct FillableRecord : public DrawableRecord
 struct RectRecord : public FillableRecord
 {
     RectRecord ();
-    RectRecord ( const vec2f& p0, const vec2f& p1, const vec2f& p2, const vec2f& p3, bool isFillTexture, float texang, float texscale, int matidx );
-    vec2f data[4];
+    RectRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, bool isFillTexture, float texang, float texscale, int matidx );
+    vec3f data[4];
 };
 
 /* struct LineRecord : public DrawableRecord */
@@ -145,9 +145,9 @@ typedef DataGroup2<vec2f> LineRecord;
 struct TextRecord : public DrawableRecord
 {
     TextRecord ();
-    TextRecord ( int b, const vec2f& offset, float s, float r, int sstart, int send, int matidx );
+    TextRecord ( int b, const vec3f& offset, float s, float r, int sstart, int send, int matidx );
     int start;
-    vec2f pos;
+    vec3f pos;
     float scale;
     float rotz;
     int silhouetteStart, silhouetteEnd;
@@ -193,9 +193,9 @@ typedef LCEntry<PLineRecord>          PLineEntry;
 typedef LCEntry<PolyRecord>           PolyEntry;
 typedef LCEntry<VertexRecord>         VertexEntry;
 typedef LCEntry<char>                 TextBufferEntry;
-typedef LCEntry<vec2f>                TextSilhouetteBufferEntry;
-typedef LCEntry<vec2f>                PLineBufferEntry;
-typedef LCEntry<vec2f>                PolyTessellationBufferEntry;
+typedef LCEntry<vec3f>                TextSilhouetteBufferEntry;
+typedef LCEntry<vec3f>                PLineBufferEntry;
+typedef LCEntry<vec3f>                PolyTessellationBufferEntry;
 typedef LCEntry<vec2f>                TexCoordBufferEntry;
 
 struct TextSilhouetteRecord

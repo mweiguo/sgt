@@ -217,7 +217,7 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		case SLC_LINE:
 		{
 		    LineRecord& lrd = lc->lineEntry->LCRecords[grd.value];
-		    if ( false == line_outside ( (float*)lrd.data, minmax ) ) {
+		    if ( false == line_outside25 ( (float*)lrd.data, minmax ) ) {
 			*out++ = _primitives[i];
 			isHit = true;
 		    }
@@ -228,7 +228,10 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		    PLineRecord& pline = lc->plineEntry->LCRecords[grd.value];
 		    for ( int ii=pline.start; ii<pline.end; ii++ )
 		    {
-			if ( false == line_outside ( (float*)(lc->plineBufferEntry->LCRecords + ii), minmax ) ) {
+// 			vec3f& p0 = lc->plineBufferEntry->LCRecords[ii];
+// 			vec3f& p1 = lc->plineBufferEntry->LCRecords[ii+1];
+// 			float linedata[4] = { p0.x(), p0.y(), p1.x(), p1.y() };
+			if ( false == line_outside25 ( (float*)(&lc->plineBufferEntry->LCRecords[ii]), minmax ) ) {
 			    *out++ = _primitives[i];
 			    isHit = true;
 			    break;
@@ -241,7 +244,10 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		    PolyRecord& poly = lc->polyEntry->LCRecords[grd.value];
 		    for ( int ii=poly.start; ii<poly.end; ii++ )
 		    {
-			if ( false == line_outside ( (float*)(lc->plineBufferEntry->LCRecords + ii), minmax ) ) {
+// 			vec3f& p0 = lc->plineBufferEntry->LCRecords[ii];
+// 			vec3f& p1 = lc->plineBufferEntry->LCRecords[ii+1];
+// 			float linedata[4] = { p0.x(), p0.y(), p1.x(), p1.y() };
+			if ( false == line_outside25 ( (float*)(&lc->plineBufferEntry->LCRecords[ii]), minmax ) ) {
 			    *out++ = _primitives[i];
 			    isHit = true;
 			    break;
@@ -261,7 +267,9 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		case SLC_RECT:
 		{
 		    RectRecord& rrd = lc->rectEntry->LCRecords[grd.value];
-		    if ( false == rect_outside ( (float*)rrd.data, minmax ) ) {
+// 		    float trc[8] = { rrd.data[0].x(), rrd.data[0].y(), rrd.data[1].x(), rrd.data[1].y(),
+// 				     rrd.data[2].x(), rrd.data[2].y(), rrd.data[3].x(), rrd.data[3].y() };
+		    if ( false == rect_outside25 ( (float*)(&(rrd.data[0])), minmax ) ) {
 			*out++ = _primitives[i];
 			isHit = true;
 		    }
@@ -270,7 +278,7 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		case SLC_TEXT:
 		{
 		    TextRecord& text = lc->textEntry->LCRecords[grd.value];
-		    if ( false == poly_outside ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
+		    if ( false == poly_outside25 ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
 						 text.silhouetteEnd - text.silhouetteStart , minmax ) ) {
 			*out++ = _primitives[i];
 			isHit = true;
