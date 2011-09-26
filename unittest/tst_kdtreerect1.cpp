@@ -682,6 +682,34 @@ TEST_F ( KdTreeRectTestCase1, IntersectRow5 ) {
 
 // ================================================================================
 
+TEST_F ( KdTreeRectTestCase1, IntersectContain ) {
+
+    { 
+	vector<int> out;
+	float box[] = { -2, -2, 2, 2 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, IntersectInside ) {
+
+    { 
+	vector<int> out;
+	float box[] = { 0.25, 0.25, 0.75, 0.75 }; 
+	bool isHit = _kdt->intersect( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+}
+
+// ================================================================================
+
 TEST_F ( KdTreeRectTestCase1, clear ) {
     _kdt->clear();
     EXPECT_EQ ( 0u, _kdt->_primitives.size() );

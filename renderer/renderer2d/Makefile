@@ -8,8 +8,8 @@ CXXFLAGS = -c -g
 LINKOPT = -lopengl32 -lglu32 -lfreetype -L"../../thirdparty/DevIL-SDK-x86-1.7.8/lib" -lDevIL -lILUT
 SHARELINKOPT = -shared  -lopengl32 -lglu32 -lfreetype -L"../../thirdparty/DevIL-SDK-x86-1.7.8/lib" -lDevIL -lILUT
 INCPATH = -I"../../graphbase" -I"." -I"../../thirdparty/utf8_v2_3_1/source" -I"../../thirdparty/DevIL-SDK-x86-1.7.8/include"
-INSTALLDIR = ../../build
-#INSTALLDIR = d:/svn_workspace/lightsimulator/build
+#INSTALLDIR = ../../build
+INSTALLDIR = d:/svn_workspace/lightsimulator/build
 
 all : $(TESTS) $(BIN)
 

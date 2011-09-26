@@ -133,6 +133,11 @@ bool tri_outside ( float* tri, const BBox2d& rhs )
 bool rect_outside ( float* rc, const BBox2d& rhs )
 {
     // 1. do box_outside test
+    if ( rc[0] <= rhs.minvec().x() &&
+	 rc[1] <= rhs.minvec().y() &&
+	 rc[4] >= rhs.maxvec().x() &&
+	 rc[5] >= rhs.maxvec().y() )
+	return false;
     // 2. for each tri.edge do line_outside test
     float tmp[4] = { rc[6], rc[7], rc[0], rc[1] };
     if ( line_outside ( rc, rhs ) &&
@@ -146,6 +151,11 @@ bool rect_outside ( float* rc, const BBox2d& rhs )
 bool rect_outside25 ( float* rc, const BBox2d& rhs )
 {
     // 1. do box_outside test
+    if ( rc[0] <= rhs.minvec().x() &&
+	 rc[1] <= rhs.minvec().y() &&
+	 rc[6] >= rhs.maxvec().x() &&
+	 rc[7] >= rhs.maxvec().y() )
+	return false;
     // 2. for each tri.edge do line_outside test
     float tmp[4] = { rc[9], rc[10], rc[0], rc[1] };
     if ( line_outside25 ( rc, rhs ) &&
