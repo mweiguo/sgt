@@ -15,6 +15,6 @@ binary.files = debug/viewer.exe
 INSTALLS += binary
 
 # Input
-HEADERS += glwidget.h mainwindow.h document.h tools.h
-SOURCES += glwidget.cpp main.cpp mainwindow.cpp document.cpp tools.cpp
+HEADERS += glwidget.h mainwindow.h document.h tools.h layermanagerwidget.h
+SOURCES += glwidget.cpp main.cpp mainwindow.cpp document.cpp tools.cpp layermanagerwidget.cpp
 RESOURCES += dockwidgets.qrc

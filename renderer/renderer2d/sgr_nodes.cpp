@@ -5,6 +5,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
+#include <mat4f.h>
 using namespace std;
 // --------------------------------------------------------------------------------
 
@@ -13,7 +14,8 @@ int SLCNode::getDepth()
     SLCNode* p = parent;
     int depth = 0;
     while ( p != 0 ) {
-        depth++;
+	if ( p->getType() != SLC_TRANSFORM )
+	    depth++;
         p = p->parent;
     }
     return depth;
@@ -22,6 +24,12 @@ int SLCNode::getDepth()
 void SLCNode::addChild ( SLCNode* node )
 {
     children.push_back ( node );
+    node->parent = this;
+}
+
+void SLCNode::push_front_child ( SLCNode* node )
+{
+    children.push_front ( node );
     node->parent = this;
 }
 
@@ -85,6 +93,7 @@ string SLCMaterial::toXML () const
 
 SLCLayerNode::SLCLayerNode ( const char* lname, SLCMaterial* bindmaterial ) : SLCNode(), name(lname), bindmat(bindmaterial)
 {
+    visible = true;
 }
 
 string SLCLayerNode::toXML () const
@@ -259,6 +268,29 @@ string SLCPolyNode::toXML () const
     for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
 	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
     ss <<"</primitive>" << endl;
+    return ss.str();
+}
+ 
+// --------------------------------------------------------------------------------
+
+SLCTransformNode::SLCTransformNode () : SLCNode()
+{
+    mat_loadidentity ( mat );
+}
+
+string SLCTransformNode::toXML () const
+{
+    stringstream ss;
+    ss << "<transform mat=\"" << 
+	mat[0] << ' ' << mat[1] << ' ' << mat[2] << ' ' << mat[3] << ' ' << 
+	mat[4] << ' ' << mat[5] << ' ' << mat[6] << ' ' << mat[7] << ' ' << 
+	mat[8] << ' ' << mat[9] << ' ' << mat[10] << ' ' << mat[11] << ' ' << 
+	mat[12] << ' ' << mat[13] << ' ' << mat[14] << ' ' << mat[15] << ' ' << "\">" << endl;
+
+    for ( list<SLCNode*>::const_iterator pp=children.begin(); pp!=children.end(); ++pp )
+	ss << (*pp)->toXML();
+
+    ss <<"</transform>" << endl;
     return ss.str();
 }
 

@@ -123,26 +123,29 @@ sgr_lc2kdtree.o : $(USER_DIR)/sgr_lc2kdtree.h $(USER_DIR)/sgr_lc2kdtree.cpp
 sgr_math.o : $(USER_DIR2)/sgr_math.h $(USER_DIR2)/sgr_math.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/sgr_math.cpp
 
+mat4f.o : $(USER_DIR2)/mat4f.h $(USER_DIR2)/mat4f.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/mat4f.c
+
 sgr_texture.o : $(USER_DIR)/sgr_texture.h $(USER_DIR)/sgr_texture.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_texture.cpp
 
 tst_math : gtest_main.a tst_math.o sgr_math.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_buildkdtreecase1 : gtest_main.a tst_buildkdtreecase1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o
+tst_buildkdtreecase1 : gtest_main.a tst_buildkdtreecase1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_buildkdtreecase2 : gtest_main.a tst_buildkdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o
+tst_buildkdtreecase2 : gtest_main.a tst_buildkdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_kdtreerect1 : gtest_main.a tst_kdtreerect1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o
+tst_kdtreerect1 : gtest_main.a tst_kdtreerect1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_kdtreecase2 : gtest_main.a tst_kdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o
+tst_kdtreecase2 : gtest_main.a tst_kdtreecase2.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_kdtreetext1 : gtest_main.a tst_kdtreetext1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o
+tst_kdtreetext1 : gtest_main.a tst_kdtreetext1.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o
+tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)

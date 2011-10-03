@@ -4,7 +4,7 @@
 #include "sgr_bboxupdater.h"
 #include "sgr_font.h"
 #include "sgr_triangulate.h"
-#include "mat4.h"
+#include "mat4f.h"
 
 #include <list>
 #include <cstring>
@@ -24,6 +24,7 @@ SLCNode2LC::SLCNode2LC ( SLCNode* node )
     polyIdx = 0;
     textIdx = 0;
     matIdx = 0;
+    mat_loadidentity ( _current_matrix );
 
     collectNodeRecord ( node );
     collectChildrenRecords ( node );
@@ -57,7 +58,7 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCLayerNode* layer = dynamic_cast<SLCLayerNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( layer->bindmat->name );
         if ( pp!=materialMap.end() )
-            layerdata.push_back ( LayerRecord(layer->name.c_str(), layer->flags, pp->second ) );
+            layerdata.push_back ( LayerRecord(layer->name.c_str(), layer->visible, pp->second ) );
         ii = layerIdx++; break;
     }
     case SLC_LOD:
@@ -80,13 +81,25 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     case SLC_LINE:
     {
         SLCLineNode* line = dynamic_cast<SLCLineNode*>(node);
-        linedata.push_back ( LineRecord( line->pnts[0], line->pnts[1] ) );
+	float v[] = { line->pnts[0].x(), line->pnts[0].y(), 0, 1 };
+	mat_multvector ( _current_matrix, v );
+	float v1[] = { line->pnts[1].x(), line->pnts[1].y(), 0, 1 };
+	mat_multvector ( _current_matrix, v1 );
+
+        linedata.push_back ( LineRecord( v, v1 ) );
         ii = lineIdx++; break;
     }
     case SLC_TRIANGLE:
     {
         SLCTriNode* tri = dynamic_cast<SLCTriNode*>(node);
-        tridata.push_back ( TriangleRecord( tri->pnts[0], tri->pnts[1], tri->pnts[2] ) );
+	float v[] = { tri->pnts[0].x(), tri->pnts[0].y(), 0, 1 };
+	mat_multvector ( _current_matrix, v );
+	float v1[] = { tri->pnts[1].x(), tri->pnts[1].y(), 0, 1 };
+	mat_multvector ( _current_matrix, v1 );
+	float v2[] = { tri->pnts[2].x(), tri->pnts[2].y(), 0, 1 };
+	mat_multvector ( _current_matrix, v2 );
+
+        tridata.push_back ( TriangleRecord( v, v1, v2 ) );
         ii = triIdx++; break;
     }
     case SLC_RECT:
@@ -95,14 +108,18 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( rc->bindmat->name );
         if ( pp!=materialMap.end() )
 	{
-	    vec3f p0 = vec3f ( rc->pnts[0].x(), rc->pnts[0].y(), rc->z );
-	    vec3f p1 = vec3f ( rc->pnts[1].x(), rc->pnts[1].y(), rc->z );
-	    vec3f p2 = vec3f ( rc->pnts[2].x(), rc->pnts[2].y(), rc->z );
-	    vec3f p3 = vec3f ( rc->pnts[3].x(), rc->pnts[3].y(), rc->z );
+	    float p0[] = { rc->pnts[0].x(), rc->pnts[0].y(), rc->z, 1 };
+	    mat_multvector ( _current_matrix, p0 );
+	    float p1[] = { rc->pnts[1].x(), rc->pnts[1].y(), rc->z, 1 };
+	    mat_multvector ( _current_matrix, p1 );
+	    float p2[] = { rc->pnts[2].x(), rc->pnts[2].y(), rc->z, 1 };
+	    mat_multvector ( _current_matrix, p2 );
+	    float p3[] = { rc->pnts[3].x(), rc->pnts[3].y(), rc->z, 1 };
+	    mat_multvector ( _current_matrix, p3 );
 	    if ( rc->filltexture )
-		quaddata.push_back ( RectRecord( p0, p1, p2, p3, true, rc->textureAngle, rc->textureScale, pp->second ) );
+		quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), true, rc->textureAngle, rc->textureScale, pp->second ) );
 	    else
-		quaddata.push_back ( RectRecord( p0, p1, p2, p3, false, rc->textureAngle, rc->textureScale, pp->second ) );
+		quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), false, rc->textureAngle, rc->textureScale, pp->second ) );
 	}
         ii = rectIdx++; break;
     }
@@ -112,9 +129,11 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( pline->bindmat->name );
         if ( pp!=materialMap.end() ) {
 	    size_t istart = plinebuffer.size();
-	    for ( size_t ii=0; ii<pline->pnts.size(); ii++ )
-		plinebuffer.push_back ( vec3f( pline->pnts[ii].x(), pline->pnts[ii].y(), pline->z ) );
-//	    copy ( pline->pnts.begin(), pline->pnts.end(), back_inserter(plinebuffer) );
+	    for ( size_t ii=0; ii<pline->pnts.size(); ii++ ) {
+		float v[] = { pline->pnts[ii].x(), pline->pnts[ii].y(), pline->z, 1 };
+		mat_multvector ( _current_matrix, v );
+		plinebuffer.push_back ( vec3f( v ) );
+	    }
 	    plinedata.push_back ( PLineRecord(istart, pline->pnts.size()+istart, pp->second) );
 	}
         ii = plineIdx++; break;
@@ -125,15 +144,21 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         map<string, int>::iterator pp = materialMap.find ( poly->bindmat->name );
         if ( pp!=materialMap.end() ) {
 	    size_t istart = plinebuffer.size();
-	    for ( size_t ii=0; ii<poly->pnts.size(); ii++ )
-		plinebuffer.push_back ( vec3f( poly->pnts[ii].x(), poly->pnts[ii].y(), poly->z ) );
-//	    copy ( poly->pnts.begin(), poly->pnts.end(), back_inserter(plinebuffer) );
+	    for ( size_t ii=0; ii<poly->pnts.size(); ii++ ) {
+		float v[] = { poly->pnts[ii].x(), poly->pnts[ii].y(), poly->z, 1 };
+		mat_multvector ( _current_matrix, v );
+		plinebuffer.push_back ( vec3f( v ) );
+	    }
+
 	    // calculate tessellation
 	    int tessStart = polytessellationbuffer.size();
 	    vector<vec2f> tempout;
 	    Triangulate::Process ( poly->pnts, back_inserter(tempout) );
-	    for ( size_t ii=0; ii<tempout.size(); ii++ )
-		polytessellationbuffer.push_back ( vec3f(tempout[ii].x(), tempout[ii].y(), poly->z) );
+	    for ( size_t ii=0; ii<tempout.size(); ii++ ) {
+		float v[] = { tempout[ii].x(), tempout[ii].y(), poly->z, 1 };
+		mat_multvector ( _current_matrix, v );
+		polytessellationbuffer.push_back ( vec3f(v) );
+	    }
 //	    Triangulate::Process ( poly->pnts, back_inserter(polytessellationbuffer) );
 	    int tessEnd = polytessellationbuffer.size();
 	    if ( poly->filltexture )
@@ -172,10 +197,23 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
 	    int sstart = textsilhouettebuffer.size();
 	    textsilhouettebuffer.resize ( textsilhouettebuffer.size() + 4 );
 	    int send = textsilhouettebuffer.size();
-	    textdata.push_back ( TextRecord(istart, tc->pos, tc->scale, tc->rotz, sstart, send, pp->second ) );
+
+	    float v[] = { tc->pos.x(), tc->pos.y(), tc->pos.z(), 1 };
+	    mat_multvector ( _current_matrix, v );
+
+	    textdata.push_back ( TextRecord(istart, vec3f(v), tc->scale, tc->rotz, sstart, send, pp->second ) );
 	}
-	
         ii = textIdx++; break;
+    }
+    case SLC_TRANSFORM:
+    {
+	// update current transform
+        SLCTransformNode* t = dynamic_cast<SLCTransformNode*>(node);
+	Mat4f m;
+	memcpy ( m.mat, t->mat, sizeof(float)*16 );
+	_current_matrix_stack.push_back ( m );
+	calcCurrentMatrix ();
+	return;
     }
     
     }
@@ -190,6 +228,20 @@ void SLCNode2LC::collectChildrenRecords ( SLCNode* node )
     {
         collectNodeRecord ( *pp );
         collectChildrenRecords ( *pp );
+	if ( (*pp)->getType() == SLC_TRANSFORM ) {
+	    _current_matrix_stack.pop_back ();
+	    calcCurrentMatrix ();
+	}
+    }
+}
+
+void SLCNode2LC::calcCurrentMatrix ()
+{
+    mat_loadidentity ( _current_matrix );
+    for ( list<Mat4f>::iterator pp=_current_matrix_stack.begin();
+	  pp!=_current_matrix_stack.end(); ++pp )
+    {
+	mat_multmatrix ( _current_matrix, pp->mat );
     }
 }
 
@@ -220,7 +272,7 @@ LC* SLCNode2LC::generateLC ()
     if ( lc->globalLCEntry->LCLen > 0 )
         memcpy ( lc->globalLCEntry->LCRecords, &(globalRecords[0]), sizeof(GlobalLCRecord) * globalRecords.size() );
 
-	lc->sceneEntry->LCLen = scenedata.size();
+    lc->sceneEntry->LCLen = scenedata.size();
     if ( lc->sceneEntry->LCLen > 0 )
         memcpy ( lc->sceneEntry->LCRecords, &(scenedata[0]), sizeof(SceneRecord) * scenedata.size() );
 
@@ -336,20 +388,21 @@ void SLCNode2LC::freeLC ( LC* lc )
     delete lc;
 }
 
-// #include "sgr_lcreport.h"
+//#include "sgr_lcreport.h"
 
 void SLCNode2LC::convert ( const char* filename )
 {
     LC* lc = generateLC();
+
     // update bbox
     BBox2dUpdater::forward_update ( *lc );
 
     lc->save ( filename );
-//     LCReport rpt ( *lc, 1 );
-//     rpt.printCounter ();
 
     // save kdt, if there have
     LC2KDT::buildKDTs ( *lc );
     
+//     LCReport rpt ( *lc, 1 );
+//     rpt.printCounter ();
     freeLC ( lc );
 }

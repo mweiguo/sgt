@@ -3,7 +3,13 @@
 
 #include "sgr_lc.h"
 #include <map>
+#include <list>
 using namespace std;
+
+struct Mat4f
+{
+    float mat[16];
+};
 
 class LC;
 class SLCNode;
@@ -37,6 +43,7 @@ public:
 private:
     void collectNodeRecord ( SLCNode* node );
     void collectChildrenRecords ( SLCNode* node );
+    void calcCurrentMatrix ();
 
     int sceneIdx;
     int layerIdx;
@@ -49,5 +56,8 @@ private:
     int polyIdx;
     int textIdx;
     int matIdx;
+
+    list<Mat4f> _current_matrix_stack;
+    float _current_matrix[16];
 };
 #endif// _NODE2LC_H_

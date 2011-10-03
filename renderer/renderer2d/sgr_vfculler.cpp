@@ -35,9 +35,24 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
     stringstream ss;
     switch ( type )
     {
+    case SLC_LAYER:
+    {
+	GlobalLCRecord& grcd = lc.globalLCEntry->LCRecords[gIdx];
+	LayerRecord& layer = lc.layerEntry->LCRecords[grcd.value];
+	if ( layer.visible )
+	{
+	    const BBox2d* nodeBBox = (const BBox2d*)grcd.minmax;
+	    if ( is_outside (*nodeBBox, vfbbox2d ) )
+		return CHILD_CULLED;
+	    else
+		return CHILD_NOT_CULLED;
+	}
+	else
+            return CHILD_CULLED;
+	
+    }
     case SLC_SCENE:
     case SLC_MATERIAL:
-    case SLC_LAYER:
     case SLC_LOD:
     {
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);

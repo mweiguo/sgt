@@ -20,8 +20,8 @@ int main ( int argc, char *argv[] )
 
     Q_INIT_RESOURCE(dockwidgets);
     MainWindow mainWin;
-    mainWin.resize ( 400, 300 );
+    mainWin.resize ( 800, 600 );
     mainWin.show();
-    mainWin.doc.openScene ( filename.c_str() );
+    mainWin.open ( filename.c_str() );
     return app.exec();
 }

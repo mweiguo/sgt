@@ -9,10 +9,13 @@
 #include <iostream>
 using namespace std;
 
+void initLC ();
+
 template < class T>
 class KdTree;
 class Font;
 class Texture;
+
 // types
 struct GlobalLCRecord
 {
@@ -56,10 +59,12 @@ struct MaterialRecord
 
 struct LayerRecord
 {
-    LayerRecord ( const char* nm="layer", int f=0, int matIdx=-1 );
+    LayerRecord ( const char* nm="layer", bool isVisible=true, int matIdx=-1 );
     char name[32];
-    int  flags;
+//    int  flags;
     int  materialIdx;
+    int  visible : 1;
+    int  reserved : sizeof(int) - 1;
 };
 
 struct LODRecord

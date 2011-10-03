@@ -1,22 +1,35 @@
 #ifndef _SLC_NODES_H_
 #define _SLC_NODES_H_
 
+#ifdef _SUPPORT_PYTHON_
+#include <Python.h>
+#endif
+
 #include <list>
 #include <vector>
 #include <string>
 #include <vec3.h>
 #include "sgr_nodetypes.h"
+
+//PYTHON_BUILD(#include <Python.h>)
+
 using namespace std;
 
 class SLCNode
 {
 public:
+#ifdef _SUPPORT_PYTHON_
+    PyListObject _list;
+#endif
+    //    PYTHON_BUILD(PyListObject list;)
+    
     SLCNode () : parent(0) {}
     
     virtual int getType() = 0;
     virtual string toXML () const = 0;
     int getDepth();
     void addChild ( SLCNode* node );
+    void push_front_child ( SLCNode* node );
 
     SLCNode* parent;
     list<SLCNode*> children;
@@ -57,7 +70,7 @@ public:
     virtual int getType() { return SLC_LAYER; }
     virtual string toXML () const;
     string name;
-    int flags;
+    bool visible;
     SLCMaterial* bindmat;
 };
 
@@ -164,5 +177,13 @@ public:
     float z;
 };
 
+class SLCTransformNode : public SLCNode
+{
+public:
+    SLCTransformNode ();
+    virtual int getType () { return SLC_TRANSFORM; }
+    virtual string toXML () const;
+    float mat[16];
+};
 #endif
 

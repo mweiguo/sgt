@@ -1,0 +1,121 @@
+#include <QTreeView>
+#include <QStandardItemModel>
+#include <QItemDelegate>
+#include <QStyledItemDelegate>
+
+#include <QMetaType>
+#include <QPointF>
+#include <QVector>
+#include <QWidget>
+#include <QImage>
+
+class StarRating
+{
+public:
+    enum EditMode { Editable, ReadOnly };
+
+    StarRating(int starCount = 1, int maxStarCount = 5);
+
+    void paint(QPainter *painter, const QRect &rect,
+	       const QPalette &palette, EditMode mode) const;
+    QSize sizeHint() const;
+    int starCount() const { return myStarCount; }
+    int maxStarCount() const { return myMaxStarCount; }
+    void setStarCount(int starCount) { myStarCount = starCount; }
+    void setMaxStarCount(int maxStarCount) { myMaxStarCount = maxStarCount; }
+
+    bool _state;
+    static void initResource ();
+private:
+    QPolygonF starPolygon;
+    QPolygonF diamondPolygon;
+    int myStarCount;
+    int myMaxStarCount;
+
+    static QImage _trueimage, _falseimage;
+};
+
+Q_DECLARE_METATYPE(StarRating)
+
+class StarEditor : public QWidget
+{
+    Q_OBJECT
+
+public:
+    StarEditor(QWidget *parent = 0);
+
+    QSize sizeHint() const;
+    void setStarRating(const StarRating &starRating) {
+	myStarRating = starRating;
+    }
+    StarRating starRating() { return myStarRating; }
+    void changeState ();
+signals:
+    void editingFinished();
+
+protected:
+    void paintEvent(QPaintEvent *event);
+//    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+
+private:
+    int starAtPosition(int x);
+
+    StarRating myStarRating;
+};
+
+class StarDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+
+public:
+    StarDelegate(QWidget *parent = 0) : QStyledItemDelegate(parent) {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+	       const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem &option,
+		   const QModelIndex &index) const;
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+			  const QModelIndex &index) const;
+    void setEditorData(QWidget *editor, const QModelIndex &index) const;
+    void setModelData(QWidget *editor, QAbstractItemModel *model,
+		      const QModelIndex &index) const;
+
+private slots:
+    void commitAndCloseEditor();
+};
+
+
+class LayerItem
+{
+public:
+    LayerItem ();
+    int id;
+    QString name;
+    bool isVisible;
+    unsigned short frgba[4];
+    unsigned short brgba[4];
+};
+
+class LayerManagerWidget : public QTreeView
+{
+    Q_OBJECT
+public:
+    LayerManagerWidget( QWidget *parent = 0);
+    void loadFromScene ( int sceneid );
+
+    /** for GUI user
+     */
+    void setLayerFColor (  int layeridx, unsigned short* rgba );
+    void setLayerBColor (  int layeridx, unsigned short* rgba );
+    void setLayerVisible ( int layeridx, bool visible );
+    QList<LayerItem> LayerItems;
+
+    /** for CUI user
+     */
+    void updateGUI ( int* layerbegin, int* layerend );
+private:
+    int _sceneid;
+    QStandardItemModel*  _model;
+};
+

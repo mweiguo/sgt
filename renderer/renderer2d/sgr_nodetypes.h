@@ -24,6 +24,7 @@
 #define SLC_VERTEXINDEX     153
 #define SLC_NORMALINDEX     154
 #define SLC_TEXCOORDINDEX   155
+#define SLC_TRANSFORM       160
 
 
 #endif// _SGR_NODETYPES_H_

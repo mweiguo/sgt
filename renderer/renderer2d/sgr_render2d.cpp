@@ -3,14 +3,13 @@
 #include "sgr_vfculler.h"
 #include "sgr_statesetbuilder.h"
 #include "sgr_renderer.h"
+#include "sgr_nodetypes.h"
 #include <vector>
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "mat4.h"
 #include <ctime>
-#include <IL/il.h>
-#include <IL/ilut.h>
 
 using namespace std;
 
@@ -30,8 +29,7 @@ void r2d_init ()
     glEnableClientState ( GL_VERTEX_ARRAY );
     mvmat.loadIdentity ();
 
-    ilInit();
-    ilutRenderer(ILUT_OPENGL);
+    initLC();
 }
 
 // ================================================================================
@@ -173,3 +171,155 @@ void r2d_get_viewport_rect ( float* x_y_width_height )
     x_y_width_height[2] = obj1[0] - obj0[0];
     x_y_width_height[3] = obj1[1] - obj0[1];
 }
+
+// ================================================================================
+
+int r2d_get_layers ( int sceneID, int* layers )
+{
+    int layercnt = 0;
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	if ( -1 != lc->toElement ( ROOT ) )
+	{
+	    if ( -1 != lc->toElement ( FIRST_CHILD ) )
+	    {
+		do
+		{
+		    if ( lc->getType () == SLC_LAYER )
+		    {
+			layers[layercnt] = lc->getGIndex();
+			layercnt ++;
+		    }
+		} 
+		while ( -1 != lc->toElement ( NEXT_SIBLING ) );
+	    }
+	}
+    }
+    return layercnt;
+}
+
+// ================================================================================
+
+void r2d_layer_visible ( int sceneID, int layerid, bool isVisible )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    layer.visible = isVisible;
+	}
+    }
+}
+
+// ================================================================================
+
+void r2d_layer_foreground_color ( int sceneID, int layerid, unsigned short* rgb )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[layer.materialIdx];
+	    mat.foreground_color.xyz ( *rgb, *(rgb+1), *(rgb+2) );
+	}
+    }
+}
+
+// ================================================================================
+
+void r2d_layer_background_color ( int sceneID, int layerid, unsigned short* rgb )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[layer.materialIdx];
+	    mat.background_color.xyz ( *rgb, *(rgb+1), *(rgb+2) );
+	}
+    }
+}
+
+// ================================================================================
+
+const char* r2d_get_layer_name ( int sceneID, int layerid )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    return layer.name;
+	}
+    }
+    return NULL;
+}
+
+// ================================================================================
+
+bool r2d_get_layer_visible ( int sceneID, int layerid )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    return layer.visible;
+	}
+    }
+    return false;
+}
+
+// ================================================================================
+
+void r2d_get_layer_foreground_color ( int sceneID, int layerid, unsigned short* rgb )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[layer.materialIdx];
+	    rgb[0] = mat.foreground_color.x();
+	    rgb[1] = mat.foreground_color.y();
+	    rgb[2] = mat.foreground_color.z();
+	}
+    }
+}
+
+// ================================================================================
+
+void r2d_get_layer_background_color ( int sceneID, int layerid, unsigned short* rgb )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[layerid];
+	if ( grcd.type == SLC_LAYER )
+	{
+	    LayerRecord& layer = lc->layerEntry->LCRecords[grcd.value];
+	    MaterialRecord& mat = lc->materialEntry->LCRecords[layer.materialIdx];
+	    rgb[0] = mat.background_color.x();
+	    rgb[1] = mat.background_color.y();
+	    rgb[2] = mat.background_color.z();
+	}
+    }
+}
+
+// ================================================================================
+

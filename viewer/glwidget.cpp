@@ -18,8 +18,11 @@ void GLWidget::paintGL ()
     swapBuffers ();
 }
 
+#include <iostream>
+using namespace std;
 void GLWidget::resizeGL ( int width, int height )
 {
+    cout << "width = " << width << ", height = " << height << endl;
     r2d_resize ( width, height );
 }
 

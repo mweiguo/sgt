@@ -1,0 +1,278 @@
+#include "layermanagerwidget.h"
+#include <sgr_render2d.h>
+#include <iostream>
+#include <QComboBox>
+#include <QtGui>
+#include <math.h>
+using namespace std;
+
+const int PaintingScaleFactor = 20;
+
+QImage StarRating::_trueimage;
+QImage StarRating::_falseimage;
+
+void StarRating::initResource ()
+{
+    _trueimage.load ( "d:/git_workspace/sgt/viewer/images/tick_16.png" );
+    _falseimage.load ( "d:/git_workspace/sgt/viewer/images/delete.png" );
+}
+
+StarRating::StarRating(int starCount, int maxStarCount)
+{
+    myStarCount = starCount;
+    myMaxStarCount = maxStarCount;
+
+    starPolygon << QPointF(1.0, 0.5);
+    for (int i = 1; i < 5; ++i)
+	starPolygon << QPointF(0.5 + 0.5 * cos(0.8 * i * 3.14),
+			       0.5 + 0.5 * sin(0.8 * i * 3.14));
+
+    diamondPolygon << QPointF(0.4, 0.5) << QPointF(0.5, 0.4)
+		   << QPointF(0.6, 0.5) << QPointF(0.5, 0.6)
+		   << QPointF(0.4, 0.5);
+
+    _state = false;
+}
+
+QSize StarRating::sizeHint() const
+{
+    return QSize ( 50, 16 );
+    return PaintingScaleFactor * QSize(myMaxStarCount, 1);
+}
+
+void StarRating::paint(QPainter *painter, const QRect &rect,
+		       const QPalette &palette, EditMode mode) const
+{
+    if ( _state )
+	painter->drawImage ( rect.topLeft(), _trueimage );
+    else
+	painter->drawImage ( rect.topLeft(), _falseimage );
+    return;
+
+    painter->save();
+
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setPen(Qt::NoPen);
+
+    if (mode == Editable) {
+	painter->setBrush(palette.highlight());
+    } else {
+	painter->setBrush(palette.foreground());
+    }
+
+    int yOffset = (rect.height() - PaintingScaleFactor) / 2;
+    painter->translate(rect.x(), rect.y() + yOffset);
+    painter->scale(PaintingScaleFactor, PaintingScaleFactor);
+
+    for (int i = 0; i < myMaxStarCount; ++i) {
+	if (i < myStarCount) {
+	    painter->drawPolygon(starPolygon, Qt::WindingFill);
+	} else if (mode == Editable) {
+	    painter->drawPolygon(diamondPolygon, Qt::WindingFill);
+	}
+	painter->translate(1.0, 0.0);
+    }
+
+    painter->restore();
+}
+
+StarEditor::StarEditor(QWidget *parent)
+    : QWidget(parent)
+{
+    setMouseTracking(true);
+    setAutoFillBackground(true);
+}
+
+QSize StarEditor::sizeHint() const
+{
+    return myStarRating.sizeHint();
+}
+
+void StarEditor::changeState ()
+{
+    myStarRating._state = !myStarRating._state;
+    emit editingFinished();
+}
+
+void StarEditor::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    myStarRating.paint(&painter, rect(), this->palette(),
+		       StarRating::Editable);
+}
+
+void StarEditor::mouseReleaseEvent(QMouseEvent * /* event */)
+{
+    myStarRating._state = !myStarRating._state;
+    emit editingFinished();
+}
+
+int StarEditor::starAtPosition(int x)
+{
+    int star = (x / (myStarRating.sizeHint().width()
+		     / myStarRating.maxStarCount())) + 1;
+    if (star <= 0 || star > myStarRating.maxStarCount())
+	return -1;
+
+    return star;
+}
+
+void StarDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
+			 const QModelIndex &index) const
+{
+    if (qVariantCanConvert<StarRating>(index.data())) {
+	StarRating starRating = qVariantValue<StarRating>(index.data());
+
+	if (option.state & QStyle::State_Selected)
+	    painter->fillRect(option.rect, option.palette.highlight());
+
+	starRating.paint(painter, option.rect, option.palette,
+			 StarRating::ReadOnly);
+    } else {
+	QStyledItemDelegate::paint(painter, option, index);
+    }
+}
+
+QSize StarDelegate::sizeHint(const QStyleOptionViewItem &option,
+			     const QModelIndex &index) const
+{
+    if (qVariantCanConvert<StarRating>(index.data())) {
+	StarRating starRating = qVariantValue<StarRating>(index.data());
+	return starRating.sizeHint();
+    } else {
+	return QStyledItemDelegate::sizeHint(option, index);
+    }
+}
+
+QWidget *StarDelegate::createEditor(QWidget *parent,
+				    const QStyleOptionViewItem &option,
+				    const QModelIndex &index) const
+
+{
+    if (qVariantCanConvert<StarRating>(index.data())) {
+	StarEditor *editor = new StarEditor(parent);
+	connect(editor, SIGNAL(editingFinished()),
+		this, SLOT(commitAndCloseEditor()));
+	return editor;
+    } else {
+	return QStyledItemDelegate::createEditor(parent, option, index);
+    }
+}
+
+void StarDelegate::setEditorData(QWidget *editor,
+				 const QModelIndex &index) const
+{
+    if (qVariantCanConvert<StarRating>(index.data())) {
+	StarRating starRating = qVariantValue<StarRating>(index.data());
+	StarEditor *starEditor = qobject_cast<StarEditor *>(editor);
+	starEditor->setStarRating(starRating);
+
+	starEditor->changeState();
+    } else {
+	QStyledItemDelegate::setEditorData(editor, index);
+    }
+}
+
+void StarDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+				const QModelIndex &index) const
+{
+    if (qVariantCanConvert<StarRating>(index.data())) {
+	StarEditor *starEditor = qobject_cast<StarEditor *>(editor);
+	model->setData(index, qVariantFromValue(starEditor->starRating()));
+    } else {
+	QStyledItemDelegate::setModelData(editor, model, index);
+    }
+}
+
+void StarDelegate::commitAndCloseEditor()
+{
+    StarEditor *editor = qobject_cast<StarEditor *>(sender());
+    emit commitData(editor);
+    emit closeEditor(editor);
+}
+
+//============================================================
+
+LayerItem::LayerItem ()
+{
+    id = -1;
+    name = "";
+    isVisible = 0;
+    memset ( frgba, 0, sizeof(unsigned short) * 4 );
+    memset ( brgba, 0, sizeof(unsigned short) * 4 );
+}
+
+//============================================================
+
+LayerManagerWidget::LayerManagerWidget ( QWidget *parent )
+    : QTreeView ( parent ), _sceneid(-1)
+{
+    StarRating::initResource ();
+
+    _model = new QStandardItemModel;
+    _model->setColumnCount ( 2 );
+    _model->setHorizontalHeaderItem( 0, new QStandardItem( "Name" ) );
+    _model->setHorizontalHeaderItem( 1, new QStandardItem( "Visible" ) );
+
+    setModel( _model );
+    setItemDelegateForColumn ( 1, new StarDelegate(this) );
+    setEditTriggers ( QAbstractItemView::DoubleClicked | QAbstractItemView::CurrentChanged );
+}
+
+void LayerManagerWidget::loadFromScene ( int sceneid )
+{
+    _sceneid = sceneid;
+    int layers[256];
+    int layercnt = r2d_get_layers ( sceneid, layers ); 
+    updateGUI ( layers, layers + layercnt );
+}
+
+void LayerManagerWidget::setLayerFColor ( int layeridx, unsigned short* rgba )
+{
+    LayerItem& layerItem = LayerItems[layeridx];
+    memcpy ( layerItem.frgba, rgba, sizeof(unsigned short)*4 );
+    r2d_layer_foreground_color ( _sceneid, layerItem.id, rgba );
+}
+
+void LayerManagerWidget::setLayerBColor ( int layeridx, unsigned short* rgba )
+{
+    LayerItem& layerItem = LayerItems[layeridx];
+    memcpy ( layerItem.frgba, rgba, sizeof(unsigned short)*4 );
+    r2d_layer_background_color ( _sceneid, layerItem.id, rgba );
+}
+
+void LayerManagerWidget::setLayerVisible ( int layeridx, bool visible )
+{
+    LayerItem& layerItem = LayerItems[layeridx];
+    layerItem.isVisible = visible;
+    r2d_layer_visible ( _sceneid, layerItem.id, visible );
+}
+
+void LayerManagerWidget::updateGUI ( int* layerbegin, int* layerend )
+{
+    LayerItems.clear();
+    _model->removeRows ( 1, _model->rowCount()-1  );
+
+    int i = 0;
+    for ( int* p=layerbegin; p!=layerend; ++p, ++i )
+    {
+	LayerItems.push_back ( LayerItem() );
+	LayerItem& layerItem = LayerItems.back();
+	layerItem.id = *p;
+	layerItem.name = r2d_get_layer_name ( _sceneid, *p );
+	layerItem.isVisible = r2d_get_layer_visible ( _sceneid, *p );
+	r2d_get_layer_foreground_color ( _sceneid, *p, layerItem.frgba );
+	r2d_get_layer_background_color ( _sceneid, *p, layerItem.brgba );
+
+	QStandardItem *item0 = new QStandardItem( layerItem.name );
+	QStandardItem *item1 = new QStandardItem;//( QString("%0").arg(layerItem.isVisible) );
+	item1->setData( qVariantFromValue(StarRating(1)), Qt::EditRole );
+
+	item0->setEditable( false );
+	item1->setEditable( true );
+	_model->insertRow ( i );
+	_model->setItem( i, 0, item0 );
+	_model->setItem( i, 1, item1 );
+    }
+}
+

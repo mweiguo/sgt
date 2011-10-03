@@ -1,5 +1,6 @@
 #include "sgr_bboxupdater.h"
-
+#include <iostream>
+using namespace std;
 BBox2d BBox2dUpdater::traverse ( LC& lc )
 {
     if ( lc.toElement ( FIRST_CHILD ) >= 0 )

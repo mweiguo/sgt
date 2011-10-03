@@ -13,6 +13,8 @@ class QMenu;
 class QTextEdit;
 QT_END_NAMESPACE
 
+class LayerManagerWidget;
+
 //! [0]
 class MainWindow : public QMainWindow
 {
@@ -21,7 +23,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
+    void open( const char* filename );
     Document doc;
+    GLWidget *displayer;
 private slots:
     void open();
     void about();
@@ -47,10 +51,10 @@ private:
     void createStatusBar();
     void createDockWindows();
 
-    GLWidget *displayer;
 //    QTextEdit *textEdit;
     QListWidget *customerList;
     QListWidget *paragraphsList;
+    LayerManagerWidget* layerManagerWidget;
 
     QMenu *fileMenu;
     QMenu *viewMenu;

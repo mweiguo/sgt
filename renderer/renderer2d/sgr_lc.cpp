@@ -1,19 +1,29 @@
 #include "sgr_lc.h"
 #include "sgr_nodes.h"
-#include <fstream>
-#include <vector>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <string>
 #include "bbox2d.h"
 #include "mat4.h"
 #include "vec4.h"
 #include "kdtree.h"
 #include "sgr_font.h"
 #include "sgr_texture.h"
+
+#include <fstream>
+#include <vector>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <string>
 #include <ctime>
 using namespace std;
+
+#include <IL/il.h>
+#include <IL/ilut.h>
+
+void initLC ()
+{
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
+}
 
 GlobalLCRecord::GlobalLCRecord ()
 {
@@ -62,12 +72,12 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& f
 
 // --------------------------------------------------------------------------------
 
-LayerRecord::LayerRecord ( const char* nm, int f, int matIdx )
+LayerRecord::LayerRecord ( const char* nm, bool isVisible, int matIdx )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
-    flags = f; 
     materialIdx = matIdx;
+    visible = isVisible;
 }
 
 // --------------------------------------------------------------------------------
@@ -634,7 +644,9 @@ void LC::freeLevelLC ()
     memset ( cursor, 0, sizeof(int)*256);
 }
 
-
+/**
+ * return -1 if fails
+ */
 int LC::toElement ( int direction )
 {
     // get LevelLCRecord from LCEntries
@@ -811,21 +823,30 @@ void LC::updateMinMax ()
     {
     case SLC_PLINE:
     {
+//	cout << "updateBBox pline" << endl;
 	PLineRecord& pline = plineEntry->LCRecords[grecord.value];
+//	cout << "updateBBox pline1" << endl;
 	if ( pline.start < pline.end )
 	{
+//	    cout << "updateBBox pline2" << endl;
 	    bbox.init ( plineBufferEntry->LCRecords[pline.start].xy() );
+//	    cout << "updateBBox pline3" << endl;
 	    for ( int i=pline.start; i<pline.end; i++ )
 	    {
+//		cout << "updateBBox pline4 i=" << i << ", plineBufferEntry->LCLen = " << plineBufferEntry->LCLen << endl;
 		bbox.expandby ( plineBufferEntry->LCRecords[i].xy() );
+//		cout << "updateBBox pline4.1" << endl;
 	    }
+//	    cout << "updateBBox pline5" << endl;
 	}
+//	cout << "updateBBox pline ok" << endl;
 	break;
     }
     case SLC_POLY:
     {
 //	vector<vec2f> input, output;
 	// update minmax
+//	cout << "updateBBox poly" << endl;
 	PolyRecord& poly = polyEntry->LCRecords[grecord.value];
 	if ( poly.start < poly.end )
 	{
@@ -835,6 +856,7 @@ void LC::updateMinMax ()
 		bbox.expandby ( plineBufferEntry->LCRecords[i].xy() );
 	    }
 	}
+//	cout << "updateBBox poly ok" << endl;
 // 	// update tessellation points
 // 	Triangulate::Process ( input, back_inserter(output) );
 // 	int j = 0;
@@ -846,11 +868,13 @@ void LC::updateMinMax ()
     }
     case SLC_LINE:
     {
+//	cout << "updateBBox line" << endl;
         LineRecord& line = lineEntry->LCRecords[grecord.value];
         vec2f& p0 = line.data[0];
         vec2f& p1 = line.data[1];
         bbox.init ( p0 );
         bbox.expandby ( p1 );
+//	cout << "updateBBox line ok" << endl;
         break;
     }
     case SLC_TRIANGLE:
@@ -866,6 +890,7 @@ void LC::updateMinMax ()
     }
     case SLC_RECT:
     {
+//	cout << "updateBBox rect" << endl;
         RectRecord& quad = rectEntry->LCRecords[grecord.value];
         vec3f& p0 = quad.data[0];
         vec3f& p1 = quad.data[1];
@@ -875,10 +900,12 @@ void LC::updateMinMax ()
         bbox.expandby ( p1.xy() );
         bbox.expandby ( p2.xy() );
         bbox.expandby ( p3.xy() );
+//	cout << "updateBBox rect ok" << endl;
         break;
     }
     case SLC_TEXT:
     {
+//	cout << "updateBBox text" << endl;
         TextRecord& text = textEntry->LCRecords[grecord.value];
 	MaterialRecord& mat = materialEntry->LCRecords[text.materialIdx];
 	Font* font = fonts[mat.fontIdx];
@@ -916,6 +943,7 @@ void LC::updateMinMax ()
 	tmp = m * vec4f ( 0, h, text.pos.z(), h );
 	v3 = tmp.xy();
 	bbox.expandby ( v3 );
+//	cout << "updateBBox text ok" << endl;
         break;
     }
     }
