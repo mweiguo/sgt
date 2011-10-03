@@ -133,7 +133,7 @@ void MainWindow::uptranslate()
     {
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( 0, delta[3]/20.0f );
+	r2d_translate ( 0, -delta[3]/20.0f );
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -148,7 +148,7 @@ void MainWindow::downtranslate()
     {
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( 0, -delta[3]/20.0f );
+	r2d_translate ( 0, delta[3]/20.0f );
 	displayer->update ();
     }
     catch ( exception& ex )

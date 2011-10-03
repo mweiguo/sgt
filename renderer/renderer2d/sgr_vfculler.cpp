@@ -42,10 +42,11 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
 	if ( layer.visible )
 	{
 	    const BBox2d* nodeBBox = (const BBox2d*)grcd.minmax;
-	    if ( is_outside (*nodeBBox, vfbbox2d ) )
+	    if ( is_outside (*nodeBBox, vfbbox2d ) ) {
 		return CHILD_CULLED;
-	    else
+	    } else {
 		return CHILD_NOT_CULLED;
+	    }
 	}
 	else
             return CHILD_CULLED;

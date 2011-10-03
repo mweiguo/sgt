@@ -18,7 +18,7 @@ mat4f mvmat;
 
 void r2d_init ()
 {
-    glClearColor ( 1.0, 1.0, 1.0, 1.0 );
+    glClearColor ( 0.0, 0.0, 0.0, 1.0 );
     glEnable ( GL_DEPTH_TEST );
     glEnable ( GL_TEXTURE_2D );
     glEnable ( GL_BLEND );
@@ -103,6 +103,7 @@ void r2d_update_scenes ( int* ids, int length )
 
 	t = clock();
 	LC* lc = globalLC[ids[i]];
+	lc->toElement ( ROOT );
 	vfculler::cull ( *lc, viewfrustum_minmax );
 	cout << "cull finished, elapse " << clock() - t << "(ms)" << endl;
 	cout << "vfculler::renderObjects.size() = " << vfculler::renderObjects.size() << endl;
