@@ -24,11 +24,23 @@ public:
     virtual void OnLButtonDown ( int x, int y );
     virtual void OnLButtonUp ( int x, int y );
     virtual void OnLMouseMove ( int x, int y );
+    virtual void OnMButtonDown ( int x, int y );
+    virtual void OnMButtonUp ( int x, int y );
+    virtual void OnMMouseMove ( int x, int y );
     virtual void OnKeyPress ( int key, int modifiers );
     virtual void OnKeyRelease ( int key, int modifiers );
 
-private:
+protected:
     Tools* _tools;
+};
+
+class NoneTool : public Tool
+{
+public:
+    NoneTool ( Tools* tools );
+    virtual void OnLButtonDown ( int x, int y );
+    virtual void OnLButtonUp ( int x, int y );
+    virtual void OnLMouseMove ( int x, int y );
 };
 
 class ZoomInTool : public Tool
@@ -56,6 +68,11 @@ public:
     virtual void OnLButtonDown ( int x, int y );
     virtual void OnLButtonUp ( int x, int y );
     virtual void OnLMouseMove ( int x, int y );
+    virtual void OnMButtonDown ( int x, int y );
+    virtual void OnMButtonUp ( int x, int y );
+    virtual void OnMMouseMove ( int x, int y );
+private:
+    float startPos[2];
 };
 
 class FullContentTool : public Tool
@@ -64,20 +81,25 @@ public:
     
 };
 
+class MainWindow;
 class Tools
 {
 public:
     enum ToolType
     {
-	ZOOMIN_TOOL   = 1,
-	ZOOMOUT_TOOL  = 2,
-	HAND_TOOL     = 4
+	NONE_TOOL     = 1,
+	ZOOMIN_TOOL   = 2,
+	ZOOMOUT_TOOL  = 4,
+	HAND_TOOL     = 8
     };
-    Tools ();
+    Tools ( MainWindow* cont );
+    ~Tools ();
     void setTools ( ToolType toolType );
-    void selectTool ( ToolType tooltype );
-    std::map<int, Tool> tools;
+    int selectTool ( int tooltype );
+    std::map<int, Tool*> tools;
     Tool* currentTool;
+    int currentToolType;
+    MainWindow* context;
 };
 
 #endif // _TOOLS_H_

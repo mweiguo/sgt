@@ -5,6 +5,7 @@
 #include <QList>
 #include "sgr_render2d.h"
 #include "layermanagerwidget.h"
+#include "tools.h"
 using namespace std;
 
 MainWindow::MainWindow()
@@ -13,8 +14,10 @@ MainWindow::MainWindow()
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
-    displayer = new GLWidget (fmt);
+    displayer = new GLWidget (this, fmt);
     displayer->document = &doc;
+    displayer->setMouseTracking ( true );
+
     setCentralWidget(displayer);
 
     createActions();
@@ -26,6 +29,8 @@ MainWindow::MainWindow()
     setWindowTitle(tr("Dock Widgets"));
 
     setUnifiedTitleAndToolBarOnMac(true);
+
+    setMouseTracking ( false );
 }
 
 void MainWindow::open()
@@ -48,6 +53,7 @@ void MainWindow::open ( const char* filename )
 {
     doc.openScene ( filename );
     layerManagerWidget->loadFromScene ( doc.sceneid );
+    homeposition();
 }
 
 void MainWindow::about()
@@ -63,7 +69,10 @@ void MainWindow::zoomin()
 {
     try
     {
-	r2d_scale ( 1.2 );
+	_scale *= 1.2;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0],  _translate[1] ); 
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -76,7 +85,10 @@ void MainWindow::zoomout()
 {
     try
     {
-	r2d_scale ( 1/1.2 );
+	_scale *= 1 / 1.2;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0],  _translate[1] ); 
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -89,7 +101,12 @@ void MainWindow::hand()
 {
     try
     {
-	tools.selectTool ( Tools::HAND_TOOL );
+	if ( dynamic_cast<HandTool*>( displayer->tools->currentTool ) ) {
+	    displayer->tools->selectTool ( Tools::NONE_TOOL );
+	} else {
+	    displayer->tools->selectTool ( Tools::HAND_TOOL );
+	}
+    
     }
     catch ( exception& ex )
     {
@@ -103,7 +120,10 @@ void MainWindow::lefttranslate()
     {
 	float delta[2];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( -delta[2]/20.0f, 0 );
+	_translate[0] += delta[2]/20.0f;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0], _translate[1] );
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -118,7 +138,10 @@ void MainWindow::righttranslate()
     {
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( delta[2]/20.0f, 0 );
+	_translate[0] += -delta[2]/20.0f;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0], _translate[1] );
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -133,7 +156,10 @@ void MainWindow::uptranslate()
     {
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( 0, -delta[3]/20.0f );
+	_translate[1] += -delta[3]/20.0f;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0], _translate[1] );
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -148,7 +174,10 @@ void MainWindow::downtranslate()
     {
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
-	r2d_translate ( 0, delta[3]/20.0f );
+	_translate[1] += delta[3]/20.0f;
+	r2d_loadidentity ();
+	r2d_scale ( _scale );
+	r2d_translate ( _translate[0], _translate[1] );
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -163,118 +192,21 @@ void MainWindow::homeposition()
 {
     try
     {
-	r2d_home ();
+	// get minmax
+	float minmax[4];
+	r2d_get_scene_minmax ( doc.sceneid, minmax, minmax+2 );
+	float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
+	float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / 2 };
+	r2d_loadidentity ();
+	_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
+//	cout << "scale = " << _scale << endl;
+	r2d_scale ( _scale );
+	_translate[0] = -center[0];
+	_translate[1] = -center[1];
+	r2d_translate ( _translate[0], _translate[1] );
+// 	s x t x p;
+// 	r2d_home ();
 	displayer->update ();
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-//================================================================================
-
-int fromQtModifiers ( Qt::KeyboardModifiers qm )
-{
-    int modifiers = 0;
-    if ( qm & Qt::NoModifier )
-	modifiers &= Tool::KB_NoModifier;
-    if ( qm & Qt::ShiftModifier )
-	modifiers &= Tool::KB_ShiftModifier;
-    if ( qm & Qt::ControlModifier )
-	modifiers &= Tool::KB_ControlModifier;
-    if ( qm & Qt::AltModifier )
-	modifiers &= Tool::KB_AltModifier;
-    if ( qm & Qt::MetaModifier )
-	modifiers &= Tool::KB_MetaModifier;
-    if ( qm & Qt::KeypadModifier )
-	modifiers &= Tool::KB_KeypadModifier;
-    if ( qm & Qt::GroupSwitchModifier )
-	modifiers &= Tool::KB_GroupSwitchModifier;
-    return modifiers;
-}
-
-void MainWindow::keyPressEvent ( QKeyEvent * event )
-{
-    try
-    {
-	if ( tools.currentTool )
-	{
-	    int modifiers = fromQtModifiers ( event->modifiers() );
-	    tools.currentTool->OnKeyPress ( event->key(), modifiers );
-	}
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-//================================================================================
-
-void MainWindow::keyReleaseEvent ( QKeyEvent * event )
-{
-    try
-    {
-	if ( tools.currentTool )
-	{
-	    int modifiers = fromQtModifiers ( event->modifiers() );
-	    tools.currentTool->OnKeyRelease ( event->key(), modifiers );
-	}
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-//================================================================================
-
-void MainWindow::mouseMoveEvent ( QMouseEvent * event )
-{
-    try
-    {
-	if ( tools.currentTool )
-	{
-	    if ( Qt::LeftButton == event->button() )
-		tools.currentTool->OnLMouseMove ( event->x(), event->y() );
-	}
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-//================================================================================
-
-void MainWindow::mousePressEvent ( QMouseEvent * event )
-{
-    try
-    {
-	if ( tools.currentTool )
-	{
-	    if ( Qt::LeftButton == event->button() )
-		tools.currentTool->OnLButtonDown ( event->x(), event->y() );
-	}
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-//================================================================================
-
-void MainWindow::mouseReleaseEvent ( QMouseEvent * event )
-{
-    try
-    {
-	if ( tools.currentTool )
-	{
-	    if ( Qt::LeftButton == event->button() )
-		tools.currentTool->OnLButtonUp ( event->x(), event->y() );
-	}
     }
     catch ( exception& ex )
     {
@@ -326,6 +258,7 @@ void MainWindow::createActions()
     handAct = new QAction(QIcon(":/images/hand.png"), tr("&HandMove..."), this);
     handAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_P ) );
     handAct->setStatusTip(tr("use a hand tool to move the canvas"));
+    handAct->setCheckable ( true );
     connect(handAct, SIGNAL(triggered()), this, SLOT(hand()));
 
     leftAct = new QAction(tr("Left Translate "), this);

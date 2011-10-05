@@ -58,6 +58,21 @@ void r2d_unload_scene ( int sceneid )
 
 // ================================================================================
 
+void r2d_get_scene_minmax ( int sceneID, float* minxy, float* maxxy )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[0];
+	minxy[0] = grcd.minmax[0];
+	minxy[1] = grcd.minmax[1];
+	maxxy[0] = grcd.minmax[2];
+	maxxy[1] = grcd.minmax[3];
+    }
+}
+
+// ================================================================================
+
 void r2d_update_scenes ( int* ids, int length )
 {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -124,10 +139,22 @@ void r2d_update_scenes ( int* ids, int length )
 
 // ================================================================================
 
-void r2d_home ()
+void r2d_get_scene_position ( int x, int y, float& scenex, float& sceney )
 {
-    mvmat.loadIdentity();
+    double mv[16], pj[16], obj0[3];
+    int vp[4];
+    glGetDoublev ( GL_MODELVIEW_MATRIX, mv );
+    glGetDoublev ( GL_PROJECTION_MATRIX, pj );
+    glGetIntegerv ( GL_VIEWPORT, vp );
+    gluUnProject ( x, vp[3]-y, 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
+    
+    scenex = obj0[0];
+    sceney = obj0[1];
 }
+// void r2d_home ()
+// {
+//     mvmat.loadIdentity();
+// }
 
 // ================================================================================
 
@@ -141,6 +168,13 @@ void r2d_translate ( float x, float y )
 void r2d_scale ( float s )
 {
     mvmat *= mat4f::scale_matrix ( s, s, s );
+}
+
+// ================================================================================
+
+void r2d_loadidentity ()
+{
+    mvmat.loadIdentity();
 }
 
 // ================================================================================

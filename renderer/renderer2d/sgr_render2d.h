@@ -20,14 +20,16 @@ void r2d_init ();
  */
 int r2d_load_scene ( const char* filename );
 void r2d_unload_scene ( int sceneID );
+void r2d_get_scene_minmax ( int sceneid, float* minxy, float* maxxy );
 
 void r2d_update_scenes ( int* ids, int length );
-
+void r2d_get_scene_position ( int x, int y, float& scenex, float& sceney );
 /** navigation interface
  */
-void r2d_home ();
+//void r2d_home ();
 void r2d_translate ( float x, float y );
 void r2d_scale ( float s );
+void r2d_loadidentity ();
 void r2d_resize ( int width, int height );
 
 /** layer access

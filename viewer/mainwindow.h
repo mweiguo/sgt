@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "glwidget.h"
 #include "document.h"
-#include "tools.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -26,6 +25,8 @@ public:
     void open( const char* filename );
     Document doc;
     GLWidget *displayer;
+    float _scale;
+    float _translate[2];
 private slots:
     void open();
     void about();
@@ -38,12 +39,12 @@ private slots:
     void downtranslate();
 
     void homeposition();
-protected:
-    virtual void keyPressEvent ( QKeyEvent * event );
-    virtual void keyReleaseEvent ( QKeyEvent * event );
-    virtual void mouseMoveEvent ( QMouseEvent * event );
-    virtual void mousePressEvent ( QMouseEvent * event );
-    virtual void mouseReleaseEvent ( QMouseEvent * event );
+/* protected: */
+/*     virtual void keyPressEvent ( QKeyEvent * event ); */
+/*     virtual void keyReleaseEvent ( QKeyEvent * event ); */
+/*     virtual void mouseMoveEvent ( QMouseEvent * event ); */
+/*     virtual void mousePressEvent ( QMouseEvent * event ); */
+/*     virtual void mouseReleaseEvent ( QMouseEvent * event ); */
 private:
     void createActions();
     void createMenus();
@@ -77,7 +78,7 @@ private:
     QAction *aboutQtAct;
     QAction *quitAct;
 
-    Tools tools;
+//    Tools* tools;
 };
 //! [0]
 
