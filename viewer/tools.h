@@ -43,19 +43,32 @@ public:
     virtual void OnLMouseMove ( int x, int y );
 };
 
-class ZoomInTool : public Tool
+class MouseTool : public Tool
 {
 public:
-    ZoomInTool ( Tools* tools );
+    MouseTool ( Tools* tools );
     virtual void OnLButtonDown ( int x, int y );
     virtual void OnLButtonUp ( int x, int y );
     virtual void OnLMouseMove ( int x, int y );
+protected:
+    float startPos[2], lastPos[2];
 };
 
-class ZoomOutTool : public Tool
+class RubberBoxTool : public MouseTool
 {
 public:
-    ZoomOutTool ( Tools* tools );
+    RubberBoxTool ( Tools* tools );
+    virtual void OnLButtonDown ( int x, int y );
+    virtual void OnLButtonUp ( int x, int y );
+    virtual void OnLMouseMove ( int x, int y );
+protected:
+    int rectid;
+};
+
+class ZoomTool : public RubberBoxTool
+{
+public:
+    ZoomTool ( Tools* tools );
     virtual void OnLButtonDown ( int x, int y );
     virtual void OnLButtonUp ( int x, int y );
     virtual void OnLMouseMove ( int x, int y );
@@ -88,13 +101,12 @@ public:
     enum ToolType
     {
 	NONE_TOOL     = 1,
-	ZOOMIN_TOOL   = 2,
-	ZOOMOUT_TOOL  = 4,
-	HAND_TOOL     = 8
+	ZOOM_TOOL     = 2,
+	HAND_TOOL     = 4
     };
     Tools ( MainWindow* cont );
     ~Tools ();
-    void setTools ( ToolType toolType );
+    void setTools ( int toolType );
     int selectTool ( int tooltype );
     std::map<int, Tool*> tools;
     Tool* currentTool;

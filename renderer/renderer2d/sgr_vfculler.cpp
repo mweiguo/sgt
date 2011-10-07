@@ -80,10 +80,9 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
     case SLC_LODPAGE:
     {
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
-        if ( is_outside (*nodeBBox, vfbbox2d ) )
+        if ( is_outside (*nodeBBox, vfbbox2d ) ) {
             return CHILD_CULLED;
-        else
-        {
+        } else {
             int objIdx = lc.globalLCEntry->LCRecords[gIdx].value;
             int kdtreeidx = lc.lodpageEntry->LCRecords[objIdx].kdtree;
             if ( -1 == kdtreeidx )

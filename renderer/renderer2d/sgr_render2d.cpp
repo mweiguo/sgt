@@ -4,6 +4,7 @@
 #include "sgr_statesetbuilder.h"
 #include "sgr_renderer.h"
 #include "sgr_nodetypes.h"
+#include "sgr_bboxupdater.h"
 #include <vector>
 #include <windows.h>
 #include <GL/gl.h>
@@ -358,3 +359,30 @@ void r2d_get_layer_background_color ( int sceneID, int layerid, unsigned short* 
 
 // ================================================================================
 
+int r2d_to_element ( int sceneID, int elementType )
+{
+    LC* lc = globalLC[sceneID];
+    lc->toElement ( elementType );
+    return lc->getGIndex ();
+}
+
+int r2d_get_node_type ( int sceneID )
+{
+    LC* lc = globalLC[sceneID];
+    return lc->getType();
+}
+
+void r2d_rect_points ( int sceneID, int rectid, float* xyz )
+{
+    LC* lc = globalLC[sceneID];
+
+    GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[rectid];
+    RectRecord& rrcd = lc->rectEntry->LCRecords[ grcd.value ];
+    rrcd.data[0].xyz ( xyz[0], xyz[1], xyz[2] );
+    rrcd.data[1].xyz ( xyz[3], xyz[1], xyz[2] );
+    rrcd.data[2].xyz ( xyz[3], xyz[4], xyz[5] );
+    rrcd.data[3].xyz ( xyz[0], xyz[4], xyz[5] );
+
+    // should be lazy update, but need LC support arbitery cursor
+    BBox2dUpdater::forward_update ( *lc );
+}

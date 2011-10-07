@@ -12,7 +12,7 @@ GLWidget::GLWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent,
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     tools = new Tools ( context );
-    tools->setTools ( (Tools::ToolType)(Tools::NONE_TOOL | Tools::HAND_TOOL) );
+    tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
 }
 
 void GLWidget::initializeGL ()
@@ -22,7 +22,8 @@ void GLWidget::initializeGL ()
 
 void GLWidget::paintGL ()
 {
-    r2d_update_scenes ( &document->sceneid, 1 );
+    int ids[] = {document->sceneid, document->miscsceneid };
+    r2d_update_scenes ( ids, 2 );
     swapBuffers ();
 }
 

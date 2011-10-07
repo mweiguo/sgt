@@ -10,6 +10,7 @@ class QAction;
 class QListWidget;
 class QMenu;
 class QTextEdit;
+class QActionGroup;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
@@ -23,7 +24,7 @@ public:
     MainWindow();
 
     void open( const char* filename );
-    Document doc;
+    Document *doc;
     GLWidget *displayer;
     float _scale;
     float _translate[2];
@@ -32,7 +33,7 @@ private slots:
     void about();
     void zoomin();
     void zoomout();
-    void hand();
+    void actionEvent( QAction* action );
     void lefttranslate();
     void righttranslate();
     void uptranslate();
@@ -67,6 +68,7 @@ private:
     QAction *openAct;
     QAction *zoominAct;
     QAction *zoomoutAct;
+    QAction *winzoomAct;
     QAction *handAct;
     QAction *leftAct;
     QAction *rightAct;
@@ -77,7 +79,7 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
     QAction *quitAct;
-
+    QActionGroup* navigroup;
 //    Tools* tools;
 };
 //! [0]

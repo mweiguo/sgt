@@ -5,10 +5,12 @@ class Document
 {
 public:
     Document ();
+    virtual ~Document ();
     void openScene ( const char* filename );
     void closeScene ();
 
     int sceneid;
+    int miscsceneid;
 };
 
 #endif // _DOCUMENT_H_

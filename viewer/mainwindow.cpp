@@ -1,21 +1,27 @@
 #include <QtGui>
-#include "mainwindow.h"
-#include <exception>
-#include <iostream>
+#include <QActionGroup>
 #include <QList>
+
+#include "mainwindow.h"
 #include "sgr_render2d.h"
 #include "layermanagerwidget.h"
 #include "tools.h"
+
+#include <exception>
+#include <iostream>
 using namespace std;
 
 MainWindow::MainWindow()
 {
+    r2d_init ();
+    doc = new Document;
+
     QGLFormat fmt;
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
     displayer = new GLWidget (this, fmt);
-    displayer->document = &doc;
+    displayer->document = doc;
     displayer->setMouseTracking ( true );
 
     setCentralWidget(displayer);
@@ -51,8 +57,8 @@ void MainWindow::open()
 
 void MainWindow::open ( const char* filename )
 {
-    doc.openScene ( filename );
-    layerManagerWidget->loadFromScene ( doc.sceneid );
+    doc->openScene ( filename );
+    layerManagerWidget->loadFromScene ( doc->sceneid );
     homeposition();
 }
 
@@ -97,22 +103,49 @@ void MainWindow::zoomout()
     }
 }
 
-void MainWindow::hand()
+void MainWindow::actionEvent( QAction* action )
 {
     try
     {
-	if ( dynamic_cast<HandTool*>( displayer->tools->currentTool ) ) {
-	    displayer->tools->selectTool ( Tools::NONE_TOOL );
-	} else {
+	if ( action == winzoomAct )
+	    displayer->tools->selectTool ( Tools::ZOOM_TOOL );
+	else if ( action == handAct )
 	    displayer->tools->selectTool ( Tools::HAND_TOOL );
-	}
-    
     }
     catch ( exception& ex )
     {
 	cerr << ex.what() << endl;
     }
 }
+
+// void MainWindow::winzoom()
+// {
+//     try
+//     {
+// 	displayer->tools->selectTool ( Tools::ZOOM_TOOL );
+//     }
+//     catch ( exception& ex )
+//     {
+// 	cerr << ex.what() << endl;
+//     }
+// }
+
+// void MainWindow::hand()
+// {
+//     try
+//     {
+// 	if ( dynamic_cast<HandTool*>( displayer->tools->currentTool ) ) {
+// 	    displayer->tools->selectTool ( Tools::NONE_TOOL );
+// 	} else {
+// 	    displayer->tools->selectTool ( Tools::HAND_TOOL );
+// 	}
+    
+//     }
+//     catch ( exception& ex )
+//     {
+// 	cerr << ex.what() << endl;
+//     }
+// }
 
 void MainWindow::lefttranslate()
 {
@@ -194,18 +227,15 @@ void MainWindow::homeposition()
     {
 	// get minmax
 	float minmax[4];
-	r2d_get_scene_minmax ( doc.sceneid, minmax, minmax+2 );
+	r2d_get_scene_minmax ( doc->sceneid, minmax, minmax+2 );
 	float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
 	float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / 2 };
 	r2d_loadidentity ();
 	_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
-//	cout << "scale = " << _scale << endl;
 	r2d_scale ( _scale );
 	_translate[0] = -center[0];
 	_translate[1] = -center[1];
 	r2d_translate ( _translate[0], _translate[1] );
-// 	s x t x p;
-// 	r2d_home ();
 	displayer->update ();
     }
     catch ( exception& ex )
@@ -255,11 +285,22 @@ void MainWindow::createActions()
     zoomoutAct->setStatusTip(tr("Zoom Out Scene"));
     connect(zoomoutAct, SIGNAL(triggered()), this, SLOT(zoomout()));
 
+    winzoomAct = new QAction(QIcon(":/images/windowzoom.png"), tr("&Window Zoom..."), this);
+    winzoomAct->setStatusTip(tr("window Zoom tool"));
+    winzoomAct->setCheckable ( true );
+//    connect(winzoomAct, SIGNAL(triggered()), this, SLOT(winzoom()));
+
     handAct = new QAction(QIcon(":/images/hand.png"), tr("&HandMove..."), this);
     handAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_P ) );
     handAct->setStatusTip(tr("use a hand tool to move the canvas"));
     handAct->setCheckable ( true );
-    connect(handAct, SIGNAL(triggered()), this, SLOT(hand()));
+//    connect(handAct, SIGNAL(triggered()), this, SLOT(hand()));
+
+    navigroup = new QActionGroup( this );
+    navigroup->setExclusive ( true );
+    navigroup->addAction ( winzoomAct );
+    navigroup->addAction ( handAct );
+    connect(navigroup, SIGNAL(triggered(QAction*)), this, SLOT(actionEvent(QAction*)));
 
     leftAct = new QAction(tr("Left Translate "), this);
     leftAct->setShortcut( QKeySequence( Qt::Key_Left ) );
@@ -297,7 +338,9 @@ void MainWindow::createMenus()
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(zoominAct);
     viewMenu->addAction(zoomoutAct);
-    viewMenu->addAction(handAct);
+    viewMenu->addActions( navigroup->actions());
+//     viewMenu->addAction(winzoomAct);
+//     viewMenu->addAction(handAct);
     viewMenu->addAction(leftAct);
     viewMenu->addAction(rightAct);
     viewMenu->addAction(upAct);
@@ -317,10 +360,12 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(openAct);
 
     navToolBar = addToolBar(tr("Navigation"));
+    navToolBar->addAction(fullextentAct);
+    navToolBar->addActions( navigroup->actions());
+//     navToolBar->addAction(handAct);
+//     navToolBar->addAction(winzoomAct);
     navToolBar->addAction(zoominAct);
     navToolBar->addAction(zoomoutAct);
-    navToolBar->addAction(handAct);
-    navToolBar->addAction(fullextentAct);
 }
 
 

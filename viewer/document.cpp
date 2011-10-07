@@ -4,11 +4,17 @@
 #include <iostream>
 using namespace std;
 
-
-
 Document::Document()
 {
     sceneid = -1;
+    miscsceneid = r2d_load_scene ( "miscscene.slc" );
+}
+
+Document::~Document ()
+{
+    closeScene();
+    r2d_unload_scene ( miscsceneid );
+    miscsceneid = -1;
 }
 
 void Document::openScene ( const char* filename )
@@ -25,4 +31,6 @@ void Document::closeScene ()
 	r2d_unload_scene ( sceneid );
 	sceneid = -1;
     }
+
 }
+

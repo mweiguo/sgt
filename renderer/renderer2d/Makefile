@@ -1,5 +1,5 @@
 TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder
-BIN    = librender2d.so libslcconverter.so buildchip
+BIN    = librender2d.so libslcconverter.so buildchip buildmisc
 OBJS   = sgr_nodes.o test_nodes.o 
 SRC    = $(OBJS:%.o=%.cpp)
 INC    = $(OBJS:%.o=%.h)
@@ -34,14 +34,17 @@ test_statesetbuilder : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_states
 #librender2d.a : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o
 #	ar cq $@ sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o
 
-librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o
-	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o -o $@ $(SHARELINKOPT)
+librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o
+	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o -o $@ $(SHARELINKOPT)
 
 libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o ../../graphbase/mat4f.o
 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o ../../graphbase/mat4f.o -o $@ $(SHARELINKOPT)
 
 buildchip : sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o
 	$(CXX) sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o -o $@ $(LINKOPT)
+
+buildmisc : sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o
+	$(CXX) sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o -o $@ $(LINKOPT)
 
 # all src
 .cpp.o:
