@@ -58,13 +58,15 @@ void State::applyState ()
 // 	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
- 	cout << "State::applyState, BACKGROUND_COLOR : " << 
-	    vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
+//  	cout << "State::applyState, BACKGROUND_COLOR : " << 
+// 	    vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
 	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.y()/255.0f, vec3iValue.z()/255.0f );
 	break;
     case LINE_TYPE:
 	break;
     case LINE_WIDTH:
+//	cout << "line width = " << floatValue << endl;
+	glLineWidth ( floatValue );
 	break;
     case TEXTURE:
 //	cout << "bind texture : " << intValue << endl;
