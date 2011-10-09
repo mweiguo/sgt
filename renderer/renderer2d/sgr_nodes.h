@@ -47,17 +47,19 @@ public:
 class SLCMaterial : public SLCNode
 {
 public:
-    enum LINETYPE {
-	LINETYPE_SOLID,
-	LINETYPE_DASH
-    };
+/*     enum LINETYPE { */
+/* 	LINETYPE_SOLID, */
+/* 	LINETYPE_DASH */
+/*     }; */
     SLCMaterial ( const char* name );
     virtual int getType () { return SLC_MATERIAL; }
     virtual string toXML () const;
     string name;
     vec3i foreground_color;
     vec3i background_color;
-    int linetype;
+    unsigned short linetypefactor;
+    unsigned short linetype; // pattern
+//    int linetype;
     float linewidth;
     string fontfilename;
     string texturefilename;

@@ -136,8 +136,17 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
         ss << "layername : " << lc.layerEntry->LCRecords[idx].name;
         break;
     case SLC_LOD:
-        ss << "lod ";
+    {
+	LODRecord& lod = lc.lodEntry->LCRecords[idx];
+	if ( lod.scalecnt != 0 )
+	{
+	    ss << "scales : ";
+	    for ( int i=0; i<lod.scalecnt; i++ )
+		ss << lod.scales[i] << ' ';
+	}
+
         break;
+    }
     case SLC_LODPAGE:
         ss << "kdtreepath : " << lc.lodpageEntry->LCRecords[idx].kdtreepath
 	   << ", delayloading : " << lc.lodpageEntry->LCRecords[idx].delayloading
@@ -223,16 +232,7 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
         ss << "name : " << mr.name <<
             ", background_color ( " << mr.background_color.x() << "," << mr.background_color.y() << "," << mr.background_color.z() <<
             " ), foreground_color ( " << mr.foreground_color.x() << "," << mr.foreground_color.y() << "," << mr.foreground_color.z() <<
-            " ), linewidth = " << mr.linewidth << ", ";
-        switch ( mr.linetype )
-        {
-        case MaterialRecord::LINETYPE_SOLID:
-            ss << "linetype = solid";
-            break;
-        case MaterialRecord::LINETYPE_DASH:
-            ss << "linetype = dash";
-            break;
-        }
+            " ), linewidth = " << mr.linewidth << ", linetype = " << mr.linetype << ", linetypefactor = " << mr.linetypefactor;
 	ss << ", font=" << mr.fontfile;
 	ss << ", texfilename=" << mr.texturefile;
         break;

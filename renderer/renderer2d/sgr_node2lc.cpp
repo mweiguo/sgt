@@ -50,7 +50,7 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     {
         SLCMaterial* material = dynamic_cast<SLCMaterial*>(node);
         materialMap.insert ( pair<string,int>(material->name, materialdata.size() ));
-        materialdata.push_back ( MaterialRecord ( material->name.c_str(), material->background_color, material->foreground_color, material->linewidth, material->linetype, material->fontfilename.c_str(), material->texturefilename.c_str() ) );
+        materialdata.push_back ( MaterialRecord ( material->name.c_str(), material->background_color, material->foreground_color, material->linewidth, material->linetype, material->linetypefactor, material->fontfilename.c_str(), material->texturefilename.c_str() ) );
         ii = matIdx++; break;
     }
     case SLC_LAYER:

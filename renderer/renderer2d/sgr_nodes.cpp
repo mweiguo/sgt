@@ -58,7 +58,7 @@ SLCMaterial::SLCMaterial ( const char* nm ) : SLCNode()
     name = nm;
     foreground_color = vec3i ( 0, 0, 0 );
     background_color = vec3i ( 0, 0, 0 );
-    linetype = LINETYPE_SOLID;
+    linetype = 0xFFFF;//LINETYPE_SOLID;
     linewidth = 0;
     fontfilename = "";
     texturefilename = "";
@@ -69,17 +69,7 @@ string SLCMaterial::toXML () const
     stringstream ss;
     ss << "<material id=\"" << name << "\">" << endl;
     ss << "<color foregroud_color=\"" << foreground_color.x() << ' ' << foreground_color.y() << ' ' << foreground_color.z() << "\" background_color=\"" << background_color.x() << ' ' << background_color.y() << ' ' << background_color.z() << "\"/>" << endl;
-    ss << "<line type=\"";
-    switch ( linetype )
-    {
-    case LINETYPE_SOLID:
-	ss << "SOLID";
-	break;
-    case LINETYPE_DASH:
-	ss << "DASH";
-	break;
-    }
-    ss << "\" width=\"" << linewidth << "\"/>" << endl;
+    ss << "<line pattern=\"" << linetype << "\" factor=\"" << linetypefactor << "\" width=\"" << linewidth << "\"/>" << endl;
     if ( fontfilename != "" )
 	ss << "<font path=\"" << fontfilename << "\"/>" << endl;
     if ( texturefilename != "" )

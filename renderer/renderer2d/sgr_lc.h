@@ -45,12 +45,13 @@ struct MaterialRecord
         LINETYPE_DASH
     };
     MaterialRecord ();
-    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int linetype, const char* fontfilename, const char* texfilename );
+    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, unsigned short linetype, unsigned short linetypefactor, const char* fontfilename, const char* texfilename );
     char name[32];
     vec3i background_color;
     vec3i foreground_color;
     float linewidth;
-    int linetype;
+    unsigned short linetypefactor;
+    unsigned short linetype;
     char fontfile[32];
     int fontIdx;
     char texturefile[32];

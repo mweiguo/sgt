@@ -49,13 +49,16 @@ MaterialRecord::MaterialRecord ()
     background_color.xyz ( 0.8, 0.8, 0.8 );
     foreground_color.xyz ( 0.2, 0.2, 0.2 );
     linewidth = 0;
-    linetype = LINETYPE_SOLID;
+    linetype = 0xFFFF;//LINETYPE_SOLID;
+    linetypefactor = 1;
     memset  ( fontfile,  0, 32 * sizeof(char) ); 
     fontIdx = -1;
     memset  ( texturefile,  0, 32 * sizeof(char) ); 
 }
 
-MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, int lt, const char* fontfilename, const char* texfilename )
+MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, 
+				 unsigned short lt, unsigned short ltfactor, 
+				 const char* fontfilename, const char* texfilename )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
@@ -63,6 +66,7 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& f
     foreground_color = fg;
     linewidth = lw;
     linetype  = lt;
+    linetypefactor  = ltfactor;
     memset  ( fontfile,  0, 32 * sizeof(char) ); 
     strncpy ( fontfile, fontfilename, 32 ); 
     fontIdx = -1;
