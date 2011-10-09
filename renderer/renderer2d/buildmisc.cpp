@@ -15,7 +15,7 @@ void initMaterials ()
     gmat = new SLCMaterial ( "layer_material");
     gmat->foreground_color = vec3i(155, 0, 0);
     gmat->background_color = vec3i(255, 255, 255);
-    gmat->linetype = SLCMaterial::LINETYPE_SOLID;
+    gmat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
     gmat->linewidth = 0;
     gmat->fontfilename = "simsun.ttc";
     gmat->texturefilename = "hands.jpg";

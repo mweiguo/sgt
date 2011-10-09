@@ -6,11 +6,13 @@
 
 list<int> vfculler::renderObjects;
 BBox2d vfculler::vfbbox2d;
+float vfculler::scale = 1;
 
 //================================================================================
 
-void vfculler::cull ( LC& lc, const BBox2d& vfbbox )
+void vfculler::cull ( LC& lc, const BBox2d& vfbbox, float s )
 {
+    scale = s;
     vfbbox2d = vfbbox;
     
     if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED ) {
@@ -54,13 +56,36 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
     }
     case SLC_SCENE:
     case SLC_MATERIAL:
-    case SLC_LOD:
     {
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
         if ( is_outside (*nodeBBox, vfbbox2d ) )
             return CHILD_CULLED;
         else
             return CHILD_NOT_CULLED;
+    }
+    case SLC_LOD:
+    {
+        const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
+        if ( is_outside (*nodeBBox, vfbbox2d ) )
+            return CHILD_CULLED;
+        else
+	{
+	    LODRecord& lod = lc.lodEntry->LCRecords[lc.getValue()];
+	    if ( lod.scalecnt == 0 )
+		return CHILD_NOT_CULLED;
+
+	    // skip to correspond node
+	    // current Scale;
+	    cout << "++++++++++++++++ in lod " << endl;
+	    for ( int i=0; i<lod.scalecnt; i++ ) {
+		if ( scale < lod.scales[i] ) {
+		    traverse ( lc, i );
+		    return CHILD_CULLED;
+		}
+	    }
+	    traverse ( lc, lod.scalecnt-1 );
+            return CHILD_CULLED;
+	}
     }
     case SLC_PLINE:
     case SLC_POLY:
@@ -122,4 +147,28 @@ void vfculler::traverse ( LC& lc )
 }
 
 //================================================================================
+
+void vfculler::traverse ( LC& lc, int i )
+{
+    if ( i<0 )
+	return;
+
+    int ii=0;
+    if ( lc.toElement ( FIRST_CHILD ) >= 0 ) {
+	if ( i == ii++ ) {
+	    if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED )
+		traverse ( lc );
+	}
+        while ( lc.toElement ( NEXT_SIBLING )>=0 ) {
+	    if ( i == ii++ ) {
+		if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED )
+		    traverse ( lc );
+	    }
+        }
+        lc.toElement ( PARENT );
+    }
+
+    if ( i>=ii )
+	return;
+}
 

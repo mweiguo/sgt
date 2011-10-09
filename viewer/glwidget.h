@@ -12,11 +12,21 @@ class GLWidget : public QGLWidget
 {
 public:
     GLWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    void zoomin();
+    void zoomout();
+    void lefttranslate();
+    void righttranslate();
+    void uptranslate();
+    void downtranslate();
+    void homeposition();
+    MainWindow* context;
     Document* document;
     Tools* tools;
+    float scale;
+    float translate[2];
 protected:
+    void setTransform();
     virtual void initializeGL ();
-    virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
 
     virtual void keyPressEvent ( QKeyEvent * event );
@@ -28,6 +38,23 @@ protected:
     int _oldTool;
 };
 
+class GLMainView : public GLWidget
+{
+public:
+    GLMainView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    virtual void paintGL ();
+};
+
+class GLBirdView : public GLWidget
+{
+public:
+    GLBirdView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    virtual void paintGL ();
+    virtual void resizeGL ( int width, int height );
+    int rectid;
+};
+
+
 class GLScrollWidget : public QWidget
 {
     Q_OBJECT
@@ -35,12 +62,21 @@ class GLScrollWidget : public QWidget
 public:
     GLScrollWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     void setViewportTransform ( float scale, float transx, float transy );
-    GLWidget* widget;
+    GLMainView* widget;
     QScrollBar *hbar, *vbar;
     MainWindow* context;
+signals:
+    void transformChanged(float,float,float,float);
 public slots:
     void onHBarValueChanged(int value );
     void onVBarValueChanged(int value );
+    void zoomin();
+    void zoomout();
+    void lefttranslate();
+    void righttranslate();
+    void uptranslate();
+    void downtranslate();
+    void homeposition();
 private:
     float initTranslate[2];
 

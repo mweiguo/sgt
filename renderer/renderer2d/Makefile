@@ -1,5 +1,5 @@
 TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder
-BIN    = librender2d.so libslcconverter.so buildchip buildmisc
+BIN    = librender2d.so libslcconverter.so buildchip buildmisc buildlod buildline
 OBJS   = sgr_nodes.o test_nodes.o 
 SRC    = $(OBJS:%.o=%.cpp)
 INC    = $(OBJS:%.o=%.h)
@@ -45,6 +45,12 @@ buildchip : sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc
 
 buildmisc : sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o
 	$(CXX) sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o -o $@ $(LINKOPT)
+
+buildlod : sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o
+	$(CXX) sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o -o $@ $(LINKOPT)
+
+buildline : sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o
+	$(CXX) sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o ../../graphbase/mat4f.o -o $@ $(LINKOPT)
 
 # all src
 .cpp.o:

@@ -20,9 +20,15 @@ MainWindow::MainWindow()
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
+    // displayer
     displayer = new GLScrollWidget (this, fmt);
-    displayer->widget->document = doc;
-
+    // birdview
+    birdview = new GLBirdView (this, fmt);
+    connect ( displayer, 
+	      SIGNAL(transformChanged(float,float,float,float)),
+	      this,
+	      SLOT(onMainViewTransformChanged(float,float,float,float)) );
+    
     setCentralWidget(displayer);
 
     createActions();
@@ -32,9 +38,7 @@ MainWindow::MainWindow()
     createDockWindows();
 
     setWindowTitle(tr("Dock Widgets"));
-
     setUnifiedTitleAndToolBarOnMac(true);
-
     setMouseTracking ( false );
 }
 
@@ -58,7 +62,8 @@ void MainWindow::open ( const char* filename )
 {
     doc->openScene ( filename );
     layerManagerWidget->loadFromScene ( doc->sceneid );
-    homeposition();
+    displayer->homeposition();
+    birdview->homeposition();
 }
 
 void MainWindow::about()
@@ -68,32 +73,6 @@ void MainWindow::about()
                "use Qt's dock widgets. You can enter your own text, "
                "click a customer to add a customer name and "
                "address, and click standard paragraphs to add them."));
-}
-
-void MainWindow::zoomin()
-{
-    try
-    {
-	_scale *= 1.2;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what () << endl;
-    }
-}
-
-void MainWindow::zoomout()
-{
-    try
-    {
-	_scale *= 1 / 1.2;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
 }
 
 void MainWindow::actionEvent( QAction* action )
@@ -111,114 +90,16 @@ void MainWindow::actionEvent( QAction* action )
     }
 }
 
-// void MainWindow::winzoom()
-// {
-//     try
-//     {
-// 	displayer->widget->tools->selectTool ( Tools::ZOOM_TOOL );
-//     }
-//     catch ( exception& ex )
-//     {
-// 	cerr << ex.what() << endl;
-//     }
-// }
-
-// void MainWindow::hand()
-// {
-//     try
-//     {
-// 	if ( dynamic_cast<HandTool*>( displayer->widget->tools->currentTool ) ) {
-// 	    displayer->widget->tools->selectTool ( Tools::NONE_TOOL );
-// 	} else {
-// 	    displayer->widget->tools->selectTool ( Tools::HAND_TOOL );
-// 	}
-    
-//     }
-//     catch ( exception& ex )
-//     {
-// 	cerr << ex.what() << endl;
-//     }
-// }
-
-void MainWindow::lefttranslate()
-{
-    try
-    {
-	float delta[2];
-	r2d_get_viewport_rect ( delta );
-	_translate[0] += delta[2]/20.0f;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-void MainWindow::righttranslate()
-{
-    try
-    {
-	float delta[4];
-	r2d_get_viewport_rect ( delta );
-	_translate[0] += -delta[2]/20.0f;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-void MainWindow::uptranslate()
-{
-    try
-    {
-	float delta[4];
-	r2d_get_viewport_rect ( delta );
-	_translate[1] += -delta[3]/20.0f;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
-void MainWindow::downtranslate()
-{
-    try
-    {
-	float delta[4];
-	r2d_get_viewport_rect ( delta );
-	_translate[1] += delta[3]/20.0f;
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
-    }
-    catch ( exception& ex )
-    {
-	cerr << ex.what() << endl;
-    }
-}
-
 //================================================================================
 
-void MainWindow::homeposition()
+void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float y2 )
 {
     try
     {
-	float ratio = 1.0 * displayer->widget->size().height() / displayer->widget->size().width();
-	// get minmax
-	float minmax[4];
-	r2d_get_scene_minmax ( doc->sceneid, minmax, minmax+2 );
-	float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
-	float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / (2*ratio) };
-	_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
- 	_translate[0] = -center[0];
- 	_translate[1] = -center[1];
-//	_translate[0] = 0;
-//	_translate[1] = 0;
-	
-	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
+//	cout << "-----------------MainWindow::onMainViewTransformChanged" << endl;
+ 	float pnts[] = {x1, y1, 50, x2, y2, 50 };
+ 	r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
+  	birdview->update();
     }
     catch ( exception& ex )
     {
@@ -258,7 +139,7 @@ void MainWindow::createActions()
     zoominAct->setAutoRepeat ( true );
     zoominAct->setShortcuts( lst );
     zoominAct->setStatusTip(tr("Zoom In Scene"));
-    connect(zoominAct, SIGNAL(triggered()), this, SLOT(zoomin()));
+    connect(zoominAct, SIGNAL(triggered()), displayer, SLOT(zoomin()));
 
     lst.clear();
     lst.push_back ( QKeySequence::ZoomOut );
@@ -267,7 +148,7 @@ void MainWindow::createActions()
     zoomoutAct->setAutoRepeat ( true );
     zoomoutAct->setShortcuts( lst );
     zoomoutAct->setStatusTip(tr("Zoom Out Scene"));
-    connect(zoomoutAct, SIGNAL(triggered()), this, SLOT(zoomout()));
+    connect(zoomoutAct, SIGNAL(triggered()), displayer, SLOT(zoomout()));
 
     winzoomAct = new QAction(QIcon(":/images/windowzoom.png"), tr("&Window Zoom..."), this);
     winzoomAct->setStatusTip(tr("window Zoom tool"));
@@ -287,27 +168,27 @@ void MainWindow::createActions()
     leftAct = new QAction(tr("Left Translate "), this);
     leftAct->setShortcut( QKeySequence( Qt::Key_Left ) );
     leftAct->setStatusTip(tr("move objects left"));
-    connect(leftAct, SIGNAL(triggered()), this, SLOT(lefttranslate()));
+    connect(leftAct, SIGNAL(triggered()), displayer, SLOT(lefttranslate()));
 
     rightAct = new QAction(tr("Right Translate"), this);
     rightAct->setShortcut( QKeySequence( Qt::Key_Right ) );
     rightAct->setStatusTip(tr("move objects right"));
-    connect(rightAct, SIGNAL(triggered()), this, SLOT(righttranslate()));
+    connect(rightAct, SIGNAL(triggered()), displayer, SLOT(righttranslate()));
 
     upAct = new QAction(tr("&Up Translate"), this);
     upAct->setShortcut( QKeySequence( Qt::Key_Up ) );
     upAct->setStatusTip(tr("move objects up"));
-    connect(upAct, SIGNAL(triggered()), this, SLOT(uptranslate()));
+    connect(upAct, SIGNAL(triggered()), displayer, SLOT(uptranslate()));
 
     downAct = new QAction(tr("&Down Translate"), this);
     downAct->setShortcut( QKeySequence( Qt::Key_Down ) );
     downAct->setStatusTip(tr("move objects down"));
-    connect(downAct, SIGNAL(triggered()), this, SLOT(downtranslate()));
+    connect(downAct, SIGNAL(triggered()), displayer, SLOT(downtranslate()));
 
     fullextentAct = new QAction(QIcon(":/images/home_32.png"), tr("&view whole scene ..."), this);
     fullextentAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_H ) );
     fullextentAct->setStatusTip(tr("to home position"));
-    connect(fullextentAct, SIGNAL(triggered()), this, SLOT(homeposition()));
+    connect(fullextentAct, SIGNAL(triggered()), displayer, SLOT(homeposition()));
 }
 
 void MainWindow::createMenus()
@@ -362,5 +243,10 @@ void MainWindow::createDockWindows()
     layerManagerWidget = new LayerManagerWidget(this, dock);
 
     dock->setWidget(layerManagerWidget);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+
+    dock = new QDockWidget(tr("birdview"), this);
+    dock->setMinimumSize ( 200, 200 );
+    dock->setWidget(birdview);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 }

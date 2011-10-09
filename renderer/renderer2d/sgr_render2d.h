@@ -56,5 +56,5 @@ void r2d_get_viewport_rect ( float* x_y_width_height );
  */
 int r2d_to_element ( int sceneID, int elementType );
 int r2d_get_node_type ( int sceneID );
-void r2d_rect_points ( int sceneID, int rectid, float* xyz );
+void r2d_rect_points ( int sceneID, int rectid, float* xyzxyz );
 #endif //_SGR_RENDERER2D_H_

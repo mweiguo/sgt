@@ -8,13 +8,16 @@ Document::Document()
 {
     sceneid = -1;
     miscsceneid = r2d_load_scene ( "miscscene.slc" );
+    birdviewmiscid = r2d_load_scene ( "birdviewmisc.slc" );
 }
 
 Document::~Document ()
 {
     closeScene();
     r2d_unload_scene ( miscsceneid );
+    r2d_unload_scene ( birdviewmiscid );
     miscsceneid = -1;
+    birdviewmiscid = -1;
 }
 
 void Document::openScene ( const char* filename )

@@ -144,19 +144,19 @@ void ZoomTool::OnLButtonUp ( int x, int y )
     float center[2] = { (lastPos[0] + startPos[0]) / 2, (lastPos[1] + startPos[1]) / 2 };
     float size[2]   = { fabs(lastPos[0] - startPos[0]) / 2, fabs(lastPos[1] - startPos[1]) / 2 };
     r2d_loadidentity ();
-    _tools->context->_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
-    _tools->context->_translate[0] = -center[0];
-    _tools->context->_translate[1] = -center[1];
+    _tools->context->displayer->widget->scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
+    _tools->context->displayer->widget->translate[0] = -center[0];
+    _tools->context->displayer->widget->translate[1] = -center[1];
 
-    _tools->context->displayer->setViewportTransform ( _tools->context->_scale,
-					       _tools->context->_translate[0], 
-					       _tools->context->_translate[1] );
+    _tools->context->displayer->setViewportTransform ( _tools->context->displayer->widget->scale,
+					       _tools->context->displayer->widget->translate[0], 
+					       _tools->context->displayer->widget->translate[1] );
 }
 
 void ZoomTool::OnLMouseMove ( int x, int y )
 {
     RubberBoxTool::OnLMouseMove ( x, y );
-    _tools->context->displayer->widget->update ();
+    _tools->context->displayer->widget->updateGL ();
 }
 
 //--------------------------------------------------------------------------------
@@ -175,6 +175,9 @@ void HandTool::OnLButtonUp ( int x, int y )
 {    
     _tools->context->displayer->widget->setCursor ( Qt::OpenHandCursor );
     OnLMouseMove ( x, y );
+    _tools->context->displayer->setViewportTransform ( _tools->context->displayer->widget->scale,
+					       _tools->context->displayer->widget->translate[0], 
+					       _tools->context->displayer->widget->translate[1] );
 }
 
 void HandTool::OnLMouseMove ( int x, int y )
@@ -183,12 +186,9 @@ void HandTool::OnLMouseMove ( int x, int y )
     r2d_get_scene_position ( x, y, ScenePos[0], ScenePos[1] );
     float dx = ScenePos[0] - startPos[0];
     float dy = ScenePos[1] - startPos[1];
-    _tools->context->_translate[0] += dx;
-    _tools->context->_translate[1] += dy;
-
-    _tools->context->displayer->setViewportTransform ( _tools->context->_scale,
-					       _tools->context->_translate[0], 
-					       _tools->context->_translate[1] );
+    _tools->context->displayer->widget->translate[0] += dx;
+    _tools->context->displayer->widget->translate[1] += dy;
+    _tools->context->displayer->widget->update();
 }
 
 void HandTool::OnMButtonDown ( int x, int y )

@@ -11,6 +11,7 @@ public:
 
     int sceneid;
     int miscsceneid;
+    int birdviewmiscid;
 };
 
 #endif // _DOCUMENT_H_

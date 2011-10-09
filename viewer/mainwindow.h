@@ -26,26 +26,12 @@ public:
     void open( const char* filename );
     Document *doc;
     GLScrollWidget *displayer;
-    float _scale;
-    float _translate[2];
+    GLBirdView *birdview;
 private slots:
     void open();
     void about();
-    void zoomin();
-    void zoomout();
     void actionEvent( QAction* action );
-    void lefttranslate();
-    void righttranslate();
-    void uptranslate();
-    void downtranslate();
-
-    void homeposition();
-/* protected: */
-/*     virtual void keyPressEvent ( QKeyEvent * event ); */
-/*     virtual void keyReleaseEvent ( QKeyEvent * event ); */
-/*     virtual void mouseMoveEvent ( QMouseEvent * event ); */
-/*     virtual void mousePressEvent ( QMouseEvent * event ); */
-/*     virtual void mouseReleaseEvent ( QMouseEvent * event ); */
+    void onMainViewTransformChanged(float,float,float,float);
 private:
     void createActions();
     void createMenus();

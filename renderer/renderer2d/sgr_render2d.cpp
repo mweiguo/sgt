@@ -16,6 +16,7 @@ using namespace std;
 
 vector<LC*> globalLC;
 mat4f mvmat;
+float currentScale = 1;
 //int gViewportMinMax[4];
 
 void r2d_init ()
@@ -92,30 +93,6 @@ void r2d_update_scenes ( int* ids, int length )
     viewfrustum_minmax[2] += viewfrustum_minmax[0];
     viewfrustum_minmax[3] += viewfrustum_minmax[1];
     
-//     glColor3f ( 0.4, 0.0, 0.0 );
-//     glRectf ( viewfrustum_minmax[0]+180, 
-// 	      viewfrustum_minmax[1]+180, 
-// 	      viewfrustum_minmax[2] - 160, 
-// 	      viewfrustum_minmax[3] - 160
-// 	);
-//     double mv[16], pj[16], obj0[3], obj1[3];
-//     int vp[4];
-//     glGetDoublev ( GL_MODELVIEW_MATRIX, mv );
-//     glGetDoublev ( GL_PROJECTION_MATRIX, pj );
-//     glGetIntegerv ( GL_VIEWPORT, vp );
-//     gluUnProject ( 0, 0, 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
-//     gluUnProject ( vp[2], vp[3], 0, mv, pj, vp, &obj1[0], &obj1[1], &obj1[2] );
-//     float viewfrustum_minmax[4];
-//     viewfrustum_minmax[0] = obj0[0];
-//     viewfrustum_minmax[1] = obj0[1];
-//     viewfrustum_minmax[2] = obj1[0];
-//     viewfrustum_minmax[3] = obj1[1];
-
-//     glBegin( GL_LINES );
-//     glVertex2f ( obj0[0], obj0[1] );
-//     glVertex2f ( obj1[0], obj1[1] );
-//     glEnd ();
-
     for ( int i=0; i<length; i++ )
     {
 	if ( ids[i]<0 || 
@@ -131,7 +108,7 @@ void r2d_update_scenes ( int* ids, int length )
 	t = clock();
 	LC* lc = globalLC[ids[i]];
 	lc->toElement ( ROOT );
-	vfculler::cull ( *lc, viewfrustum_minmax );
+	vfculler::cull ( *lc, viewfrustum_minmax, currentScale );
 	cout << "cull finished, elapse " << clock() - t << "(ms)" << endl;
 	cout << "vfculler::renderObjects.size() = " << vfculler::renderObjects.size() << endl;
 
@@ -180,6 +157,7 @@ void r2d_translate ( float x, float y )
 void r2d_scale ( float s )
 {
     mvmat *= mat4f::scale_matrix ( s, s, s );
+    currentScale = s;
 }
 
 // ================================================================================
@@ -187,6 +165,7 @@ void r2d_scale ( float s )
 void r2d_loadidentity ()
 {
     mvmat.loadIdentity();
+    currentScale = 1;
 }
 
 // ================================================================================
