@@ -8,6 +8,22 @@
 #include "sgr_font.h"
 #include "sgr_texture.h"
 
+#ifndef MAKEWORD
+#define MAKEWORD(a, b)      ((WORD)(((BYTE)((DWORD_PTR)(a) & 0xff)) | ((WORD)((BYTE)((DWORD_PTR)(b) & 0xff))) << 8))
+#endif
+
+#ifndef MAKELONG
+#define MAKELONG(a, b)      ((LONG)(((WORD)((DWORD_PTR)(a) & 0xffff)) | ((DWORD)((WORD)((DWORD_PTR)(b) & 0xffff))) << 16))
+#endif
+
+#ifndef LOWORD
+#define LOWORD(l)           ((WORD)((DWORD_PTR)(l) & 0xffff))
+#endif
+
+#ifndef HIWORD
+#define HIWORD(l)           ((WORD)((DWORD_PTR)(l) >> 16))
+#endif
+
 //================================================================================
 
 State::State ( StateType t, int value, StateFlag f )
@@ -63,7 +79,14 @@ void State::applyState ()
 	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.y()/255.0f, vec3iValue.z()/255.0f );
 	break;
     case LINE_TYPE:
+    {
+	unsigned short pattern = LOWORD(intValue);
+	unsigned short factor = HIWORD(intValue);
+	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
+	glEnable ( GL_LINE_STIPPLE );
+	glLineStipple ( factor, pattern );
 	break;
+    }
     case LINE_WIDTH:
 //	cout << "line width = " << floatValue << endl;
 	glLineWidth ( floatValue );
@@ -102,7 +125,7 @@ StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 	StateSet* tss = new StateSet ();
 	tss->addState ( State(State::BACKGROUND_COLOR, mat->background_color, State::INHERIT) );
 	tss->addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::INHERIT) );
-	tss->addState ( State(State::LINE_TYPE, mat->linetype,   State::INHERIT) );
+	tss->addState ( State(State::LINE_TYPE, (int)MAKELONG(mat->linetype,mat->linetypefactor), State::INHERIT) );
 	tss->addState ( State(State::LINE_WIDTH, mat->linewidth, State::INHERIT) );
 	Texture* tex = lc->textures[mat->textureIdx];
 	tss->addState ( State(State::TEXTURE, (int)tex->texture, State::INHERIT) );
@@ -136,7 +159,7 @@ StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 	}
 	if ( (state=getState ( State::LINE_TYPE )) != NULL ) {
 	    if ( state->intValue != mat->linetype )
-		nss.addState ( State(State::LINE_TYPE, mat->linetype, State::OVERWRITE) );
+		nss.addState ( State(State::LINE_TYPE, (int)MAKELONG(mat->linetype,mat->linetypefactor), State::OVERWRITE) );
 	    else
 		cnt ++;
 	}
@@ -261,7 +284,10 @@ string StateSet::toXML () const
 	    ss << " BACKGROUND_COLOR=\"" << state.vec3iValue.x() << ' ' << state.vec3iValue.y() << ' ' << state.vec3iValue.z() << "\"";
 	    break;
 	case State::LINE_TYPE:
-	    ss << " LINE_TYPE=\"" << state.intValue << "\"";
+	    unsigned short pattern, factor;
+	    pattern = LOWORD(state.intValue);
+	    factor = HIWORD(state.intValue);
+	    ss << " LINE_TYPE_PATTERN=\"" << pattern << "\" LINE_TYPE_FACTOR=\"" << factor << "\"";
 	    break;
 	case State::LINE_WIDTH:
 	    ss << " LINE_WIDTH=\"" << state.floatValue << "\"";

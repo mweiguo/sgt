@@ -15,7 +15,8 @@ void initMaterials ()
     gmat = new SLCMaterial ( "material1");
     gmat->foreground_color = vec3i(155, 0, 0);
     gmat->background_color = vec3i(55, 255, 255);
-    gmat->linetype = SLCMaterial::LINETYPE_SOLID;
+    gmat->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
+    gmat->linetypefactor = 16;
     gmat->linewidth = 0;
     gmat->fontfilename = "simsun.ttc";
     gmat->texturefilename = "hands.jpg";
@@ -24,7 +25,9 @@ void initMaterials ()
     gmat1 = new SLCMaterial ( "material2");
     gmat1->foreground_color = vec3i(155, 0, 0);
     gmat1->background_color = vec3i(55, 255, 255);
-    gmat1->linetype = SLCMaterial::LINETYPE_SOLID;
+    gmat1->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
+    gmat1->linetypefactor = 8;
+//    gmat1->linetype = SLCMaterial::LINETYPE_SOLID;
     gmat1->linewidth = 4;
     gmat1->fontfilename = "simsun.ttc";
     gmat1->texturefilename = "hands.jpg";
@@ -33,7 +36,9 @@ void initMaterials ()
     gmat2 = new SLCMaterial ( "material3");
     gmat2->foreground_color = vec3i(155, 0, 0);
     gmat2->background_color = vec3i(55, 255, 255);
-    gmat2->linetype = SLCMaterial::LINETYPE_SOLID;
+    gmat2->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
+    gmat2->linetypefactor = 16;
+//    gmat2->linetype = SLCMaterial::LINETYPE_SOLID;
     gmat2->linewidth = 10.2;
     gmat2->fontfilename = "simsun.ttc";
     gmat2->texturefilename = "hands.jpg";
@@ -95,7 +100,6 @@ int main ( int argc, char* argv[] )
 	    SLCPLineNode* line = new SLCPLineNode( gmat2 );
 	    nodes.push_back ( line );
 	    line->pnts.push_back ( vec2f( 0, 7) );
-
 	    line->pnts.push_back ( vec2f( 10, 7) );
 	    line->z = 1;
 	    lodpage->addChild ( line );
