@@ -1,16 +1,23 @@
-#include "glwidget.h"
-#include <sgr_render2d.h>
-#include "document.h"
-#include "tools.h"
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QHBoxLayout>
+#include <QScrollBar>
 
 #include <iostream>
+
+#include "glwidget.h"
+#include "document.h"
+#include "tools.h"
+#include "mainwindow.h"
+
+#include <sgr_render2d.h>
+
 using namespace std;
 
 GLWidget::GLWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
     QGLWidget ( fmt, parent, shareWidget, f )
 {
+    setMouseTracking ( true );
     tools = new Tools ( context );
     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
 }
@@ -29,7 +36,6 @@ void GLWidget::paintGL ()
 
 void GLWidget::resizeGL ( int width, int height )
 {
-//    cout << "width = " << width << ", height = " << height << endl;
     r2d_resize ( width, height );
 }
 
@@ -164,3 +170,108 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
     }
 }
 
+//================================================================================
+
+GLScrollWidget::GLScrollWidget ( MainWindow* cont, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+{
+    context = cont;
+    widget = new GLWidget(context, fmt, parent, shareWidget, f );
+
+    hbar = new QScrollBar();
+    hbar->setRange ( 0, 1 );
+    hbar->setOrientation ( Qt::Horizontal );
+    hbar->setSingleStep ( 1 );
+    hbar->show ();
+    hbar->resize ( 200, 20 );
+
+    vbar = new QScrollBar();
+    vbar->setRange ( 0, 1 );
+    vbar->setOrientation ( Qt::Vertical );
+    vbar->setSingleStep ( 1 );
+    vbar->show ();
+    vbar->resize ( 20, 200 );
+    connect ( hbar, SIGNAL(valueChanged(int)), this, SLOT(onHBarValueChanged(int)) );
+    connect ( vbar, SIGNAL(valueChanged(int)), this, SLOT(onVBarValueChanged(int)) );
+
+    QHBoxLayout* h = new QHBoxLayout();
+    h->setSpacing (0);
+    h->addWidget ( widget );
+    h->addWidget ( vbar );
+
+    QHBoxLayout* h2 = new QHBoxLayout();
+    h2->setSpacing (0);
+    h2->addWidget ( hbar );
+    h2->addSpacing ( 20 );
+
+    QVBoxLayout* v = new QVBoxLayout();
+    v->setContentsMargins ( 0, 0, 0, 0);
+    v->setSpacing (0);
+    v->addLayout ( h );
+    v->addLayout ( h2 );
+    setLayout ( v );
+}
+
+void GLScrollWidget::onHBarValueChanged(int value )
+{
+//    cout << "GLScrollWidget::onHBarValueChanged, " << value << endl;
+    // calculate new translate
+    float vxywh[4];
+    r2d_get_viewport_rect ( vxywh ); 
+    float delta = vxywh[2] / 40.0;
+    context->_translate[0] = initTranslate[0] + value * delta;
+
+    r2d_loadidentity ();
+    r2d_scale ( context->_scale );
+    r2d_translate ( context->_translate[0], context->_translate[1] );
+    widget->updateGL ();
+}
+
+void GLScrollWidget::onVBarValueChanged(int value )
+{
+//    cout << "GLScrollWidget::onVBarValueChanged, " << value << endl;
+    float vxywh[4];
+    r2d_get_viewport_rect ( vxywh ); 
+    float delta = vxywh[3] / 40.0;
+    context->_translate[1] = initTranslate[1] + value * delta;
+
+    r2d_loadidentity ();
+    r2d_scale ( context->_scale );
+    r2d_translate ( context->_translate[0], context->_translate[1] );
+    widget->updateGL ();
+}
+
+void GLScrollWidget::setViewportTransform ( float scale, float transx, float transy )
+{
+    r2d_loadidentity ();
+    r2d_scale ( scale );
+    r2d_translate ( transx, transy );
+    widget->updateGL ();
+
+//     // calculate scrollbar
+     float sminmax[4], vxywh[4], swh[2];
+     r2d_get_scene_minmax ( widget->document->sceneid, sminmax, sminmax+2 );
+//     cout << "++++++++++++++++++++++++min,max = " << sminmax[0] << ", " << sminmax[1] << "  " << sminmax[2] << ", " << sminmax[3] << endl;
+     swh[0] = sminmax[2] - sminmax[0];
+     swh[1] = sminmax[3] - sminmax[1];
+     r2d_get_viewport_rect ( vxywh ); 
+//     cout << "++++++++++++++++++++++++vxywh = " << vxywh[0] << ", " << vxywh[1] << "  " << vxywh[2] << ", " << vxywh[3] << endl;
+     int h = 40 * (swh[0] - vxywh[2]) / vxywh[2];
+     int v = 40 * (swh[1] - vxywh[3]) / vxywh[3];
+//     cout << "++++++++++++++++++++++++h = " << h << endl;
+     h = h > 0 ? h : 0;
+     v = v > 0 ? v : 0;
+     int hp = 40 * (vxywh[0] - sminmax[0]) / vxywh[2];
+     int vp = v - 40 * (vxywh[1] - sminmax[1]) / vxywh[3];
+
+    initTranslate[0] = transx - vxywh[0] + sminmax[0];
+    initTranslate[1] = transy - vxywh[1] + sminmax[1];
+
+     disconnect ( hbar, SIGNAL(valueChanged(int)), 0, 0 );
+     disconnect ( vbar, SIGNAL(valueChanged(int)), 0, 0 );
+     hbar->setRange ( 0, h );
+     vbar->setRange ( 0, v );
+     hbar->setSliderPosition  ( hp );
+     vbar->setSliderPosition  ( vp );
+     connect ( hbar, SIGNAL(valueChanged(int)), this, SLOT(onHBarValueChanged(int)) );
+     connect ( vbar, SIGNAL(valueChanged(int)), this, SLOT(onVBarValueChanged(int)) );
+}

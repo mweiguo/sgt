@@ -54,9 +54,9 @@ int main ( int argc, char* argv[] )
 	SLCRectNode* rc1 = new SLCRectNode ( gmat );
 	nodes.push_back ( rc1 );
 	rc1->pnts[0] = vec2f ( 0, 0 );
-	rc1->pnts[1] = vec2f ( 1, 0 );
-	rc1->pnts[2] = vec2f ( 1, 1 );
-	rc1->pnts[3] = vec2f ( 0, 1 );
+	rc1->pnts[1] = vec2f ( 0, 0 );
+	rc1->pnts[2] = vec2f ( 0, 0 );
+	rc1->pnts[3] = vec2f ( 0, 0 );
 	rc1->z = 100;
 	lodpage->addChild ( rc1 );
     }
@@ -79,7 +79,7 @@ int main ( int argc, char* argv[] )
     cout << "parse finished, elapse " << clock() - t << "(ms), kdtreesize = " << nlc.kdtrees.size() << endl;
 
     t = clock();
-    LCReport rpt ( nlc );
+    LCReport rpt ( nlc, 1 );
     rpt.printCounter ();
     cout << "traverse finished, elapse " << clock() - t << "(ms)" << endl;
 

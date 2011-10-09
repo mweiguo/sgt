@@ -16,6 +16,7 @@ using namespace std;
 
 vector<LC*> globalLC;
 mat4f mvmat;
+//int gViewportMinMax[4];
 
 void r2d_init ()
 {
@@ -86,19 +87,29 @@ void r2d_update_scenes ( int* ids, int length )
     glMultMatrixf ( mvmat.data ); 
     
     // calculate view-frustum
-    double mv[16], pj[16], obj0[3], obj1[3];
-    int vp[4];
-    glGetDoublev ( GL_MODELVIEW_MATRIX, mv );
-    glGetDoublev ( GL_PROJECTION_MATRIX, pj );
-    glGetIntegerv ( GL_VIEWPORT, vp );
-    gluUnProject ( 0, 0, 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
-    gluUnProject ( vp[2], vp[3], 0, mv, pj, vp, &obj1[0], &obj1[1], &obj1[2] );
-//    cout << "vp[0] = " <<  vp[0] << ", vp[1] = " << vp[1] << ", vp[2] = " <<  vp[2] << ", vp[3] = " << vp[3] << endl;
     float viewfrustum_minmax[4];
-    viewfrustum_minmax[0] = obj0[0];
-    viewfrustum_minmax[1] = obj0[1];
-    viewfrustum_minmax[2] = obj1[0];
-    viewfrustum_minmax[3] = obj1[1];
+    r2d_get_viewport_rect ( viewfrustum_minmax );
+    viewfrustum_minmax[2] += viewfrustum_minmax[0];
+    viewfrustum_minmax[3] += viewfrustum_minmax[1];
+    
+//     glColor3f ( 0.4, 0.0, 0.0 );
+//     glRectf ( viewfrustum_minmax[0]+180, 
+// 	      viewfrustum_minmax[1]+180, 
+// 	      viewfrustum_minmax[2] - 160, 
+// 	      viewfrustum_minmax[3] - 160
+// 	);
+//     double mv[16], pj[16], obj0[3], obj1[3];
+//     int vp[4];
+//     glGetDoublev ( GL_MODELVIEW_MATRIX, mv );
+//     glGetDoublev ( GL_PROJECTION_MATRIX, pj );
+//     glGetIntegerv ( GL_VIEWPORT, vp );
+//     gluUnProject ( 0, 0, 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
+//     gluUnProject ( vp[2], vp[3], 0, mv, pj, vp, &obj1[0], &obj1[1], &obj1[2] );
+//     float viewfrustum_minmax[4];
+//     viewfrustum_minmax[0] = obj0[0];
+//     viewfrustum_minmax[1] = obj0[1];
+//     viewfrustum_minmax[2] = obj1[0];
+//     viewfrustum_minmax[3] = obj1[1];
 
 //     glBegin( GL_LINES );
 //     glVertex2f ( obj0[0], obj0[1] );
@@ -182,10 +193,27 @@ void r2d_loadidentity ()
 
 void r2d_resize ( int width, int height )
 {
+//     float ratio = 4.0f / 3.0f;
+//     if ( (height * ratio) > width ) {
+//  	glViewport ( 0.0, 0.0, height * ratio, height );
+// //	glViewport ( -(height*ratio-width)/2.0, 0, height * ratio, height );
+// // 	gViewportMinMax[0] = (height*ratio-width)/2.0;
+// // 	gViewportMinMax[1] = 0;
+// // 	gViewportMinMax[2] = (height*ratio+width)/2.0;
+// // 	gViewportMinMax[3] = height;
+//     } else {
+//  	glViewport ( 0, 0.0, width, width / ratio );
+// //  	glViewport ( 0, -(width/ratio-height)/2.0, width, width / ratio );
+// // 	gViewportMinMax[0] = 0;
+// // 	gViewportMinMax[1] = (width/ratio-height)/2.0;
+// // 	gViewportMinMax[2] = width;
+// // 	gViewportMinMax[3] = (width/ratio+height)/2.0;
+//     }
+    float ratio = 1.0f * height / width;
     glViewport ( 0, 0, width, height );
     glMatrixMode ( GL_PROJECTION );
     glLoadIdentity ();
-    glOrtho ( -1, 1, -1, 1, 1, 100 );
+    glOrtho ( -1, 1, -ratio, ratio, 1, 100 );
 //    gluPerspective ( 30.0, 1.0 * width / height, 0.1, 100.0 );
     glMatrixMode ( GL_MODELVIEW );
 }
@@ -201,6 +229,8 @@ void r2d_get_viewport_rect ( float* x_y_width_height )
     glGetIntegerv ( GL_VIEWPORT, vp );
     gluUnProject ( 0, 0, 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
     gluUnProject ( vp[2], vp[3], 0, mv, pj, vp, &obj1[0], &obj1[1], &obj1[2] );
+//     gluUnProject ( gViewportMinMax[0], gViewportMinMax[1], 0, mv, pj, vp, &obj0[0], &obj0[1], &obj0[2] );
+//     gluUnProject ( gViewportMinMax[2], gViewportMinMax[3], 0, mv, pj, vp, &obj1[0], &obj1[1], &obj1[2] );
     
     x_y_width_height[0] = obj0[0];
     x_y_width_height[1] = obj0[1];

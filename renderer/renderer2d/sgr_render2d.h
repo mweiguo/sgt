@@ -41,6 +41,8 @@ const char* r2d_get_layer_name ( int sceneID, int layerid );
 bool r2d_get_layer_visible ( int sceneID, int layerid );
 void r2d_get_layer_foreground_color ( int sceneID, int layerid, unsigned short* rgb );
 void r2d_get_layer_background_color ( int sceneID, int layerid, unsigned short* rgb );
+/** get current view frustum coordinates (world coordinate)
+ */
 void r2d_get_viewport_rect ( float* x_y_width_height );
 
 /** element traverse

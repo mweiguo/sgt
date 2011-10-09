@@ -6,6 +6,8 @@
 class Document;
 class Tools;
 class MainWindow;
+class QScrollBar;
+
 class GLWidget : public QGLWidget
 {
 public:
@@ -24,6 +26,24 @@ protected:
     virtual void mouseReleaseEvent ( QMouseEvent * event );
 
     int _oldTool;
+};
+
+class GLScrollWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    GLScrollWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    void setViewportTransform ( float scale, float transx, float transy );
+    GLWidget* widget;
+    QScrollBar *hbar, *vbar;
+    MainWindow* context;
+public slots:
+    void onHBarValueChanged(int value );
+    void onVBarValueChanged(int value );
+private:
+    float initTranslate[2];
+
 };
 
 #endif // _GL_WIDGET_H_

@@ -25,7 +25,7 @@ public:
 
     void open( const char* filename );
     Document *doc;
-    GLWidget *displayer;
+    GLScrollWidget *displayer;
     float _scale;
     float _translate[2];
 private slots:

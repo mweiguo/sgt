@@ -50,7 +50,7 @@ void LayerItemEditor::changeState ()
     myLayerItem.isVisible = !myLayerItem.isVisible;
     r2d_layer_visible ( myLayerItem.sceneid, myLayerItem.id, myLayerItem.isVisible );
     if ( myLayerItem.context ) {
-	myLayerItem.context->displayer->update();
+	myLayerItem.context->displayer->widget->update();
     }
 }
 

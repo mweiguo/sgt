@@ -145,18 +145,18 @@ void ZoomTool::OnLButtonUp ( int x, int y )
     float size[2]   = { fabs(lastPos[0] - startPos[0]) / 2, fabs(lastPos[1] - startPos[1]) / 2 };
     r2d_loadidentity ();
     _tools->context->_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
-    r2d_scale ( _tools->context->_scale );
     _tools->context->_translate[0] = -center[0];
     _tools->context->_translate[1] = -center[1];
-    r2d_translate ( _tools->context->_translate[0], _tools->context->_translate[1] );
 
-    _tools->context->displayer->update ();
+    _tools->context->displayer->setViewportTransform ( _tools->context->_scale,
+					       _tools->context->_translate[0], 
+					       _tools->context->_translate[1] );
 }
 
 void ZoomTool::OnLMouseMove ( int x, int y )
 {
     RubberBoxTool::OnLMouseMove ( x, y );
-    _tools->context->displayer->update ();
+    _tools->context->displayer->widget->update ();
 }
 
 //--------------------------------------------------------------------------------
@@ -167,13 +167,13 @@ HandTool::HandTool ( Tools* tools ) : Tool ( tools )
 
 void HandTool::OnLButtonDown ( int x, int y )
 {
-    _tools->context->displayer->setCursor ( Qt::ClosedHandCursor );
+    _tools->context->displayer->widget->setCursor ( Qt::ClosedHandCursor );
     r2d_get_scene_position ( x, y, startPos[0], startPos[1] );
 }
 
 void HandTool::OnLButtonUp ( int x, int y )
 {    
-    _tools->context->displayer->setCursor ( Qt::OpenHandCursor );
+    _tools->context->displayer->widget->setCursor ( Qt::OpenHandCursor );
     OnLMouseMove ( x, y );
 }
 
@@ -185,10 +185,10 @@ void HandTool::OnLMouseMove ( int x, int y )
     float dy = ScenePos[1] - startPos[1];
     _tools->context->_translate[0] += dx;
     _tools->context->_translate[1] += dy;
-    r2d_loadidentity ();
-    r2d_scale ( _tools->context->_scale );
-    r2d_translate ( _tools->context->_translate[0], _tools->context->_translate[1] );
-    _tools->context->displayer->update ();
+
+    _tools->context->displayer->setViewportTransform ( _tools->context->_scale,
+					       _tools->context->_translate[0], 
+					       _tools->context->_translate[1] );
 }
 
 void HandTool::OnMButtonDown ( int x, int y )
@@ -243,15 +243,15 @@ int Tools::selectTool ( int tooltype )
     switch ( tooltype )
     {
     case NONE_TOOL:
-	context->displayer->setCursor ( Qt::ArrowCursor );
+	context->displayer->widget->setCursor ( Qt::ArrowCursor );
 	currentToolType = NONE_TOOL;
 	break;
     case HAND_TOOL:
-	context->displayer->setCursor ( Qt::OpenHandCursor );
+	context->displayer->widget->setCursor ( Qt::OpenHandCursor );
 	currentToolType = HAND_TOOL;
 	break;
     case ZOOM_TOOL:
-	context->displayer->setCursor ( Qt::CrossCursor );
+	context->displayer->widget->setCursor ( Qt::CrossCursor );
 	currentToolType = ZOOM_TOOL;
 	break;
     default:

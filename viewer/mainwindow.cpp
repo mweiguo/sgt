@@ -20,9 +20,8 @@ MainWindow::MainWindow()
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
-    displayer = new GLWidget (this, fmt);
-    displayer->document = doc;
-    displayer->setMouseTracking ( true );
+    displayer = new GLScrollWidget (this, fmt);
+    displayer->widget->document = doc;
 
     setCentralWidget(displayer);
 
@@ -76,10 +75,7 @@ void MainWindow::zoomin()
     try
     {
 	_scale *= 1.2;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0],  _translate[1] ); 
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -92,10 +88,7 @@ void MainWindow::zoomout()
     try
     {
 	_scale *= 1 / 1.2;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0],  _translate[1] ); 
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -108,9 +101,9 @@ void MainWindow::actionEvent( QAction* action )
     try
     {
 	if ( action == winzoomAct )
-	    displayer->tools->selectTool ( Tools::ZOOM_TOOL );
+	    displayer->widget->tools->selectTool ( Tools::ZOOM_TOOL );
 	else if ( action == handAct )
-	    displayer->tools->selectTool ( Tools::HAND_TOOL );
+	    displayer->widget->tools->selectTool ( Tools::HAND_TOOL );
     }
     catch ( exception& ex )
     {
@@ -122,7 +115,7 @@ void MainWindow::actionEvent( QAction* action )
 // {
 //     try
 //     {
-// 	displayer->tools->selectTool ( Tools::ZOOM_TOOL );
+// 	displayer->widget->tools->selectTool ( Tools::ZOOM_TOOL );
 //     }
 //     catch ( exception& ex )
 //     {
@@ -134,10 +127,10 @@ void MainWindow::actionEvent( QAction* action )
 // {
 //     try
 //     {
-// 	if ( dynamic_cast<HandTool*>( displayer->tools->currentTool ) ) {
-// 	    displayer->tools->selectTool ( Tools::NONE_TOOL );
+// 	if ( dynamic_cast<HandTool*>( displayer->widget->tools->currentTool ) ) {
+// 	    displayer->widget->tools->selectTool ( Tools::NONE_TOOL );
 // 	} else {
-// 	    displayer->tools->selectTool ( Tools::HAND_TOOL );
+// 	    displayer->widget->tools->selectTool ( Tools::HAND_TOOL );
 // 	}
     
 //     }
@@ -154,10 +147,7 @@ void MainWindow::lefttranslate()
 	float delta[2];
 	r2d_get_viewport_rect ( delta );
 	_translate[0] += delta[2]/20.0f;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0], _translate[1] );
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -172,10 +162,7 @@ void MainWindow::righttranslate()
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
 	_translate[0] += -delta[2]/20.0f;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0], _translate[1] );
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -190,10 +177,7 @@ void MainWindow::uptranslate()
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
 	_translate[1] += -delta[3]/20.0f;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0], _translate[1] );
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -208,10 +192,7 @@ void MainWindow::downtranslate()
 	float delta[4];
 	r2d_get_viewport_rect ( delta );
 	_translate[1] += delta[3]/20.0f;
-	r2d_loadidentity ();
-	r2d_scale ( _scale );
-	r2d_translate ( _translate[0], _translate[1] );
-	displayer->update ();
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -225,18 +206,19 @@ void MainWindow::homeposition()
 {
     try
     {
+	float ratio = 1.0 * displayer->widget->size().height() / displayer->widget->size().width();
 	// get minmax
 	float minmax[4];
 	r2d_get_scene_minmax ( doc->sceneid, minmax, minmax+2 );
 	float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
-	float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / 2 };
-	r2d_loadidentity ();
+	float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / (2*ratio) };
 	_scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
-	r2d_scale ( _scale );
-	_translate[0] = -center[0];
-	_translate[1] = -center[1];
-	r2d_translate ( _translate[0], _translate[1] );
-	displayer->update ();
+ 	_translate[0] = -center[0];
+ 	_translate[1] = -center[1];
+//	_translate[0] = 0;
+//	_translate[1] = 0;
+	
+	displayer->setViewportTransform ( _scale, _translate[0], _translate[1] );
     }
     catch ( exception& ex )
     {
@@ -273,6 +255,7 @@ void MainWindow::createActions()
     lst.push_back ( QKeySequence::ZoomIn );
     lst.push_back ( QKeySequence (Qt::CTRL + Qt::Key_PageUp) );
     zoominAct = new QAction(QIcon(":/images/zoomin.png"), tr("&ZoomIn..."), this);
+    zoominAct->setAutoRepeat ( true );
     zoominAct->setShortcuts( lst );
     zoominAct->setStatusTip(tr("Zoom In Scene"));
     connect(zoominAct, SIGNAL(triggered()), this, SLOT(zoomin()));
@@ -281,6 +264,7 @@ void MainWindow::createActions()
     lst.push_back ( QKeySequence::ZoomOut );
     lst.push_back ( QKeySequence (Qt::CTRL + Qt::Key_PageDown) );
     zoomoutAct = new QAction(QIcon(":/images/zoomout.png"), tr("&ZoomOut..."), this);
+    zoomoutAct->setAutoRepeat ( true );
     zoomoutAct->setShortcuts( lst );
     zoomoutAct->setStatusTip(tr("Zoom Out Scene"));
     connect(zoomoutAct, SIGNAL(triggered()), this, SLOT(zoomout()));
@@ -288,13 +272,11 @@ void MainWindow::createActions()
     winzoomAct = new QAction(QIcon(":/images/windowzoom.png"), tr("&Window Zoom..."), this);
     winzoomAct->setStatusTip(tr("window Zoom tool"));
     winzoomAct->setCheckable ( true );
-//    connect(winzoomAct, SIGNAL(triggered()), this, SLOT(winzoom()));
 
     handAct = new QAction(QIcon(":/images/hand.png"), tr("&HandMove..."), this);
     handAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_P ) );
     handAct->setStatusTip(tr("use a hand tool to move the canvas"));
     handAct->setCheckable ( true );
-//    connect(handAct, SIGNAL(triggered()), this, SLOT(hand()));
 
     navigroup = new QActionGroup( this );
     navigroup->setExclusive ( true );
