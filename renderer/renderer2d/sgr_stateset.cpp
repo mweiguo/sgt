@@ -24,6 +24,8 @@
 #define HIWORD(l)           ((WORD)((DWORD_PTR)(l) >> 16))
 #endif
 
+extern float currentScale;
+
 //================================================================================
 
 State::State ( StateType t, int value, StateFlag f )
@@ -88,8 +90,8 @@ void State::applyState ()
 	break;
     }
     case LINE_WIDTH:
-//	cout << "line width = " << floatValue << endl;
-	glLineWidth ( floatValue );
+//	cout << "line width = " << currentScale * floatValue << endl;
+	glLineWidth ( currentScale * floatValue );
 	break;
     case TEXTURE:
 //	cout << "bind texture : " << intValue << endl;
