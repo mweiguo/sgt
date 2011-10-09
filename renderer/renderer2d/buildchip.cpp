@@ -4,6 +4,7 @@
 #include "mat4f.h"
 #include <fstream>
 #include <ctime>
+#include <math.h>
 
 list<SLCNode*> nodes;
 SLCMaterial *gmat, *gmat1;
@@ -410,12 +411,13 @@ int main ( int argc, char* argv[] )
 	lod->addChild ( lodpage );
 
 	SLCTransformNode* t = new SLCTransformNode ();
+//	mat_rotatematrix ( t->mat, M_PI / 2, 2 );
 	mat_translatematrix ( t->mat, -100, -100, 0 );
 	nodes.push_back ( t );
 	lodpage->addChild ( t );
 
-	float w = 6300;
-	float h = 11800;
+	float w = 6400;
+	float h = 11900;
 	SLCRectNode* rc1 = new SLCRectNode ( gmat1 );
 	nodes.push_back ( rc1 );
 	rc1->pnts[0] = vec2f ( 0, 0 );
@@ -423,9 +425,8 @@ int main ( int argc, char* argv[] )
 	rc1->pnts[2] = vec2f ( w, h );
 	rc1->pnts[3] = vec2f ( 0, h );
 	rc1->z = -2;
-	lodpage->addChild ( rc1 );
+//	lodpage->addChild ( rc1 );
 	t->addChild ( rc1 );
-
     }
     {
 	SLCLayerNode* layer = new SLCLayerNode ( "local routing", gmat );
@@ -476,7 +477,6 @@ int main ( int argc, char* argv[] )
 	float w, h;
 	lodpage->addChild ( port_lod0( gmat, w, h) );
     }
-
 //     ofstream o;
 //     o.open ("test.xml" );
 //     o << scene.toXML();
