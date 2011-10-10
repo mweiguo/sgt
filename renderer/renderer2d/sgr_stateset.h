@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 using namespace std;
-#include <vec3.h>
+#include <vec4.h>
 
 class State
 {
@@ -23,14 +23,14 @@ public:
     };
     State ( StateType t, int value, StateFlag f );
     State ( StateType t, float value, StateFlag f );
-    State ( StateType t, vec3i value, StateFlag f );
+    State ( StateType t, vec4i value, StateFlag f );
     State ( const State& rhs );
     void applyState ();
     StateFlag flag;
     StateType type;
     int intValue;
     float floatValue;
-    vec3i vec3iValue;
+    vec4i vec4iValue;
 };
 
 class LC;

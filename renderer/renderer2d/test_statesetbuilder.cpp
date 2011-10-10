@@ -10,7 +10,7 @@
 #include <IL/ilut.h>
 
 using namespace std;
-
+float currentScale = 1;
 int main ( int argc, char* argv[] )
 {
     if ( argc != 3 )

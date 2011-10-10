@@ -7,9 +7,9 @@
 #include <math.h>
 
 list<SLCNode*> nodes;
-SLCMaterial *gmat, *gmat1;
+SLCMaterial *gmat, *gmat1, *gmatLine0, *gmatLine, *gmatLine2, *gmatLine3;
 
-SLCNode* logic0_lod0 ( SLCMaterial *mat, float& width, float& height )
+SLCNode* logic0_lod2 ( SLCMaterial *mat, float& width, float& height )
 {
     width = 40;
     height = 300;
@@ -38,6 +38,57 @@ SLCNode* logic0_lod0 ( SLCMaterial *mat, float& width, float& height )
     return t;
 }
 
+SLCNode* logic_lod2 ( SLCMaterial *mat, float& width, float& height )
+{
+    SLCTransformNode* t = new SLCTransformNode ();
+    nodes.push_back ( t );
+
+    float dx=0;
+    float dy=0;
+    float w, h;
+    for ( int i=0; i<20; i++ )
+    {
+	dx = 0;
+	for ( int j=0; j<32; j++ )
+	{
+	    SLCTransformNode* t1 = new SLCTransformNode ();
+	    t->addChild ( t1 );
+	    nodes.push_back ( t1 );
+	    t1->addChild ( logic0_lod2 ( mat, w, h ) );
+	    mat_translatematrix ( t1->mat, dx, dy, 0 );
+	    dx += 7 * w;
+	}
+	dy += 1.8 * h;
+    }
+    return t;
+}
+
+SLCNode* logic0_lod0 ( SLCMaterial *mat, float& width, float& height )
+{
+    width = 40;
+    height = 300;
+    SLCTransformNode* t = new SLCTransformNode ();
+    nodes.push_back ( t );
+
+    float dy=0;
+    float h = 150;
+    for ( int i=0; i<2; i++ )
+    {
+	SLCTransformNode* t1 = new SLCTransformNode ();
+	mat_translatematrix ( t1->mat, -40, dy, 0 );
+	SLCRectNode* rc1 = new SLCRectNode ( mat );
+	rc1->pnts[0] = vec2f ( 0, 0 ); rc1->pnts[1] = vec2f (80, 0 ); rc1->pnts[2] = vec2f (80, 150); rc1->pnts[3] = vec2f ( 0, 150);
+	rc1->z = -1;
+	t1->addChild ( rc1 );
+	t->addChild ( t1 );
+	nodes.push_back ( t1 );
+	nodes.push_back ( rc1 );
+
+	dy += 4 * h/3;
+    }
+    return t;
+}
+
 SLCNode* logic_lod0 ( SLCMaterial *mat, float& width, float& height )
 {
     SLCTransformNode* t = new SLCTransformNode ();
@@ -56,11 +107,99 @@ SLCNode* logic_lod0 ( SLCMaterial *mat, float& width, float& height )
 	    nodes.push_back ( t1 );
 	    t1->addChild ( logic0_lod0 ( mat, w, h ) );
 	    mat_translatematrix ( t1->mat, dx, dy, 0 );
-	    dx += 5 * w;
+	    dx += 7 * w;
 	}
-	dy += 2 * h;
+	dy += 1.8 * h;
     }
     return t;
+}
+
+SLCNode* logic0_lod1 ( SLCMaterial *mat, float& width, float& height )
+{
+    width = 40;
+    height = 300;
+    SLCTransformNode* t = new SLCTransformNode ();
+    nodes.push_back ( t );
+
+    float dy=0;
+    float h = 150;
+    for ( int i=0; i<2; i++ )
+    {
+	SLCTransformNode* t1 = new SLCTransformNode ();
+	mat_translatematrix ( t1->mat, 0, dy, 0 );
+	SLCRectNode* rc1 = new SLCRectNode ( mat );
+	rc1->pnts[0] = vec2f ( 0, 0 ); rc1->pnts[1] = vec2f (40, 0 ); rc1->pnts[2] = vec2f (40, 150); rc1->pnts[3] = vec2f ( 0, 150);
+	rc1->z = -1;
+	t1->addChild ( rc1 );
+	t->addChild ( t1 );
+	nodes.push_back ( t1 );
+	nodes.push_back ( rc1 );
+
+	dy += 5 * h/4;
+    }
+    return t;
+}
+
+SLCNode* logic_lod1 ( SLCMaterial *mat, float& width, float& height )
+{
+    SLCTransformNode* t = new SLCTransformNode ();
+    nodes.push_back ( t );
+
+    float dx=0;
+    float dy=0;
+    float w, h;
+    for ( int i=0; i<20; i++ )
+    {
+	dx = 0;
+	for ( int j=0; j<32; j++ )
+	{
+	    SLCTransformNode* t1 = new SLCTransformNode ();
+	    t->addChild ( t1 );
+	    nodes.push_back ( t1 );
+	    t1->addChild ( logic0_lod1 ( mat, w, h ) );
+	    mat_translatematrix ( t1->mat, dx, dy, 0 );
+	    dx += 7 * w;
+	}
+	dy += 1.8 * h;
+    }
+    return t;
+}
+
+// --------------------------------------------------------------------------------
+
+SLCNode* globalrouting_lod0 ( SLCMaterial *mat, float& width, float& height )
+{
+    width = 40;
+    height = 300;
+    float z = 1;
+    SLCTransformNode* t0 = new SLCTransformNode ();
+    nodes.push_back ( t0 );
+
+    // horizontal
+    float y = 430;
+    for ( int i=0; i<19; i++ )
+    {
+	SLCPLineNode* line = new SLCPLineNode( gmatLine0 );
+	nodes.push_back ( line );
+	t0->addChild ( line );
+	line->pnts.push_back ( vec2f( -100, y) );
+	line->pnts.push_back ( vec2f( 8800, y) );
+	line->z = z;
+	y += 1.8 * 300;
+    }
+
+    float x = 130;
+    for ( int i=0; i<31; i++ )
+    {
+	SLCPLineNode* line = new SLCPLineNode( gmatLine0 );
+	nodes.push_back ( line );
+	t0->addChild ( line );
+	line->pnts.push_back ( vec2f( x, -100) );
+	line->pnts.push_back ( vec2f( x, 10700) );
+	line->z = z;
+	x += 7 * 40;
+    }
+    return t0;
 }
 
 // --------------------------------------------------------------------------------
@@ -69,7 +208,7 @@ SLCNode* localrouting0_lod0 ( SLCMaterial *mat, float& width, float& height )
 {
     width = 40;
     height = 300;
-    float z = 0;
+    float z = 2;
 
     SLCTransformNode* t0 = new SLCTransformNode ();
     nodes.push_back ( t0 );
@@ -155,7 +294,7 @@ SLCNode* localrouting0_lod0 ( SLCMaterial *mat, float& width, float& height )
 	}
 
 	{
-	    SLCPLineNode* line = new SLCPLineNode( mat );
+	    SLCPLineNode* line = new SLCPLineNode( gmatLine3 );
 	    nodes.push_back ( line );
 	    t->addChild ( line );
 	    line->pnts.push_back ( vec2f( -26, 340) );
@@ -166,7 +305,7 @@ SLCNode* localrouting0_lod0 ( SLCMaterial *mat, float& width, float& height )
 	}
 
 	{
-	    SLCPLineNode* line = new SLCPLineNode( mat );
+	    SLCPLineNode* line = new SLCPLineNode( gmatLine );
 	    nodes.push_back ( line );
 	    t->addChild ( line );
 	    line->pnts.push_back ( vec2f( -80, 355) );
@@ -175,7 +314,7 @@ SLCNode* localrouting0_lod0 ( SLCMaterial *mat, float& width, float& height )
 	}
 
 	{
-	    SLCPLineNode* line = new SLCPLineNode( mat );
+	    SLCPLineNode* line = new SLCPLineNode( gmatLine2 );
 	    nodes.push_back ( line );
 	    t->addChild ( line );
 	    line->pnts.push_back ( vec2f( 64, 355) );
@@ -204,9 +343,9 @@ SLCNode* localrouting_lod0 ( SLCMaterial *mat, float& width, float& height )
 	    nodes.push_back ( t1 );
 	    t1->addChild ( localrouting0_lod0 ( mat, w, h ) );
 	    mat_translatematrix ( t1->mat, dx, dy, 0 );
-	    dx += 5 * w;
+	    dx += 7 * w;
 	}
-	dy += 2 * h;
+	dy += 1.8 * h;
     }
     return t;
 }
@@ -350,9 +489,9 @@ SLCNode* port_lod0 ( SLCMaterial *mat, float& width, float& height )
 	    nodes.push_back ( t1 );
 	    t1->addChild ( port0_lod0 ( mat, w, h ) );
 	    mat_translatematrix ( t1->mat, dx, dy, 0 );
-	    dx += 5 * w;
+	    dx += 7 * w;
 	}
-	dy += 2 * h;
+	dy += 1.8 * h;
     }
     return t;
 }
@@ -361,23 +500,59 @@ SLCNode* port_lod0 ( SLCMaterial *mat, float& width, float& height )
 
 void initMaterials ()
 {
-    gmat = new SLCMaterial ( "layer_material");
-    gmat->foreground_color = vec3i(155, 0, 0);
-    gmat->background_color = vec3i(255, 255, 255);
+    gmat = new SLCMaterial ( "material");
+    gmat->foreground_color = vec4i(155, 0, 0, 255);
+    gmat->background_color = vec4i(255, 255, 255, 255);
     gmat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
-    gmat->linewidth = 0;
+    gmat->linewidth = 1;
     gmat->fontfilename = "simsun.ttc";
     gmat->texturefilename = "hands.jpg";
     nodes.push_back ( gmat );
 
-    gmat1 = new SLCMaterial ( "layer_material1");
-    gmat1->foreground_color = vec3i(0, 0, 155);
-    gmat1->background_color = vec3i(190, 213, 235);
+    gmat1 = new SLCMaterial ( "material1");
+    gmat1->foreground_color = vec4i(0, 0, 155, 255);
+    gmat1->background_color = vec4i(190, 213, 235, 255);
     gmat1->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
-    gmat1->linewidth = 0;
+    gmat1->linewidth = 1;
     gmat1->fontfilename = "simsun.ttc";
     gmat1->texturefilename = "hands.jpg";
     nodes.push_back ( gmat1 );
+
+    gmatLine0 = new SLCMaterial ( "materialLine0");
+    gmatLine0->foreground_color = vec4i(0, 0, 155, 255);
+    gmatLine0->background_color = vec4i(250, 250, 250, 255);
+    gmatLine0->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
+    gmatLine0->linewidth = 10000;
+    gmatLine0->fontfilename = "simsun.ttc";
+    gmatLine0->texturefilename = "hands.jpg";
+    nodes.push_back ( gmatLine0 );
+
+    gmatLine = new SLCMaterial ( "materialLine");
+    gmatLine->foreground_color = vec4i(0, 0, 155, 255);
+    gmatLine->background_color = vec4i(255, 255, 252, 255);
+    gmatLine->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
+    gmatLine->linewidth = 4000;
+    gmatLine->fontfilename = "simsun.ttc";
+    gmatLine->texturefilename = "hands.jpg";
+    nodes.push_back ( gmatLine );
+
+    gmatLine2 = new SLCMaterial ( "materialLine2");
+    gmatLine2->foreground_color = vec4i(0, 0, 155, 255);
+    gmatLine2->background_color = vec4i(255, 255, 254, 255);
+    gmatLine2->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
+    gmatLine2->linewidth = 2000;
+    gmatLine2->fontfilename = "simsun.ttc";
+    gmatLine2->texturefilename = "hands.jpg";
+    nodes.push_back ( gmatLine2 );
+
+    gmatLine3 = new SLCMaterial ( "materialLine3");
+    gmatLine3->foreground_color = vec4i(0, 0, 155, 255);
+    gmatLine3->background_color = vec4i(255, 255, 250, 255);
+    gmatLine3->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
+    gmatLine3->linewidth = 1000;
+    gmatLine3->fontfilename = "simsun.ttc";
+    gmatLine3->texturefilename = "hands.jpg";
+    nodes.push_back ( gmatLine3 );
 }
 
 int main ( int argc, char* argv[] )
@@ -395,6 +570,10 @@ int main ( int argc, char* argv[] )
     SLCSceneNode scene ( "test_scene");
     scene.addChild ( gmat );
     scene.addChild ( gmat1 );
+    scene.addChild ( gmatLine0 );
+    scene.addChild ( gmatLine );
+    scene.addChild ( gmatLine2 );
+    scene.addChild ( gmatLine3 );
 
     {
 	SLCLayerNode* layer = new SLCLayerNode ( "background", gmat );
@@ -416,8 +595,8 @@ int main ( int argc, char* argv[] )
 	nodes.push_back ( t );
 	lodpage->addChild ( t );
 
-	float w = 6400;
-	float h = 11900;
+	float w = 8900;
+	float h = 10800;
 	SLCRectNode* rc1 = new SLCRectNode ( gmat1 );
 	nodes.push_back ( rc1 );
 	rc1->pnts[0] = vec2f ( 0, 0 );
@@ -428,7 +607,26 @@ int main ( int argc, char* argv[] )
 //	lodpage->addChild ( rc1 );
 	t->addChild ( rc1 );
     }
+
     {
+	SLCLayerNode* layer = new SLCLayerNode ( "global routing", gmat );
+	nodes.push_back ( layer );
+	SLCLODNode* lod = new SLCLODNode();
+	nodes.push_back ( lod );
+	SLCLODPageNode* lodpage = new SLCLODPageNode();
+	nodes.push_back ( lodpage );
+	lodpage->delayloading = false;
+	lodpage->kdtree = "globalrouting0.idx";
+	lodpage->imposter = true;
+	scene.addChild ( layer );
+	layer->addChild ( lod );
+	lod->addChild ( lodpage );
+	float w, h;
+	lodpage->addChild ( globalrouting_lod0(gmat, w, h) );
+    }
+
+    {
+	float w, h;
 	SLCLayerNode* layer = new SLCLayerNode ( "local routing", gmat );
 	nodes.push_back ( layer );
 	SLCLODNode* lod = new SLCLODNode();
@@ -440,28 +638,54 @@ int main ( int argc, char* argv[] )
 	lodpage->imposter = true;
 	scene.addChild ( layer );
 	layer->addChild ( lod );
-	lod->addChild ( lodpage );
-	float w, h;
 	lodpage->addChild ( localrouting_lod0(gmat, w, h) );
+
+	SLCLODPageNode* lodpage1 = new SLCLODPageNode();
+	nodes.push_back ( lodpage1 );
+	lod->addChild ( lodpage1 );
+	lod->addChild ( lodpage );
+	lod->scales.push_back (0.00019);
     }
     {
+	float w, h;
 	SLCLayerNode* layer = new SLCLayerNode ( "logic", gmat );
 	nodes.push_back ( layer );
+	scene.addChild ( layer );
+
 	SLCLODNode* lod = new SLCLODNode();
 	nodes.push_back ( lod );
-	SLCLODPageNode* lodpage = new SLCLODPageNode();
-	nodes.push_back ( lodpage );
-	lodpage->delayloading = false;
-	lodpage->kdtree = "logic0.idx";
-	lodpage->imposter = true;
-	scene.addChild ( layer );
 	layer->addChild ( lod );
-	lod->addChild ( lodpage );
-	float w, h;
-	lodpage->addChild ( logic_lod0( gmat, w, h) );
+
+	SLCLODPageNode* lodpage0 = new SLCLODPageNode();
+	nodes.push_back ( lodpage0 );
+	lodpage0->delayloading = false;
+	lodpage0->kdtree = "logic0.idx";
+	lodpage0->imposter = true;
+	lodpage0->addChild ( logic_lod0( gmat, w, h) );
+
+	SLCLODPageNode* lodpage1 = new SLCLODPageNode();
+	nodes.push_back ( lodpage1 );
+	lodpage1->delayloading = false;
+	lodpage1->kdtree = "logic1.idx";
+	lodpage1->imposter = true;
+	lodpage1->addChild ( logic_lod1( gmat, w, h) );
+
+	SLCLODPageNode* lodpage2 = new SLCLODPageNode();
+	nodes.push_back ( lodpage2 );
+	lodpage2->delayloading = false;
+	lodpage2->kdtree = "logic2.idx";
+	lodpage2->imposter = true;
+	lodpage2->addChild ( logic_lod2( gmat, w, h) );
+
+	lod->addChild ( lodpage0 );
+	lod->addChild ( lodpage1 );
+	lod->addChild ( lodpage2 );
+	lod->scales.push_back (0.00019);
+	lod->scales.push_back (0.00022);
     }
 
     {
+	float w, h;
 	SLCLayerNode* layer = new SLCLayerNode ( "port", gmat );
 	nodes.push_back ( layer );
 	SLCLODNode* lod = new SLCLODNode();
@@ -473,9 +697,13 @@ int main ( int argc, char* argv[] )
 	lodpage->imposter = true;
 	scene.addChild ( layer );
 	layer->addChild ( lod );
-	lod->addChild ( lodpage );
-	float w, h;
 	lodpage->addChild ( port_lod0( gmat, w, h) );
+	SLCLODPageNode* lodpage1 = new SLCLODPageNode();
+	nodes.push_back ( lodpage1 );
+	lod->addChild ( lodpage1 );
+	lod->addChild ( lodpage );
+
+	lod->scales.push_back (0.00026);
     }
 //     ofstream o;
 //     o.open ("test.xml" );

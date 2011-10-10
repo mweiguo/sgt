@@ -230,8 +230,8 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
     {
         MaterialRecord& mr = lc.materialEntry->LCRecords[idx];
         ss << "name : " << mr.name <<
-            ", background_color ( " << mr.background_color.x() << "," << mr.background_color.y() << "," << mr.background_color.z() <<
-            " ), foreground_color ( " << mr.foreground_color.x() << "," << mr.foreground_color.y() << "," << mr.foreground_color.z() <<
+            ", background_color ( " << mr.background_color.x() << "," << mr.background_color.y() << "," << mr.background_color.z() <<"," << mr.background_color.w() <<
+            " ), foreground_color ( " << mr.foreground_color.x() << "," << mr.foreground_color.y() << "," << mr.foreground_color.z() << "," << mr.foreground_color.w() <<
             " ), linewidth = " << mr.linewidth << ", linetype = " << mr.linetype << ", linetypefactor = " << mr.linetypefactor;
 	ss << ", font=" << mr.fontfile;
 	ss << ", texfilename=" << mr.texturefile;

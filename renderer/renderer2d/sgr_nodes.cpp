@@ -56,8 +56,8 @@ string SLCSceneNode::toXML () const
 SLCMaterial::SLCMaterial ( const char* nm ) : SLCNode()
 {
     name = nm;
-    foreground_color = vec3i ( 0, 0, 0 );
-    background_color = vec3i ( 0, 0, 0 );
+    foreground_color = vec4i ( 0, 0, 0, 1 );
+    background_color = vec4i ( 0, 0, 0, 1 );
     linetype = 0xFFFF;//LINETYPE_SOLID;
     linewidth = 0;
     fontfilename = "";
@@ -68,7 +68,7 @@ string SLCMaterial::toXML () const
 {
     stringstream ss;
     ss << "<material id=\"" << name << "\">" << endl;
-    ss << "<color foregroud_color=\"" << foreground_color.x() << ' ' << foreground_color.y() << ' ' << foreground_color.z() << "\" background_color=\"" << background_color.x() << ' ' << background_color.y() << ' ' << background_color.z() << "\"/>" << endl;
+    ss << "<color foregroud_color=\"" << foreground_color.x() << ' ' << foreground_color.y() << ' ' << foreground_color.z() << ' ' << foreground_color.w() << "\" background_color=\"" << background_color.x() << ' ' << background_color.y() << ' ' << background_color.z()<< ' ' << background_color.w() << "\"/>" << endl;
     ss << "<line pattern=\"" << linetype << "\" factor=\"" << linetypefactor << "\" width=\"" << linewidth << "\"/>" << endl;
     if ( fontfilename != "" )
 	ss << "<font path=\"" << fontfilename << "\"/>" << endl;

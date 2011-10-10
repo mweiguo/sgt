@@ -83,6 +83,7 @@ public:
     vec4 operator / ( T rhs ) const;
     reference operator *= ( T rhs ); 
     bool operator == ( const_reference rhs ) const; 
+    bool operator != ( const_reference rhs ) const; 
 
     value_type& operator[] (int idx)       { return _v[idx]; }
     value_type operator[] (int idx) const  { return _v[idx]; }
@@ -171,13 +172,20 @@ inline typename vec4<T>::reference vec4<T>::operator *= ( T rhs )
     _v[0] *= rhs;
     _v[1] *= rhs;
     _v[2] *= rhs;
+    _v[3] *= rhs;
     return *this;
 }
 
 template < class T >
 inline bool vec4<T>::operator == ( const_reference rhs ) const
 {
-    return ( _v[0]== rhs._v[0] && _v[1]== rhs._v[1] && _v[2]== rhs._v[2] );
+    return ( _v[0]==rhs._v[0] && _v[1]==rhs._v[1] && _v[2]==rhs._v[2] && _v[3]==rhs._v[3] );
+}
+
+template < class T >
+inline bool vec4<T>::operator != ( const_reference rhs ) const
+{
+    return ( _v[0] != rhs._v[0] || _v[1] != rhs._v[1] || _v[2] != rhs._v[2] || _v[3] != rhs._v[3] );
 }
 
 typedef vec4<float>  vec4f;

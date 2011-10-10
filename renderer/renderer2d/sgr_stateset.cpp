@@ -46,10 +46,10 @@ State::State ( StateType t, float value, StateFlag f )
 
 //================================================================================
 
-State::State ( StateType t, vec3i value, StateFlag f )
+State::State ( StateType t, vec4i value, StateFlag f )
 {
     type = t;
-    vec3iValue = value;
+    vec4iValue = value;
     flag = f;
 }
 
@@ -62,7 +62,7 @@ State::State ( const State& rhs )
 
     intValue = rhs.intValue;
     floatValue = rhs.floatValue;
-    vec3iValue = rhs.vec3iValue;
+    vec4iValue = rhs.vec4iValue;
 }
 
 //================================================================================
@@ -72,13 +72,13 @@ void State::applyState ()
     switch ( type )
     {
     case FOREGROUND_COLOR:
-//  	cout << "State::applyState, FOREGROUND_COLOR" << vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
-// 	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.x()/255.0f, vec3iValue.z()/255.0f );
+//  	cout << "State::applyState, FOREGROUND_COLOR" << vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << endl;
+// 	glColor3f ( vec4iValue.x()/255.0f, vec4iValue.x()/255.0f, vec4iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
-//  	cout << "State::applyState, BACKGROUND_COLOR : " << 
-// 	    vec3iValue.x() << ", " << vec3iValue.y() << ", " << vec3iValue.z() << endl;
-	glColor3f ( vec3iValue.x()/255.0f, vec3iValue.y()/255.0f, vec3iValue.z()/255.0f );
+ 	cout << "State::applyState, BACKGROUND_COLOR : " << 
+	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
+	glColor4f ( vec4iValue.x()/255.0f, vec4iValue.y()/255.0f, vec4iValue.z()/255.0f, vec4iValue.w()/255.0f );
 	break;
     case LINE_TYPE:
     {
@@ -148,13 +148,13 @@ StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 
 	// calculate match count
 	if ( (state=getState ( State::BACKGROUND_COLOR )) != NULL ) {
-	    if ( state->vec3iValue != mat->background_color ) 
+	    if ( state->vec4iValue != mat->background_color ) 
 		nss.addState ( State(State::BACKGROUND_COLOR, mat->background_color, State::OVERWRITE) );
 	    else
 		cnt ++;
 	}
 	if ( (state=getState ( State::FOREGROUND_COLOR )) != NULL ) {
-	    if ( state->vec3iValue != mat->foreground_color )
+	    if ( state->vec4iValue != mat->foreground_color )
 		nss.addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::OVERWRITE) );
 	    else
 		cnt ++;
@@ -211,10 +211,10 @@ int StateSet::getMatchCount ( MaterialRecord* mat )
     StateSet nss;
     State* state;
     if ( (state=getState(State::BACKGROUND_COLOR))!=NULL )
-	if ( state->vec3iValue == mat->background_color )
+	if ( state->vec4iValue == mat->background_color )
 	    cnt ++;
     if ( (state=getState ( State::FOREGROUND_COLOR)) != NULL )
-	if ( state->vec3iValue == mat->foreground_color )
+	if ( state->vec4iValue == mat->foreground_color )
 	    cnt ++;
     if ( (state=getState ( State::LINE_TYPE ))!= NULL )
 	if ( state->intValue == mat->linetype )
@@ -280,10 +280,10 @@ string StateSet::toXML () const
 	switch ( state.type )
 	{
 	case State::FOREGROUND_COLOR:
-	    ss << " FOREGROUND_COLOR=\"" << state.vec3iValue.x() << ' ' << state.vec3iValue.y() << ' ' << state.vec3iValue.z() << "\"";
+	    ss << " FOREGROUND_COLOR=\"" << state.vec4iValue.x() << ' ' << state.vec4iValue.y() << ' ' << state.vec4iValue.z() << ' ' << state.vec4iValue.w() << "\"";
 	    break;
 	case State::BACKGROUND_COLOR:
-	    ss << " BACKGROUND_COLOR=\"" << state.vec3iValue.x() << ' ' << state.vec3iValue.y() << ' ' << state.vec3iValue.z() << "\"";
+	    ss << " BACKGROUND_COLOR=\"" << state.vec4iValue.x() << ' ' << state.vec4iValue.y() << ' ' << state.vec4iValue.z() << ' ' << state.vec4iValue.w() << "\"";
 	    break;
 	case State::LINE_TYPE:
 	    unsigned short pattern, factor;

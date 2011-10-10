@@ -246,7 +246,9 @@ void MainWindow::createDockWindows()
     addDockWidget(Qt::RightDockWidgetArea, dock);
 
     dock = new QDockWidget(tr("birdview"), this);
-    dock->setMinimumSize ( 200, 200 );
+    dock->setMinimumSize ( 230, 200 );
+    dock->setMaximumSize ( 230, 200 );
     dock->setWidget(birdview);
     addDockWidget(Qt::RightDockWidgetArea, dock);
 }
+

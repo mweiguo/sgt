@@ -13,8 +13,8 @@ SLCMaterial *gmat, *gmat1, *gmat2;
 void initMaterials ()
 {
     gmat = new SLCMaterial ( "material1");
-    gmat->foreground_color = vec3i(155, 0, 0);
-    gmat->background_color = vec3i(55, 255, 255);
+    gmat->foreground_color = vec4i(155, 0, 0, 125);
+    gmat->background_color = vec4i(55, 255, 255, 125);
     gmat->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
     gmat->linetypefactor = 16;
     gmat->linewidth = 0;
@@ -23,8 +23,8 @@ void initMaterials ()
     nodes.push_back ( gmat );
 
     gmat1 = new SLCMaterial ( "material2");
-    gmat1->foreground_color = vec3i(155, 0, 0);
-    gmat1->background_color = vec3i(55, 255, 255);
+    gmat1->foreground_color = vec4i(155, 0, 0, 125);
+    gmat1->background_color = vec4i(55, 255, 255, 125);
     gmat1->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
     gmat1->linetypefactor = 8;
 //    gmat1->linetype = SLCMaterial::LINETYPE_SOLID;
@@ -34,8 +34,8 @@ void initMaterials ()
     nodes.push_back ( gmat1 );
 
     gmat2 = new SLCMaterial ( "material3");
-    gmat2->foreground_color = vec3i(155, 0, 0);
-    gmat2->background_color = vec3i(55, 255, 255);
+    gmat2->foreground_color = vec4i(155, 0, 0, 125);
+    gmat2->background_color = vec4i(55, 255, 255, 125);
     gmat2->linetype = 0xaaaa;//SLCMaterial::LINETYPE_SOLID;
     gmat2->linetypefactor = 16;
 //    gmat2->linetype = SLCMaterial::LINETYPE_SOLID;

@@ -8,7 +8,7 @@
 #include <list>
 #include <vector>
 #include <string>
-#include <vec3.h>
+#include <vec4.h>
 #include "sgr_nodetypes.h"
 
 //PYTHON_BUILD(#include <Python.h>)
@@ -55,8 +55,8 @@ public:
     virtual int getType () { return SLC_MATERIAL; }
     virtual string toXML () const;
     string name;
-    vec3i foreground_color;
-    vec3i background_color;
+    vec4i foreground_color;
+    vec4i background_color;
     unsigned short linetypefactor;
     unsigned short linetype; // pattern
 //    int linetype;

@@ -76,14 +76,13 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
 
 	    // skip to correspond node
 	    // current Scale;
-	    cout << "++++++++++++++++ in lod " << endl;
 	    for ( int i=0; i<lod.scalecnt; i++ ) {
 		if ( scale < lod.scales[i] ) {
 		    traverse ( lc, i );
 		    return CHILD_CULLED;
 		}
 	    }
-	    traverse ( lc, lod.scalecnt-1 );
+	    traverse ( lc, lod.scalecnt );
             return CHILD_CULLED;
 	}
     }

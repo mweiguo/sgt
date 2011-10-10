@@ -2,7 +2,7 @@
 #define _SLC_LC_H_
 
 #include <vec2.h>
-#include <vec3.h>
+#include <vec4.h>
 #include <vector>
 #include <string>
 #include <cstring>
@@ -45,10 +45,10 @@ struct MaterialRecord
         LINETYPE_DASH
     };
     MaterialRecord ();
-    MaterialRecord ( const char* nm, const vec3i& bg, const vec3i& fg, float lw, unsigned short linetype, unsigned short linetypefactor, const char* fontfilename, const char* texfilename );
+    MaterialRecord ( const char* nm, const vec4i& bg, const vec4i& fg, float lw, unsigned short linetype, unsigned short linetypefactor, const char* fontfilename, const char* texfilename );
     char name[32];
-    vec3i background_color;
-    vec3i foreground_color;
+    vec4i background_color;
+    vec4i foreground_color;
     float linewidth;
     unsigned short linetypefactor;
     unsigned short linetype;
