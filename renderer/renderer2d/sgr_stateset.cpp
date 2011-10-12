@@ -76,15 +76,15 @@ void State::applyState ()
 // 	glColor3f ( vec4iValue.x()/255.0f, vec4iValue.x()/255.0f, vec4iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
- 	cout << "State::applyState, BACKGROUND_COLOR : " << 
-	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
+//  	cout << "State::applyState, BACKGROUND_COLOR : " << 
+// 	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
 	glColor4f ( vec4iValue.x()/255.0f, vec4iValue.y()/255.0f, vec4iValue.z()/255.0f, vec4iValue.w()/255.0f );
 	break;
     case LINE_TYPE:
     {
 	unsigned short pattern = LOWORD(intValue);
 	unsigned short factor = HIWORD(intValue);
-	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
+// 	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
 	glEnable ( GL_LINE_STIPPLE );
 	glLineStipple ( factor, pattern );
 	break;

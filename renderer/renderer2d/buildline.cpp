@@ -106,10 +106,10 @@ int main ( int argc, char* argv[] )
 	}
     }
 
-//     ofstream o;
-//     o.open ("test.xml" );
-//     o << scene.toXML();
-//     o.close();
+    ofstream o;
+    o.open ("test.xml" );
+    o << scene.toXML();
+    o.close();
 
     // ********************************************************************************
     SLCNode2LC node2lc ( &scene );
