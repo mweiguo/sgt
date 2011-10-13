@@ -358,6 +358,7 @@ void KdTree<T>::load ( const char* filename )
     in.read ( (char*)&size, sizeof(int) );
 /*     cout << "load primitive.size = " << size << endl; */
     _primitives.reserve ( size );
+    _primitives.resize ( size );
     in.read ( (char*)&(_primitives[0]), sizeof(T) * size );
 
 //     _primitives.reserve ( size );
