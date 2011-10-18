@@ -206,7 +206,7 @@ void MainWindow::createActions()
     fullextentAct->setStatusTip(tr("to home position"));
     connect(fullextentAct, SIGNAL(triggered()), displayer->bottom, SLOT(homeposition()));
 
-    layoutAct = new QAction(QIcon(":/images/home_32.png"), tr("&run layout"), this);
+    layoutAct = new QAction(QIcon("./images/right_32.png"), tr("&run layout"), this);
     layoutAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_L ) );
     layoutAct->setStatusTip(tr("run layout"));
     connect(layoutAct, SIGNAL(triggered()), this, SLOT(runlayout()));

@@ -285,6 +285,8 @@ LC* SLCNode2LC::generateLC ()
     {
 	Font* ft = 0;
 	MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
+	if ( string("") == mr.fontfile )
+	    strcpy ( mr.fontfile, "simhei.ttf" );
 	for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
 	{
 	    if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
@@ -294,7 +296,7 @@ LC* SLCNode2LC::generateLC ()
 	    }
 	}
 
-	if ( NULL == ft ) {
+	if ( NULL == ft && string("")!=mr.fontfile ) {
 	    ft = new Font ( mr.fontfile );
 	    mr.fontIdx = lc->fonts.size();
 	    lc->fonts.push_back ( ft );
