@@ -29,7 +29,6 @@ void r2d_init ()
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
     glEnable ( GL_ALPHA_TEST );
     glAlphaFunc ( GL_GREATER, 0.01 );
-
     glEnableClientState ( GL_VERTEX_ARRAY );
     mvmat.loadIdentity ();
 
@@ -94,8 +93,10 @@ void r2d_update_scenes ( int* ids, int length )
     viewfrustum_minmax[2] += viewfrustum_minmax[0];
     viewfrustum_minmax[3] += viewfrustum_minmax[1];
     
+//    cout << "length =  " << length << endl;
     for ( int i=0; i<length; i++ )
     {
+//	cout << "ids[" << i << "] = " << ids[i] << ", globalLC.size() = " << globalLC.size() << endl;
 	if ( ids[i]<0 || 
 	     ids[i]>=globalLC.size() ||
 	     globalLC[ids[i]] == 0 )
@@ -122,9 +123,9 @@ void r2d_update_scenes ( int* ids, int length )
 	    Renderer::render ( StateSetBuilder::root, lc );
 	    cout << "render finished, elapse " << clock() - t << "(ms)" << endl;
 	}
-	cout << "======================================== " << endl;
-
+	cout << endl;
     }
+    cout << "======================================== " << endl;
 }
 
 // ================================================================================

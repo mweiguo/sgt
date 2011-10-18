@@ -19,25 +19,25 @@ inline int next_p2 (int a )
     return rval;
 }
 
-Font::Font ( const char* fontfilename )
+Font::Font ( const char* filename )
 {
-    string filename = fontfilename;
+    fontfilename = filename;
 
     ifstream in;
-    in.open ( filename.c_str() );
+    in.open ( fontfilename.c_str() );
     if ( false == in.is_open () ) {
-	filename = "simhei.ttf";
+	fontfilename = "simhei.ttf";
     }
     in.close();
     
-    cout << "load font '" << filename << "'" << endl;
+    cout << "load font '" << fontfilename << "'" << endl;
     FT_Library  library;
     int error = FT_Init_FreeType( &library );
     if ( error )
 	cout << "FT_Init_FreeType failed" << endl;
 
     FT_Face face;
-    error = FT_New_Face( library, filename.c_str(), 0, &face );
+    error = FT_New_Face( library, fontfilename.c_str(), 0, &face );
     if ( error == FT_Err_Unknown_File_Format )
 	cout << "unsupported format" << endl;
     else if ( error )
@@ -86,20 +86,16 @@ Font::Font ( const char* fontfilename )
 	glNewList(list_base + i,GL_COMPILE);
 	glBindTexture(GL_TEXTURE_2D, list_base + i );
 	float x=(float)bitmap.width / (float)width, y=(float)bitmap.rows / (float)height;
+//	cout << "i : " << i << "x = " << x << ", y = " << y << endl;
 	glBegin(GL_QUADS);
 	float r = bitmap.rows / pixelsize;
 	float r1 = bitmap.width / pixelsize;
 	widths.push_back ( r1 );
 	heights.push_back ( r );
-// 	glTexCoord2d(0,0); glVertex2f(0, bitmap.rows);
-// 	glTexCoord2d(0,y); glVertex2f(0, 0);
-// 	glTexCoord2d(x,y); glVertex2f(bitmap.width, 0);
-// 	glTexCoord2d(x,0); glVertex2f(bitmap.width, bitmap.rows);
 	glTexCoord2d(0,0); glVertex2f(0, r);
 	glTexCoord2d(0,y); glVertex2f(0, 0);
 	glTexCoord2d(x,y); glVertex2f(r1, 0);
 	glTexCoord2d(x,0); glVertex2f(r1, r);
-// 	cout << "i = " << i << ", width = " << bitmap.width << ", height = " << bitmap.rows << endl;
 	glEnd();
 	glEndList();
     }

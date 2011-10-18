@@ -8,7 +8,7 @@ int main ( int argc, char *argv[] )
 {
     QApplication app(argc, argv);
     QStringList args = app.arguments();
-    string filename;
+    string filename = "";
     for ( int i=0; i<args.size(); i++ ) {
 	if ( args[i] == "-f" )
 	    filename = args[++i].toStdString();
@@ -22,6 +22,8 @@ int main ( int argc, char *argv[] )
     MainWindow mainWin;
     mainWin.resize ( 800, 600 );
     mainWin.show();
-    mainWin.open ( filename.c_str() );
+    mainWin.doc->init ();
+    if ( filename != "" )
+	mainWin.open ( filename.c_str() );
     return app.exec();
 }

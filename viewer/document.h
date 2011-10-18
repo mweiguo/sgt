@@ -6,6 +6,7 @@ class Document
 public:
     Document ();
     virtual ~Document ();
+    void init ();
     void openScene ( const char* filename );
     void closeScene ();
 
@@ -13,5 +14,6 @@ public:
     int miscsceneid;
     int birdviewmiscid;
 };
+
 
 #endif // _DOCUMENT_H_

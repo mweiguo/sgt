@@ -15,10 +15,10 @@ void initMaterials ()
     gmat = new SLCMaterial ( "layer_material");
     gmat->foreground_color = vec4i(155, 0, 0, 155);
     gmat->background_color = vec4i(0, 0, 200, 115);
-    gmat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
-    gmat->linewidth = 0;
-    gmat->fontfilename = "simsun.ttc";
-    gmat->texturefilename = "hands.jpg";
+//     gmat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
+//     gmat->linewidth = 1;
+//     gmat->fontfilename = "";
+//     gmat->texturefilename = "";
     nodes.push_back ( gmat );
 }
 
@@ -61,10 +61,10 @@ int main ( int argc, char* argv[] )
 	lodpage->addChild ( rc1 );
     }
 
-//     ofstream o;
-//     o.open ("test.xml" );
-//     o << scene.toXML();
-//     o.close();
+    ofstream o;
+    o.open ("base.xml" );
+    o << scene.toXML();
+    o.close();
 
     // ********************************************************************************
     SLCNode2LC node2lc ( &scene );

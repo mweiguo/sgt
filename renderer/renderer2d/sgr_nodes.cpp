@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <mat4f.h>
+#include <bbox2d.h>
 using namespace std;
 // --------------------------------------------------------------------------------
 
@@ -59,7 +60,7 @@ SLCMaterial::SLCMaterial ( const char* nm ) : SLCNode()
     foreground_color = vec4i ( 0, 0, 0, 1 );
     background_color = vec4i ( 0, 0, 0, 1 );
     linetype = 0xFFFF;//LINETYPE_SOLID;
-    linewidth = 0;
+    linewidth = 1;
     fontfilename = "";
     texturefilename = "";
 }
@@ -156,6 +157,11 @@ SLCPrimitiveNode::SLCPrimitiveNode ( SLCMaterial* mat ) : SLCNode()
     bindmat = mat;
 }
 
+SLCPrimitiveNode::SLCPrimitiveNode ( const SLCPrimitiveNode& rhs )
+{
+    bindmat = rhs.bindmat;
+}
+
 // --------------------------------------------------------------------------------
 
 string SLCLineNode::toXML () const
@@ -167,6 +173,14 @@ string SLCLineNode::toXML () const
 }
 
 // --------------------------------------------------------------------------------
+
+SLCFillablePrimitiveNode::SLCFillablePrimitiveNode ( const SLCFillablePrimitiveNode& rhs )
+    : SLCPrimitiveNode(rhs)
+{
+    textureScale = rhs.textureScale;
+    textureAngle = rhs.textureAngle;
+    filltexture  = rhs.filltexture;
+}
 
 string SLCFillablePrimitiveNode::toXML () const
 {
@@ -196,6 +210,16 @@ SLCRectNode::SLCRectNode ( SLCMaterial* mat )
     z = 0.0f;
 }
 
+SLCRectNode::SLCRectNode ( const SLCRectNode& rhs )
+    : SLCFillablePrimitiveNode ( rhs )
+{
+    pnts[0] = rhs.pnts[0];
+    pnts[1] = rhs.pnts[1];
+    pnts[2] = rhs.pnts[2];
+    pnts[3] = rhs.pnts[3];
+    z = rhs.z;
+}
+
 string SLCRectNode::toXML () const
 {
     stringstream ss;
@@ -205,6 +229,44 @@ string SLCRectNode::toXML () const
 	pnts[2].x() << ' ' << pnts[2].y() << ' ' << z << ' ' <<
 	pnts[3].x() << ' ' << pnts[3].y() << ' ' << z << "</primitive>" << endl;
     return ss.str();
+}
+
+SLCPrimitiveNode* SLCRectNode::copy()
+{
+    return new SLCRectNode (*this);
+}
+
+void SLCRectNode::getMinMax ( float* minmax )
+{
+    BBox2d box;
+    box.init ( pnts[0] );
+    box.expandby ( pnts[1] );
+    box.expandby ( pnts[2] );
+    box.expandby ( pnts[3] );
+    minmax[0] = box.minvec().x();
+    minmax[1] = box.minvec().y();
+    minmax[2] = z;
+    minmax[3] = box.maxvec().x();
+    minmax[4] = box.maxvec().y();
+    minmax[5] = z;
+}
+
+void SLCRectNode::setRect ( float x, float y, float zz, float w, float h )
+{
+    pnts[0] = vec3f(x,y,zz);
+    pnts[1] = vec3f(x+w,y,zz);
+    pnts[2] = vec3f(x+w,y+h,zz);
+    pnts[3] = vec3f(x,y+h,zz);
+}
+
+void SLCRectNode::setSize ( float w, float h )
+{
+    float x = pnts[0].x();
+    float y = pnts[0].y();
+    float zz = z;
+    pnts[1] = vec3f(x+w,y,zz);
+    pnts[2] = vec3f(x+w,y+h,zz);
+    pnts[3] = vec3f(x,y+h,zz);
 }
 
 // --------------------------------------------------------------------------------
@@ -217,6 +279,15 @@ SLCTextNode::SLCTextNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
     text = "";
 }
 
+SLCTextNode::SLCTextNode ( const SLCTextNode& rhs )
+    : SLCPrimitiveNode(rhs)
+{
+    pos = rhs.pos;
+    scale = rhs.scale;
+    rotz = rhs.rotz;
+    text = rhs.text;
+}
+
 string SLCTextNode::toXML () const
 {
     stringstream ss;
@@ -226,11 +297,27 @@ string SLCTextNode::toXML () const
     return ss.str();
 }
 
+SLCPrimitiveNode* SLCTextNode::copy()
+{
+    return new SLCTextNode(*this);
+}
+
+void SLCTextNode::getMinMax ( float* minmaxabc )
+{
+}
+
 // --------------------------------------------------------------------------------
 
 SLCPLineNode::SLCPLineNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
 {
     z = 0.0f;
+}
+
+SLCPLineNode::SLCPLineNode ( const SLCPLineNode& rhs )
+    : SLCPrimitiveNode(rhs)
+{
+    pnts.assign ( rhs.pnts.begin(), rhs.pnts.end() );
+    z = rhs.z;
 }
 
 string SLCPLineNode::toXML () const
@@ -244,11 +331,40 @@ string SLCPLineNode::toXML () const
     return ss.str();
 }
 
+SLCPrimitiveNode* SLCPLineNode::copy()
+{
+    return new SLCPLineNode(*this);
+}
+
+void SLCPLineNode::getMinMax ( float* minmax )
+{
+    BBox2d box;
+    vector<vec2f>::iterator pp=pnts.begin();
+    box.init ( *pp );
+
+    for ( ++pp; pp!=pnts.end(); ++pp )
+	box.expandby ( *pp );
+
+    minmax[0] = box.minvec().x();
+    minmax[1] = box.minvec().y();
+    minmax[2] = z;
+    minmax[3] = box.maxvec().x();
+    minmax[4] = box.maxvec().y();
+    minmax[5] = z;
+}
+
 // --------------------------------------------------------------------------------
 
 SLCPolyNode::SLCPolyNode ( SLCMaterial* mat ) : SLCFillablePrimitiveNode (mat)
 {
     z = 0.0f;
+}
+
+SLCPolyNode::SLCPolyNode ( const SLCPolyNode& rhs )
+    : SLCFillablePrimitiveNode(rhs)
+{
+    pnts.assign(rhs.pnts.begin(), rhs.pnts.end());
+    z = rhs.z;
 }
 
 string SLCPolyNode::toXML () const
@@ -261,6 +377,28 @@ string SLCPolyNode::toXML () const
     return ss.str();
 }
  
+SLCPrimitiveNode* SLCPolyNode::copy()
+{
+    return new SLCPolyNode(*this);
+}
+
+void SLCPolyNode::getMinMax ( float* minmax )
+{
+    BBox2d box;
+    vector<vec2f>::iterator pp=pnts.begin();
+    box.init ( *pp );
+
+    for ( ++pp; pp!=pnts.end(); ++pp )
+	box.expandby ( *pp );
+
+    minmax[0] = box.minvec().x();
+    minmax[1] = box.minvec().y();
+    minmax[2] = z;
+    minmax[3] = box.maxvec().x();
+    minmax[4] = box.maxvec().y();
+    minmax[5] = z;
+}
+
 // --------------------------------------------------------------------------------
 
 SLCTransformNode::SLCTransformNode () : SLCNode()

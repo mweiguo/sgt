@@ -76,26 +76,28 @@ void State::applyState ()
 // 	glColor3f ( vec4iValue.x()/255.0f, vec4iValue.x()/255.0f, vec4iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
-//  	cout << "State::applyState, BACKGROUND_COLOR : " << 
-// 	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
+ 	cout << "State::applyState, BACKGROUND_COLOR : " << 
+	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
 	glColor4f ( vec4iValue.x()/255.0f, vec4iValue.y()/255.0f, vec4iValue.z()/255.0f, vec4iValue.w()/255.0f );
 	break;
     case LINE_TYPE:
     {
 	unsigned short pattern = LOWORD(intValue);
 	unsigned short factor = HIWORD(intValue);
-// 	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
+ 	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
 	glEnable ( GL_LINE_STIPPLE );
 	glLineStipple ( factor, pattern );
 	break;
     }
     case LINE_WIDTH:
-//	cout << "line width = " << currentScale * floatValue << endl;
+	cout << "line width = " << currentScale * floatValue << endl;
 	glLineWidth ( currentScale * floatValue );
 	break;
     case TEXTURE:
-//	cout << "bind texture : " << intValue << endl;
-	glBindTexture ( GL_TEXTURE_2D, intValue );
+	if ( intValue >= 0 ) {
+	    cout << "glBindTexture texture = " << intValue << endl;
+	    glBindTexture ( GL_TEXTURE_2D, intValue );
+	}
 	break;
     }
 }
@@ -129,8 +131,12 @@ StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 	tss->addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::INHERIT) );
 	tss->addState ( State(State::LINE_TYPE, (int)MAKELONG(mat->linetype,mat->linetypefactor), State::INHERIT) );
 	tss->addState ( State(State::LINE_WIDTH, mat->linewidth, State::INHERIT) );
-	Texture* tex = lc->textures[mat->textureIdx];
-	tss->addState ( State(State::TEXTURE, (int)tex->texture, State::INHERIT) );
+	if ( mat->textureIdx<0 || mat->textureIdx>=lc->textures.size() ) {
+	    tss->addState ( State(State::TEXTURE, -1, State::INHERIT) );
+	} else {
+	    Texture* tex = lc->textures[mat->textureIdx];
+	    tss->addState ( State(State::TEXTURE, (int)tex->texture, State::INHERIT) );
+	}
 	addChild ( tss );
 	return tss;
     }
@@ -172,11 +178,15 @@ StateSet* StateSet::CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat )
 		cnt ++;
 	}
 	if ( (state=getState ( State::TEXTURE )) != NULL ) {
-	    Texture* tex = lc->textures[mat->textureIdx];
-	    if ( state->intValue != tex->texture )
-		nss.addState ( State(State::TEXTURE, (int)tex->texture, State::OVERWRITE) );
-	    else
+	    if ( mat->textureIdx<0 && mat->textureIdx>lc->textures.size() ) {
 		cnt ++;
+	    } else {
+		Texture* tex = lc->textures[mat->textureIdx];
+		if ( state->intValue != tex->texture )
+		    nss.addState ( State(State::TEXTURE, (int)tex->texture, State::OVERWRITE) );
+		else
+		    cnt ++;
+	    }
 	}
 
 	if ( cnt == 0 ) {
@@ -354,31 +364,39 @@ void StateSet::render ( LC* lc )
 	{ 
 	case SLC_RECT:
 	{
+	    cout << "draw rect" << endl;
 	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
 	    float* begin = (float*)&(r.data[0]);
 	    float* end   = begin + 12;
 	    copy ( begin, end, back_inserter(rects) );
+	    cout << "draw rect" << endl;
 	    break;
 	}
 	case SLC_TEXT:
 	{
+	    cout << "draw text" << endl;
 	    texts.push_back ( &lc->textEntry->LCRecords[g.value] );
+	    cout << "draw text" << endl;
 	    break;
 	}
 	case SLC_PLINE:
 	{
-//	    cout << "draw pline" << endl;
+	    cout << "draw pline" << endl;
+//	    cout << "glDisable ( GL_TEXTURE_2D );" << endl;
 	    glDisable ( GL_TEXTURE_2D );
 	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
 	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
 	    glDrawArrays ( GL_LINE_STRIP, 0, pline.end - pline.start );
 	    glEnable ( GL_TEXTURE_2D );
+//	    cout << "glEnable ( GL_TEXTURE_2D );" << endl;
+	    cout << "draw pline" << endl;
 	    break;
 	}
 	case SLC_POLY:
 	{
+	    cout << "draw poly" << endl;
+//	    cout << "glDisable ( GL_TEXTURE_2D );" << endl;
 	    glDisable ( GL_TEXTURE_2D );
-//	    cout << "draw poly" << endl;
 //	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
 	    PolyRecord& poly = lc->polyEntry->LCRecords[g.value];
 	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
@@ -386,6 +404,8 @@ void StateSet::render ( LC* lc )
 	    glDrawArrays ( GL_TRIANGLES, 0, poly.tessellationend - poly.tessellationstart );
 //	    glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
 	    glEnable ( GL_TEXTURE_2D );
+//	    cout << "glEnable ( GL_TEXTURE_2D );" << endl;
+	    cout << "draw poly" << endl;
 	    break;
 	}
 	}
@@ -393,28 +413,45 @@ void StateSet::render ( LC* lc )
 
     // draw rects
     if ( false == rects.empty() ) {
-//	cout << "draw rects" << endl;
+//	cout << "glDisable ( GL_TEXTURE_2D );" << endl;
 	glDisable ( GL_TEXTURE_2D );
 	glVertexPointer ( 3, GL_FLOAT, 0, &(rects[0]) );
 	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+//	glBegin( GL_QUADS );
+// 	cout << "draw rects ";
+// 	for ( int i=0; i<rects.size(); i+=3 ) {
+// 	    glVertex3f ( rects[i], rects[i+1], rects[i+2] );
+// 	    cout << "( " << rects[i] << ", " << rects[i+1] << ", " << rects[i+2] << ") ";
+// 	}
+// 	cout << endl;
+//	glEnd();
+// 	cout << "draw rect (" << rects[0] << ", " << rects[1] << ", " << rects[2] << "), " << 
+// 	    ", (" << rects[3] << ", " << rects[4] << ", " << rects[5] << "), " << 
+// 	    ", (" << rects[6] << ", " << rects[7] << ", " << rects[8] << "), " << 
+// 	    ", (" << rects[9] << ", " << rects[10] << ", " << rects[11] << "), " << endl;
 	glEnable ( GL_TEXTURE_2D );
+//	cout << "glEnable ( GL_TEXTURE_2D );" << endl;
     }
 
     // draw text
     for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
     {
-//	cout << "draw text" << endl;
+//	cout << "glEnable ( GL_TEXTURE_2D );" << endl;
+	glEnable ( GL_TEXTURE_2D );
 	TextRecord* tr = *pp;
 	glPushMatrix ();
-	glRotatef ( tr->rotz, 0, 0, 1 );
-	glScalef ( tr->scale, tr->scale, tr->scale );
 	glTranslatef ( tr->pos.x(), tr->pos.y(), tr->pos.z() );
+	glScalef ( tr->scale, tr->scale, tr->scale );
+	glRotatef ( tr->rotz, 0, 0, 1 );
 	// get material
 	MaterialRecord& mr = lc->materialEntry->LCRecords[ tr->materialIdx ];
 	// get font
 	Font* font = lc->fonts[ mr.fontIdx ];
 	font->drawText ( lc->textBufferEntry->LCRecords + tr->start );
+
 	glPopMatrix ();
+	glDisable ( GL_TEXTURE_2D );
+//	cout << "glDisable ( GL_TEXTURE_2D );" << endl;
     }
 }
 

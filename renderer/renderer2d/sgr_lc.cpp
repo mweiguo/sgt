@@ -54,6 +54,7 @@ MaterialRecord::MaterialRecord ()
     memset  ( fontfile,  0, 32 * sizeof(char) ); 
     fontIdx = -1;
     memset  ( texturefile,  0, 32 * sizeof(char) ); 
+    textureIdx = -1;
 }
 
 MaterialRecord::MaterialRecord ( const char* nm, const vec4i& bg, const vec4i& fg, float lw, 
@@ -72,6 +73,7 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec4i& bg, const vec4i& f
     fontIdx = -1;
     memset  ( texturefile,  0, 32 * sizeof(char) ); 
     strncpy ( texturefile, texfilename, 32 ); 
+    textureIdx = -1;
 }
 
 // --------------------------------------------------------------------------------
@@ -363,7 +365,7 @@ bool LC::load ( const char* filename )
     ifstream in;
     in.open ( filename, ifstream::binary );
     if ( in.is_open () == false ) {
-        cerr << "open file " << filename << " error" << endl;
+//        cerr << "open file " << filename << " error" << endl;
         return false;
     }
     in.seekg (0, ios::end);
@@ -388,6 +390,8 @@ bool LC::load ( const char* filename )
     {
 	Font* ft = 0;
 	MaterialRecord& mr = materialEntry->LCRecords[ii];
+	if ( string("") == mr.fontfile )
+	    strcpy ( mr.fontfile, "simhei.ttf" );
 	for ( size_t jj=0; jj<fonts.size(); jj++ )
 	{
 	    if ( fonts[jj]->fontfilename == mr.fontfile ) {
@@ -397,7 +401,7 @@ bool LC::load ( const char* filename )
 	    }
 	}
 
-	if ( NULL == ft ) {
+	if ( NULL == ft && string("")!=mr.fontfile ) {
 	    ft = new Font ( mr.fontfile );
 	    mr.fontIdx = fonts.size();
 	    fonts.push_back ( ft );
@@ -416,7 +420,7 @@ bool LC::load ( const char* filename )
 		break;
 	    }
 	}
-	if ( NULL == tex ) {
+	if ( NULL == tex && string("")!=mr.texturefile ) {
  	    tex = new Texture ( mr.texturefile );
 	    if ( tex->texture == 0 )
 		cerr << "load texture '" << mr.texturefile << "' failed" << endl;
@@ -924,6 +928,7 @@ void LC::updateMinMax ()
 	bbox.init ( text.pos.xy() );
 	float w=0, h=0;
 	font->getSize (content.c_str(), w, h );
+//	cout << "x,y,w,h = " << text.pos.x() << "," << text.pos.y() << "," << w << "," << h << ". text.rotz:" << text.rotz << ".text.scale:" << text.scale << endl;
 // 	unsigned int strcnt = utf8_strlen ( content.c_str() );
 	bbox.expandby ( text.pos.xy() + vec2f(w, h ) );
 	mat4f m;
@@ -932,21 +937,26 @@ void LC::updateMinMax ()
 	m *= mat4f::scale_matrix ( text.scale, text.scale, text.scale );
 
 	// set bbox & silhouette
-	vec4f tmp = m * vec4f(0, 0, text.pos.z(), h);
+	vec4f tmp = m * vec4f(0, 0, text.pos.z(), 1);
 	v0 = tmp.xy();
+//	cout << v0.x() << "," << v0.y() << endl;
 	bbox.init ( v0 );
 
-	tmp = m * vec4f ( w, 0, text.pos.z(), h );
+	tmp = m * vec4f ( w, 0, text.pos.z(), 1 );
 	v1 = tmp.xy();
+//	cout << v1.x() << "," << v1.y() << endl;
 	bbox.expandby ( v1 );
 
-	tmp = m * vec4f ( w, h, text.pos.z(), h);
+	tmp = m * vec4f ( w, h, text.pos.z(), 1);
 	v2 = tmp.xy();
+//	cout << v2.x() << "," << v2.y() << endl;
 	bbox.expandby ( v2 );
 
-	tmp = m * vec4f ( 0, h, text.pos.z(), h );
+	tmp = m * vec4f ( 0, h, text.pos.z(), 1 );
 	v3 = tmp.xy();
+	cout << v3.x() << "," << v3.y() << endl;
 	bbox.expandby ( v3 );
+//	cout << bbox.minvec().x() << "," << bbox.minvec().y() << "," << bbox.maxvec().x() << "," <<  bbox.maxvec().y() << endl;
 //	cout << "updateBBox text ok" << endl;
         break;
     }

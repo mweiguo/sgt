@@ -100,8 +100,11 @@ class SLCPrimitiveNode : public SLCNode
 {
 public:
     SLCPrimitiveNode ( SLCMaterial* mat );
+    SLCPrimitiveNode ( const SLCPrimitiveNode& rhs );
     virtual int getType() = 0;
     virtual string toXML () const = 0;
+    virtual SLCPrimitiveNode* copy() = 0;
+    virtual void getMinMax ( float* minmaxabc ) = 0;
     SLCMaterial* bindmat;
 };
 
@@ -113,6 +116,7 @@ public:
 	textureAngle = 0;
 	filltexture = false;
     }
+    SLCFillablePrimitiveNode ( const SLCFillablePrimitiveNode& rhs );
     virtual string toXML () const;
     float textureScale;
     float textureAngle;
@@ -141,8 +145,13 @@ class SLCRectNode : public SLCFillablePrimitiveNode
 {
 public:
     SLCRectNode ( SLCMaterial* mat );
+    SLCRectNode ( const SLCRectNode& rhs );
     virtual int getType () { return SLC_RECT; }
     virtual string toXML () const;
+    virtual SLCPrimitiveNode* copy();
+    virtual void getMinMax ( float* minmaxabc );
+    void setRect ( float x, float y, float z, float w, float h );
+    void setSize ( float w, float h );
     vec2f pnts[4];
     float z;
 };
@@ -151,8 +160,11 @@ class SLCTextNode : public SLCPrimitiveNode
 {
 public:
     SLCTextNode ( SLCMaterial* mat );
+    SLCTextNode ( const SLCTextNode& rhs );
     virtual int getType () { return SLC_TEXT; }
     virtual string toXML () const;
+    virtual SLCPrimitiveNode* copy();
+    virtual void getMinMax ( float* minmaxabc );
     vec3f pos;
     float scale;
     float rotz;
@@ -163,8 +175,11 @@ class SLCPLineNode : public SLCPrimitiveNode
 {
 public:
     SLCPLineNode ( SLCMaterial* mat );
+    SLCPLineNode ( const SLCPLineNode& rhs );
     virtual int getType () { return SLC_PLINE; }
     virtual string toXML () const;
+    virtual SLCPrimitiveNode* copy();
+    virtual void getMinMax ( float* minmaxabc );
     vector<vec2f> pnts;
     float z;
 };
@@ -173,8 +188,11 @@ class SLCPolyNode : public SLCFillablePrimitiveNode
 {
 public:
     SLCPolyNode ( SLCMaterial* mat );
+    SLCPolyNode ( const SLCPolyNode& rhs );
     virtual int getType () { return SLC_POLY; }
     virtual string toXML () const;
+    virtual SLCPrimitiveNode* copy();
+    virtual void getMinMax ( float* minmaxabc );
     vector<vec2f> pnts;
     float z;
 };

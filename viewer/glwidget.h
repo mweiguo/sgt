@@ -11,7 +11,7 @@ class QScrollBar;
 class GLWidget : public QGLWidget
 {
 public:
-    GLWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     void zoomin();
     void zoomout();
     void lefttranslate();
@@ -24,6 +24,7 @@ public:
     Tools* tools;
     float scale;
     float translate[2];
+    int* pMainSceneId;
 protected:
     void setTransform();
     virtual void initializeGL ();
@@ -41,14 +42,14 @@ protected:
 class GLMainView : public GLWidget
 {
 public:
-    GLMainView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
 };
 
 class GLBirdView : public GLWidget
 {
 public:
-    GLBirdView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
     int rectid;
@@ -58,9 +59,8 @@ public:
 class GLScrollWidget : public QWidget
 {
     Q_OBJECT
-
 public:
-    GLScrollWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLScrollWidget ( MainWindow* context, GLMainView* widget );
     void setViewportTransform ( float scale, float transx, float transy );
     GLMainView* widget;
     QScrollBar *hbar, *vbar;

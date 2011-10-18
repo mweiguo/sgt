@@ -13,7 +13,6 @@ using namespace std;
 
 MainWindow::MainWindow()
 {
-    r2d_init ();
     doc = new Document;
 
     QGLFormat fmt;
@@ -21,9 +20,9 @@ MainWindow::MainWindow()
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
     // displayer
-    displayer = new GLScrollWidget (this, fmt);
+    displayer = new GLScrollWidget ( this, new GLMainView(this, &(doc->sceneid), fmt) );
     // birdview
-    birdview = new GLBirdView (this, fmt);
+    birdview = new GLBirdView (this, &(doc->sceneid), fmt);
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
 	      this,
@@ -40,6 +39,7 @@ MainWindow::MainWindow()
     setWindowTitle(tr("Dock Widgets"));
     setUnifiedTitleAndToolBarOnMac(true);
     setMouseTracking ( false );
+    r2d_init ();
 }
 
 void MainWindow::open()
@@ -97,9 +97,24 @@ void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float 
     try
     {
 //	cout << "-----------------MainWindow::onMainViewTransformChanged" << endl;
- 	float pnts[] = {x1, y1, 50, x2, y2, 50 };
- 	r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
-  	birdview->update();
+	if ( doc->birdviewmiscid != -1 )
+	{
+	    if ( birdview->rectid == -1 )
+	    {
+		int sid = doc->birdviewmiscid;
+		r2d_to_element ( sid, R2D_ROOT );
+		r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+		r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+		r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+		birdview->rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+	    }
+	    float pnts[] = {x1, y1, 2.1, x2, y2, 2.1 };
+	    
+	    r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
+// 	    cout << "r2d_rect_points (" << doc->birdviewmiscid << ", " << birdview->rectid << ", " << x1 << ", " << y1 << ", " <<
+// 		50 << ", " << x2 << ", " << y2 << ", " << 50 << " )" << endl;
+	    birdview->update();
+	}
     }
     catch ( exception& ex )
     {
@@ -239,7 +254,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::createDockWindows()
 {
-    QDockWidget *dock = new QDockWidget(tr("Paragraphs"), this);
+    QDockWidget *dock = new QDockWidget(tr("Layers"), this);
     layerManagerWidget = new LayerManagerWidget(this, dock);
 
     dock->setWidget(layerManagerWidget);

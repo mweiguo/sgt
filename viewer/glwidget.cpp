@@ -16,9 +16,10 @@
 
 using namespace std;
 
-GLWidget::GLWidget ( MainWindow* cont, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
     QGLWidget ( fmt, parent, shareWidget, f )
 {
+    pMainSceneId = mainSceneId;
     context = cont;
     setMouseTracking ( true );
     document = context->doc;
@@ -70,7 +71,7 @@ void GLWidget::homeposition()
     float ratio = 1.0 * size().height() / size().width();
     // get minmax
     float minmax[4];
-    r2d_get_scene_minmax ( context->doc->sceneid, minmax, minmax+2 );
+    r2d_get_scene_minmax ( *pMainSceneId, minmax, minmax+2 );
     float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
     float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / (2*ratio) };
     scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
@@ -133,8 +134,8 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 //================================================================================
 
-GLMainView::GLMainView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, fmt, parent, shareWidget, f )
+GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
 {
     tools = new Tools ( context );
     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
@@ -142,32 +143,37 @@ GLMainView::GLMainView ( MainWindow* context, const QGLFormat& fmt, QWidget* par
 
 void GLMainView::paintGL ()
 {
+    cout << "GLMainView::paintGL ()" << endl;
     setTransform();
-    int ids[] = {document->sceneid, document->miscsceneid };
-    r2d_update_scenes ( ids, 2 );
+    int ids[] = {document->sceneid, document->miscsceneid, document->birdviewmiscid };
+    r2d_update_scenes ( ids, 1 );
     swapBuffers ();
 }
 
 //================================================================================
 
-GLBirdView::GLBirdView ( MainWindow* context, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, fmt, parent, shareWidget, f )
+GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
 {
     tools = new Tools ( context );
     tools->setTools ( Tools::NONE_TOOL );
-
+    rectid = -1;
     int sid = document->birdviewmiscid;
-    r2d_to_element ( sid, R2D_ROOT );
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
-    rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+    if ( sid != -1 )
+    {
+	r2d_to_element ( sid, R2D_ROOT );
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+	rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+    }
 }
 
 void GLBirdView::paintGL ()
 {
+    cout << "GLBirdView::paintGL ()" << endl;
     setTransform();
-    int ids[] = {document->sceneid, document->birdviewmiscid};
+    int ids[] = {document->sceneid, document->birdviewmiscid };
     r2d_update_scenes ( ids, 2 );
     swapBuffers ();
 }
@@ -274,10 +280,11 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 //================================================================================
 
-GLScrollWidget::GLScrollWidget ( MainWindow* cont, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
 {
     context = cont;
-    widget = new GLMainView(context, fmt, parent, shareWidget, f );
+    widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );
+//    pMainSceneId = mainSceneId;
 
     hbar = new QScrollBar();
     hbar->setRange ( 0, 1 );
@@ -349,7 +356,9 @@ void GLScrollWidget::setViewportTransform ( float scale, float transx, float tra
 
 //     // calculate scrollbar
      float sminmax[4], vxywh[4], swh[2];
-     r2d_get_scene_minmax ( widget->document->sceneid, sminmax, sminmax+2 );
+     r2d_get_scene_minmax ( *(widget->pMainSceneId), sminmax, sminmax+2 );
+//     r2d_get_scene_minmax ( widget->document->sceneid, sminmax, sminmax+2 );
+
 //     cout << "++++++++++++++++++++++++min,max = " << sminmax[0] << ", " << sminmax[1] << "  " << sminmax[2] << ", " << sminmax[3] << endl;
      swh[0] = sminmax[2] - sminmax[0];
      swh[1] = sminmax[3] - sminmax[1];

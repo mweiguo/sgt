@@ -93,12 +93,15 @@ void MouseTool::OnLMouseMove ( int x, int y )
 RubberBoxTool::RubberBoxTool ( Tools* tools ) : MouseTool ( tools )
 {
     // get rectangle from misc scene
-    int sid = _tools->context->doc->miscsceneid;
-    r2d_to_element ( sid, R2D_ROOT );
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
-    r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
-    rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+    if ( _tools->context->doc->miscsceneid != -1 )
+    {
+	int sid = _tools->context->doc->miscsceneid;
+	r2d_to_element ( sid, R2D_ROOT );
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+	rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+    }
 }
 
 void RubberBoxTool::OnLButtonDown ( int x, int y )
@@ -111,7 +114,16 @@ void RubberBoxTool::OnLButtonUp ( int x, int y )
     MouseTool::OnLButtonUp ( x, y );
     float minmax[6] = { 0, 0, 100, 0, 0, 100 };
     int sid = _tools->context->doc->miscsceneid;
-    r2d_rect_points ( sid, rectid, minmax );
+    if ( sid != -1 )
+    {
+	sid = _tools->context->doc->miscsceneid;
+	r2d_to_element ( sid, R2D_ROOT );
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+	rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+	r2d_rect_points ( sid, rectid, minmax );
+    }
 }
 
 void RubberBoxTool::OnLMouseMove ( int x, int y )
@@ -124,7 +136,16 @@ void RubberBoxTool::OnLMouseMove ( int x, int y )
     minmax[4] = startPos[1] > lastPos[1] ? startPos[1] : lastPos[1];
 
     int sid = _tools->context->doc->miscsceneid;
-    r2d_rect_points ( sid, rectid, minmax );
+    if ( sid != -1 )
+    {
+	sid = _tools->context->doc->miscsceneid;
+	r2d_to_element ( sid, R2D_ROOT );
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+	rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+	r2d_rect_points ( sid, rectid, minmax );
+    }
 }
 
 //--------------------------------------------------------------------------------
