@@ -21,7 +21,7 @@ void GLItemsWidget::paintGL ()
     setTransform();
     LayoutDocument* doc = dynamic_cast<LayoutDocument*>(document);
     if ( doc ) {
-	std::cout << "_________________________________" << doc->layoutSceneId << std::endl;
+	//std::cout << "_________________________________" << doc->layoutSceneId << std::endl;
 	int ids[] = { doc->layoutSceneId };
 	r2d_update_scenes ( ids, 1 );
 	swapBuffers ();
@@ -29,6 +29,12 @@ void GLItemsWidget::paintGL ()
 }
 
 //================================================================================
+
+void GLItemsWidget::resizeGL ( int width, int height )
+{
+	GLMainView::resizeGL(width,height);
+	homeposition1();
+}
 
 // GLScrollItemsWidget::GLScrollItemsWidget ( MainWindow* context, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
 // {

@@ -19,6 +19,7 @@ public:
     void uptranslate();
     void downtranslate();
     void homeposition();
+    void homeposition1();
     MainWindow* context;
     Document* document;
     Tools* tools;
@@ -77,6 +78,7 @@ public slots:
     void uptranslate();
     void downtranslate();
     void homeposition();
+    void homeposition1();
 private:
     float initTranslate[2];
 

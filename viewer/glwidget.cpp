@@ -79,6 +79,24 @@ void GLWidget::homeposition()
     translate[1] = -center[1];
 }
 
+void GLWidget::homeposition1()
+{
+    float ratio = 1.0 * size().height() / size().width();
+    // get minmax
+	float xywh[4];
+	r2d_get_viewport_rect ( xywh );
+    float minmax[4];
+    r2d_get_scene_minmax ( *pMainSceneId, minmax, minmax+2 );
+    float center[2] = { (minmax[2] + minmax[0]) / 2, (minmax[3] + minmax[1]) / 2 };
+    float size[2]   = { (minmax[2] - minmax[0]) / 2, (minmax[3] - minmax[1]) / (2*ratio) };
+    scale = 1.0 / (1.2 * size[1]) ;
+//	translate[0] = -center[0]-(xywh[2]/2.0-size[0]);
+	translate[0] = -center[0];
+	//cout << "------width = " << xywh[2] << ", size[0] = " << size[0] << ", center[0] = " << center[0] << "xywh[2]/2.0-size[0]=" << xywh[2]/2.0-size[0] << endl;
+    translate[1] = -center[1];
+
+}
+
 void GLWidget::initializeGL ()
 {
     r2d_init ();
@@ -470,6 +488,19 @@ void GLScrollWidget::homeposition()
     try
     {
  	widget->homeposition();
+	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
+    }
+    catch ( exception& ex )
+    {
+	cerr << ex.what() << endl;
+    }
+}
+
+void GLScrollWidget::homeposition1()
+{
+    try
+    {
+ 	widget->homeposition1();
 	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
     }
     catch ( exception& ex )

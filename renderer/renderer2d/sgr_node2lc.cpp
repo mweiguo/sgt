@@ -9,6 +9,8 @@
 #include <list>
 #include <cstring>
 #include <cstdlib>
+#define _USE_MATH_DEFINES
+#include <math.h>
 using namespace std;
 
 SLCNode2LC::SLCNode2LC ( SLCNode* node )
@@ -281,27 +283,27 @@ LC* SLCNode2LC::generateLC ()
         memcpy ( lc->materialEntry->LCRecords, &(materialdata[0]), sizeof(MaterialRecord) * materialdata.size() );
 
     // fonts
-    for ( int ii=0; ii<lc->materialEntry->LCLen; ii++ )
-    {
-	Font* ft = 0;
-	MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
-	if ( string("") == mr.fontfile )
-	    strcpy ( mr.fontfile, "simhei.ttf" );
-	for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
+	for ( int ii=0; ii<lc->materialEntry->LCLen; ii++ )
 	{
-	    if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
-		ft = lc->fonts[jj];
-		mr.fontIdx = jj;
-		break;
-	    }
-	}
+		Font* ft = 0;
+		MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
+		if ( string("") == mr.fontfile )
+			strcpy ( mr.fontfile, "simhei.ttf" );
+		for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
+		{
+			if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
+				ft = lc->fonts[jj];
+				mr.fontIdx = jj;
+				break;
+			}
+		}
 
-	if ( NULL == ft && string("")!=mr.fontfile ) {
-	    ft = new Font ( mr.fontfile );
-	    mr.fontIdx = lc->fonts.size();
-	    lc->fonts.push_back ( ft );
+		if ( NULL == ft && string("")!=mr.fontfile ) {
+			ft = new Font ( mr.fontfile );
+			mr.fontIdx = lc->fonts.size();
+			lc->fonts.push_back ( ft );
+		}
 	}
-    }
 
 
     lc->layerEntry->LCLen = layerdata.size();

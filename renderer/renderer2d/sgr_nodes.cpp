@@ -8,6 +8,22 @@
 #include <mat4f.h>
 #include <bbox2d.h>
 using namespace std;
+
+typedef struct {
+    float mat[16];
+} MyMat;
+list<MyMat> _current_matrix_stack;
+float _current_matrix[16];
+void calcCurrentMatrix ()
+{
+    mat_loadidentity ( _current_matrix );
+    for ( list<MyMat>::iterator pp=_current_matrix_stack.begin();
+	  pp!=_current_matrix_stack.end(); ++pp )
+    {
+	mat_multmatrix ( _current_matrix, pp->mat );
+    }
+}
+
 // --------------------------------------------------------------------------------
 
 int SLCNode::getDepth()
@@ -223,11 +239,13 @@ SLCRectNode::SLCRectNode ( const SLCRectNode& rhs )
 string SLCRectNode::toXML () const
 {
     stringstream ss;
+    float p0[] = { pnts[0].x(), pnts[0].y(), z, 1 };
+    mat_multvector ( _current_matrix, p0 );
+    float p1[] = { pnts[2].x(), pnts[2].y(), z, 1 };
+    mat_multvector ( _current_matrix, p1 );
     ss << "<primitive type=\"rect\" bindmaterial=\"" << bindmat->name << "\">" << 
-	pnts[0].x() << ' ' << pnts[0].y() << ' ' << z << ' ' <<
-	pnts[1].x() << ' ' << pnts[1].y() << ' ' << z << ' ' <<
-	pnts[2].x() << ' ' << pnts[2].y() << ' ' << z << ' ' <<
-	pnts[3].x() << ' ' << pnts[3].y() << ' ' << z << "</primitive>" << endl;
+	p0[0] << ' ' << p0[1] << ' ' << p1[0]-p0[0] << ' ' <<
+	p1[1]-p0[1] << ' ' << 0 << "</primitive>" << endl;
     return ss.str();
 }
 
@@ -291,8 +309,11 @@ SLCTextNode::SLCTextNode ( const SLCTextNode& rhs )
 string SLCTextNode::toXML () const
 {
     stringstream ss;
+    float v[] = { pos.x(), pos.y(), pos.z(), 1 };
+    mat_multvector ( _current_matrix, v );
+
     ss << "<primitive type=\"text\" bindmaterial=\"" << bindmat->name << "\" pos=\"" << 
-	pos.x() << ' ' << pos.y() << ' ' << pos.z() << "\" scale=\"" << scale << "\" rotz=\"" << rotz <<
+	v[0] << ' ' << v[1] << ' ' << v[2] << "\" scale=\"" << scale << "\" rotz=\"" << rotz <<
 	"\">" << text << "</primitive>" << endl;
     return ss.str();
 }
@@ -325,8 +346,11 @@ string SLCPLineNode::toXML () const
     stringstream ss;
     ss << "<primitive type=\"pline\" bindmaterial=\"" << bindmat->name << "\">";
     
-    for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
-	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
+    for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp ) {
+	float v[] = { pp->x(), pp->y(), z, 1 };
+	mat_multvector ( _current_matrix, v );
+	ss << v[0] << ' ' << v[1] << ' ' << v[2] << ' ';
+    }
     ss <<"</primitive>" << endl;
     return ss.str();
 }
@@ -371,8 +395,12 @@ string SLCPolyNode::toXML () const
 {
     stringstream ss;
     ss << "<primitive type=\"poly\" bindmaterial=\"" << bindmat->name << "\" " << SLCFillablePrimitiveNode::toXML () << ">";
-    for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp )
-	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
+    for ( vector<vec2f>::const_iterator pp=pnts.begin(); pp!=pnts.end(); ++pp ) {
+	float v[] = { pp->x(), pp->y(), z, 1 };
+	mat_multvector ( _current_matrix, v );
+	ss << v[0] << ' ' << v[1] << ' ' << v[2] << ' ';
+    }
+//	ss << pp->x() << ' ' << pp->y() << ' ' << z << ' ';
     ss <<"</primitive>" << endl;
     return ss.str();
 }
@@ -408,17 +436,22 @@ SLCTransformNode::SLCTransformNode () : SLCNode()
 
 string SLCTransformNode::toXML () const
 {
+    MyMat m;
+    memcpy ( m.mat, mat, sizeof(float)*16 );
+    _current_matrix_stack.push_back ( m );
+    calcCurrentMatrix ();
+
     stringstream ss;
-    ss << "<transform mat=\"" << 
-	mat[0] << ' ' << mat[1] << ' ' << mat[2] << ' ' << mat[3] << ' ' << 
-	mat[4] << ' ' << mat[5] << ' ' << mat[6] << ' ' << mat[7] << ' ' << 
-	mat[8] << ' ' << mat[9] << ' ' << mat[10] << ' ' << mat[11] << ' ' << 
-	mat[12] << ' ' << mat[13] << ' ' << mat[14] << ' ' << mat[15] << ' ' << "\">" << endl;
+//     ss << "<transform mat=\"" << 
+// 	mat[0] << ' ' << mat[1] << ' ' << mat[2] << ' ' << mat[3] << ' ' << 
+// 	mat[4] << ' ' << mat[5] << ' ' << mat[6] << ' ' << mat[7] << ' ' << 
+// 	mat[8] << ' ' << mat[9] << ' ' << mat[10] << ' ' << mat[11] << ' ' << 
+// 	mat[12] << ' ' << mat[13] << ' ' << mat[14] << ' ' << mat[15] << ' ' << "\">" << endl;
 
     for ( list<SLCNode*>::const_iterator pp=children.begin(); pp!=children.end(); ++pp )
 	ss << (*pp)->toXML();
 
-    ss <<"</transform>" << endl;
+//     ss <<"</transform>" << endl;
     return ss.str();
 }
 

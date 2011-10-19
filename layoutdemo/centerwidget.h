@@ -15,6 +15,7 @@ class GLItemsWidget : public GLMainView
 public:
     GLItemsWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
+    virtual void resizeGL ( int width, int height );
 };
 
 // class GLScrollItemsWidget : public GLScrollWidget

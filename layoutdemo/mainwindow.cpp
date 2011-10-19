@@ -11,6 +11,8 @@
 #include "glwidget.h"
 #include "layoutdocument.h"
 
+//#include <nestSys.h>
+
 #include <exception>
 #include <iostream>
 using namespace std;
@@ -25,14 +27,16 @@ MainWindow::MainWindow()
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
     // displayer
-    displayer = new CenterWidget (this, new GLItemsWidget(this,&(doc->layoutSceneId),fmt), new GLMainView(this,&(doc->sceneid),fmt) );
+    displayer = new CenterWidget (this, 
+                                  new GLItemsWidget(this,&(doc->layoutSceneId),fmt), 
+                                  new GLMainView(this,&(doc->sceneid),fmt) );
     // birdview
     birdview = new GLBirdView (this, &(doc->sceneid), fmt);
     connect ( displayer->bottom, 
-	      SIGNAL(transformChanged(float,float,float,float)),
-	      this,
-	      SLOT(onMainViewTransformChanged(float,float,float,float)) );
-    
+              SIGNAL(transformChanged(float,float,float,float)),
+              this,
+              SLOT(onMainViewTransformChanged(float,float,float,float)) );
+
     setCentralWidget(displayer);
 
     createActions();
@@ -50,15 +54,15 @@ void MainWindow::open()
 {
     try
     {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose a file name"), ".", tr("SLC (*.slc *.slc)"));
-	if (fileName.isEmpty())
-	    return;
-	cout << "file name = " << fileName.toStdString() << endl;
-	open ( fileName.toStdString().c_str() );
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Choose a file name"), ".", tr("SLC (*.slc *.slc)"));
+        if (fileName.isEmpty())
+            return;
+        cout << "file name = " << fileName.toStdString() << endl;
+        open ( fileName.toStdString().c_str() );
     }
     catch ( exception& ex )
     {
-	cout << ex.what() << endl;
+        cout << ex.what() << endl;
     }
 }
 
@@ -66,43 +70,54 @@ void MainWindow::open ( const char* filename )
 {
     try
     {
-	doc->openLayoutScene ( filename );
-//	doc->openScene ( filename );
-	layerManagerWidget->loadFromScene ( doc->layoutSceneId );
-	displayer->top->homeposition();
-	birdview->homeposition();
+        displayer->bottom->widget->makeCurrent();
+        doc->openScene ( filename );
+        layerManagerWidget->loadFromScene ( doc->sceneid );
+        displayer->bottom->homeposition();
+        birdview->homeposition();
     }
     catch ( exception& ex )
     {
-	cout << ex.what() << endl;
+        cout << ex.what() << endl;
     }
+}
 
+void MainWindow::opentop( const char* filename )
+{
+    try
+    {
+        displayer->top->widget->makeCurrent();
+        doc->openLayoutScene ( filename );
+        displayer->top->homeposition1();
+    }
+    catch ( exception& ex )
+    {
+        cout << ex.what() << endl;
+    }
 }
 
 void MainWindow::about()
 {
-   QMessageBox::about(this, tr("About Dock Widgets"),
-            tr("The <b>Dock Widgets</b> example demonstrates how to "
-               "use Qt's dock widgets. You can enter your own text, "
-               "click a customer to add a customer name and "
-               "address, and click standard paragraphs to add them."));
+    QMessageBox::about(this, tr("About Dock Widgets"),
+                       tr("The <b>Dock Widgets</b> example demonstrates how to "
+                          "use Qt's dock widgets. You can enter your own text, "
+                          "click a customer to add a customer name and "
+                          "address, and click standard paragraphs to add them."));
 }
 
 void MainWindow::actionEvent( QAction* action )
 {
     try
     {
-	if ( action == winzoomAct ) {
-	    displayer->top->widget->tools->selectTool ( Tools::ZOOM_TOOL );
-	    displayer->bottom->widget->tools->selectTool ( Tools::ZOOM_TOOL );
-	} else if ( action == handAct ) {
-	    displayer->top->widget->tools->selectTool ( Tools::HAND_TOOL );
-	    displayer->bottom->widget->tools->selectTool ( Tools::HAND_TOOL );
-	}
+        if ( action == winzoomAct ) {
+            displayer->bottom->widget->tools->selectTool ( Tools::ZOOM_TOOL );
+        } else if ( action == handAct ) {
+            displayer->bottom->widget->tools->selectTool ( Tools::HAND_TOOL );
+        }
     }
     catch ( exception& ex )
     {
-	cerr << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
 }
 
@@ -112,14 +127,29 @@ void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float 
 {
     try
     {
-//	cout << "-----------------MainWindow::onMainViewTransformChanged" << endl;
- 	float pnts[] = {x1, y1, 50, x2, y2, 50 };
- 	r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
-  	birdview->update();
+	cout << "-----------------MainWindow::onMainViewTransformChanged" << doc->birdviewmiscid << ", " << birdview->rectid << endl;
+        if ( doc->birdviewmiscid != -1 )
+        {
+            if ( birdview->rectid == -1 )
+            {
+                int sid = doc->birdviewmiscid;
+                r2d_to_element ( sid, R2D_ROOT );
+                r2d_to_element ( sid, R2D_FIRST_CHILD ); // layer
+                r2d_to_element ( sid, R2D_FIRST_CHILD ); // lod
+                r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
+                birdview->rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
+            }
+            float pnts[] = {x1, y1, 2.1, x2, y2, 2.1 };
+
+            r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
+            cout << "r2d_rect_points (" << doc->birdviewmiscid << ", " << birdview->rectid << ", " << x1 << ", " << y1 << ", " <<
+                50 << ", " << x2 << ", " << y2 << ", " << 50 << " )" << endl;
+            birdview->update();
+        }
     }
     catch ( exception& ex )
     {
-	cerr << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
 }
 
@@ -223,8 +253,8 @@ void MainWindow::createMenus()
     viewMenu->addAction(zoominAct);
     viewMenu->addAction(zoomoutAct);
     viewMenu->addActions( navigroup->actions());
-//     viewMenu->addAction(winzoomAct);
-//     viewMenu->addAction(handAct);
+    //     viewMenu->addAction(winzoomAct);
+    //     viewMenu->addAction(handAct);
     viewMenu->addAction(leftAct);
     viewMenu->addAction(rightAct);
     viewMenu->addAction(upAct);
@@ -249,8 +279,8 @@ void MainWindow::createToolBars()
     navToolBar = addToolBar(tr("Navigation"));
     navToolBar->addAction(fullextentAct);
     navToolBar->addActions( navigroup->actions());
-//     navToolBar->addAction(handAct);
-//     navToolBar->addAction(winzoomAct);
+    //     navToolBar->addAction(handAct);
+    //     navToolBar->addAction(winzoomAct);
     navToolBar->addAction(zoominAct);
     navToolBar->addAction(zoomoutAct);
 
@@ -288,26 +318,30 @@ void MainWindow::runlayout ()
     // outfile
     try
     {
-	// buildlayout
-	doc->setShapeCount ( 1, 2 );
-	doc->setShapeCount ( 2, 2 );
-	// buildplate
-	doc->setPlateSize ( 400, 300 );
-	// optfile
-	doc->saveShapeFile ( "objFile.xml", "objSLCFile.slc" );
-	doc->savePlateFile ( "plateFile.xml" );
+        //// buildlayout
+        //doc->setShapeCount ( 1, 2 );
+        //doc->setShapeCount ( 2, 2 );
+        //// buildplate
+        //doc->setPlateSize ( 400, 300 );
+        // optfile
+        doc->saveShapeFile ( "objects.xml", "objects.slc" );
+        doc->savePlateFile ( "plate.xml" );
 
-// 	// outfile
-// 	nestSys nestingSys("plateFile.xml","objFile.xml","","outFile.slc");
-// 	nestingSys.run();
-// 	doc->openScene ( "outFile.slc" );
-// 	layerManagerWidget->loadFromScene ( doc->sceneid );
-// 	displayer->bottom->homeposition();
-// 	birdview->homeposition();
-    }
+/*        // outfile
+          string plateFile = "plate.xml";
+          string objFile = "objects.xml";
+          string optFile = "";
+          string outFile = "outFile.slc";
+          nestSys nestingSys(plateFile,objFile,optFile,outFile);
+          nestingSys.run();
+          doc->openScene ( "outFile.slc" );
+          layerManagerWidget->loadFromScene ( doc->sceneid );
+          displayer->bottom->homeposition();
+          birdview->homeposition();
+*/    }
     catch ( exception& ex )
     {
-	cout << ex.what() << endl;
+        cout << ex.what() << endl;
     }
 
 

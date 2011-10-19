@@ -25,6 +25,7 @@ public:
     MainWindow();
 
     void open( const char* filename );
+    void opentop( const char* filename );
     LayoutDocument *doc;
     CenterWidget *displayer;
     GLBirdView *birdview;

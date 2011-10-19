@@ -76,26 +76,26 @@ void State::applyState ()
 // 	glColor3f ( vec4iValue.x()/255.0f, vec4iValue.x()/255.0f, vec4iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
- 	cout << "State::applyState, BACKGROUND_COLOR : " << 
-	    vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
+ 	//cout << "State::applyState, BACKGROUND_COLOR : " << 
+	 //   vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
 	glColor4f ( vec4iValue.x()/255.0f, vec4iValue.y()/255.0f, vec4iValue.z()/255.0f, vec4iValue.w()/255.0f );
 	break;
     case LINE_TYPE:
     {
 	unsigned short pattern = LOWORD(intValue);
 	unsigned short factor = HIWORD(intValue);
- 	cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
+ 	//cout << "line type = " << pattern << ", linetype factor = " << factor << endl;
 	glEnable ( GL_LINE_STIPPLE );
 	glLineStipple ( factor, pattern );
 	break;
     }
     case LINE_WIDTH:
-	cout << "line width = " << currentScale * floatValue << endl;
+	//cout << "line width = " << currentScale * floatValue << endl;
 	glLineWidth ( currentScale * floatValue );
 	break;
     case TEXTURE:
 	if ( intValue >= 0 ) {
-	    cout << "glBindTexture texture = " << intValue << endl;
+	    //cout << "glBindTexture texture = " << intValue << endl;
 	    glBindTexture ( GL_TEXTURE_2D, intValue );
 	}
 	break;
@@ -364,24 +364,24 @@ void StateSet::render ( LC* lc )
 	{ 
 	case SLC_RECT:
 	{
-	    cout << "draw rect" << endl;
+	    //cout << "draw rect" << endl;
 	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
 	    float* begin = (float*)&(r.data[0]);
 	    float* end   = begin + 12;
 	    copy ( begin, end, back_inserter(rects) );
-	    cout << "draw rect" << endl;
+	    //cout << "draw rect" << endl;
 	    break;
 	}
 	case SLC_TEXT:
 	{
-	    cout << "draw text" << endl;
+	    //cout << "draw text" << endl;
 	    texts.push_back ( &lc->textEntry->LCRecords[g.value] );
-	    cout << "draw text" << endl;
+	    //cout << "draw text" << endl;
 	    break;
 	}
 	case SLC_PLINE:
 	{
-	    cout << "draw pline" << endl;
+	    //cout << "draw pline" << endl;
 //	    cout << "glDisable ( GL_TEXTURE_2D );" << endl;
 	    glDisable ( GL_TEXTURE_2D );
 	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
@@ -389,12 +389,12 @@ void StateSet::render ( LC* lc )
 	    glDrawArrays ( GL_LINE_STRIP, 0, pline.end - pline.start );
 	    glEnable ( GL_TEXTURE_2D );
 //	    cout << "glEnable ( GL_TEXTURE_2D );" << endl;
-	    cout << "draw pline" << endl;
+	    //cout << "draw pline" << endl;
 	    break;
 	}
 	case SLC_POLY:
 	{
-	    cout << "draw poly" << endl;
+	    //cout << "draw poly" << endl;
 //	    cout << "glDisable ( GL_TEXTURE_2D );" << endl;
 	    glDisable ( GL_TEXTURE_2D );
 //	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
@@ -405,7 +405,7 @@ void StateSet::render ( LC* lc )
 //	    glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
 	    glEnable ( GL_TEXTURE_2D );
 //	    cout << "glEnable ( GL_TEXTURE_2D );" << endl;
-	    cout << "draw poly" << endl;
+	    //cout << "draw poly" << endl;
 	    break;
 	}
 	}
