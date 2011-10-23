@@ -1,5 +1,5 @@
 TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder
-BIN    = librender2d.so buildchip buildmisc buildlod buildline buildbirdviewmisc buildlayout buildlayoutitem buildtext
+BIN    = librender2d.so buildchip buildmisc buildlod buildline buildbirdviewmisc buildlayout buildlayoutitem buildtext buildimage
 OBJS   = sgr_nodes.o test_nodes.o 
 SRC    = $(OBJS:%.o=%.cpp)
 INC    = $(OBJS:%.o=%.h)
@@ -63,6 +63,9 @@ buildlayoutitem : sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcrep
 
 buildtext : sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
+
+buildimage : sgr_nodes.o buildimage.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
+	$(CXX) sgr_nodes.o buildimage.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
 
 # all src
 .cpp.o:

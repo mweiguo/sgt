@@ -24,9 +24,11 @@ void r2d_init ()
     glClearColor ( 0.0, 0.0, 0.0, 1.0 );
     glEnable ( GL_DEPTH_TEST );
     glEnable ( GL_TEXTURE_2D );
-    glEnable ( GL_BLEND );
     glEnable ( GL_LINE_SMOOTH );
+
+    glEnable ( GL_BLEND );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
+
     glEnable ( GL_ALPHA_TEST );
     glAlphaFunc ( GL_GREATER, 0.01 );
     glEnableClientState ( GL_VERTEX_ARRAY );
@@ -76,30 +78,11 @@ void r2d_get_scene_minmax ( int sceneID, float* minxy, float* maxxy )
 
 // ================================================================================
 
-void r2d_update_scenes ( int* ids, int length )
+void draw ( int* ids, int length, float* viewfrustum_minmax )
 {
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    if ( length == 0 )
-	return;
-
-    // set modelview matrix
-    glLoadIdentity ();
-    gluLookAt ( 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 );
-    glMultMatrixf ( mvmat.data ); 
-    
-    // calculate view-frustum
-    float viewfrustum_minmax[4];
-    r2d_get_viewport_rect ( viewfrustum_minmax );
-    viewfrustum_minmax[2] += viewfrustum_minmax[0];
-    viewfrustum_minmax[3] += viewfrustum_minmax[1];
-    
-//    cout << "length =  " << length << endl;
     for ( int i=0; i<length; i++ )
     {
-//	cout << "ids[" << i << "] = " << ids[i] << ", globalLC.size() = " << globalLC.size() << endl;
-	if ( ids[i]<0 || 
-	     ids[i]>=globalLC.size() ||
-	     globalLC[ids[i]] == 0 )
+	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
 	    continue;
 	
 	clock_t t = clock();
@@ -125,7 +108,39 @@ void r2d_update_scenes ( int* ids, int length )
 	}
 	cout << endl;
     }
-    cout << "======================================== " << endl;
+}
+
+// ================================================================================
+
+void r2d_update_scenes ( int* ids, int length )
+{
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    if ( length == 0 )
+	return;
+
+    // set modelview matrix
+    glLoadIdentity ();
+    gluLookAt ( 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 );
+    glMultMatrixf ( mvmat.data ); 
+    
+    // calculate view-frustum
+    float viewfrustum_minmax[4];
+    r2d_get_viewport_rect ( viewfrustum_minmax );
+    viewfrustum_minmax[2] += viewfrustum_minmax[0];
+    viewfrustum_minmax[3] += viewfrustum_minmax[1];
+    
+    // draw performance
+//    glDepthMask ( true );
+//    glAlphaFunc ( GL_EQUAL, 1 );
+    draw ( ids, length, viewfrustum_minmax );
+
+//     // draw transparency
+//     glDepthMask ( false );
+//     glAlphaFunc ( GL_NOTEQUAL, 1 );
+// //    glDisable ( GL_ALPHA_TEST );
+// //     glEnable ( GL_BLEND );
+// //     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
+//     draw ( ids, length, viewfrustum_minmax );
 }
 
 // ================================================================================

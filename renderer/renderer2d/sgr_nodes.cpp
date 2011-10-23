@@ -289,6 +289,33 @@ void SLCRectNode::setSize ( float w, float h )
 
 // --------------------------------------------------------------------------------
 
+SLCImageNode::SLCImageNode ()
+    : SLCRectNode(NULL)
+{
+    texturefilename = "";
+}
+
+SLCImageNode::SLCImageNode ( const SLCImageNode& rhs )
+    : SLCRectNode(rhs)
+{
+    texturefilename = rhs.texturefilename;
+}
+
+string SLCImageNode::toXML () const
+{
+    stringstream ss;
+    float p0[] = { pnts[0].x(), pnts[0].y(), z, 1 };
+    mat_multvector ( _current_matrix, p0 );
+    float p1[] = { pnts[2].x(), pnts[2].y(), z, 1 };
+    mat_multvector ( _current_matrix, p1 );
+    ss << "<primitive type=\"image\" filename=\"" << texturefilename << "\">" << 
+	p0[0] << ' ' << p0[1] << ' ' << p1[0]-p0[0] << ' ' <<
+	p1[1]-p0[1] << ' ' << 0 << "</primitive>" << endl;
+    return ss.str();
+}
+
+// --------------------------------------------------------------------------------
+
 SLCTextNode::SLCTextNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
 {
     pos.xyz(0, 0, 0);

@@ -156,6 +156,16 @@ public:
     float z;
 };
 
+class SLCImageNode : public SLCRectNode
+{
+public:
+    SLCImageNode ();
+    SLCImageNode ( const SLCImageNode& rhs );
+    virtual int getType() { return SLC_IMAGE; }
+    virtual string toXML () const;
+    string texturefilename;
+};
+
 class SLCTextNode : public SLCPrimitiveNode
 {
 public:

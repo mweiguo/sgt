@@ -26,5 +26,4 @@ private:
     static float scale;
 };
 
-
 #endif // _VFC_CULLER_H_

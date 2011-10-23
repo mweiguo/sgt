@@ -146,7 +146,8 @@ void vfculler::traverse ( LC& lc )
 }
 
 //================================================================================
-
+/** for LOD node
+ */
 void vfculler::traverse ( LC& lc, int i )
 {
     if ( i<0 )
