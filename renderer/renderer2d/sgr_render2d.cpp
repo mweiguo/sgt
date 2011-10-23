@@ -6,6 +6,8 @@
 #include "sgr_nodetypes.h"
 #include "sgr_bboxupdater.h"
 #include <vector>
+#include <fstream>
+
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -27,8 +29,8 @@ void r2d_init ()
     glEnable ( GL_BLEND );
     glEnable ( GL_LINE_SMOOTH );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
-    glEnable ( GL_ALPHA_TEST );
-    glAlphaFunc ( GL_GREATER, 0.01 );
+//     glEnable ( GL_ALPHA_TEST );
+//     glAlphaFunc ( GL_GREATER, 0.01 );
     glEnableClientState ( GL_VERTEX_ARRAY );
     mvmat.loadIdentity ();
 
@@ -76,30 +78,11 @@ void r2d_get_scene_minmax ( int sceneID, float* minxy, float* maxxy )
 
 // ================================================================================
 
-void r2d_update_scenes ( int* ids, int length )
+void draw ( int* ids, int length, float* viewfrustum_minmax )
 {
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    if ( length == 0 )
-	return;
-
-    // set modelview matrix
-    glLoadIdentity ();
-    gluLookAt ( 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 );
-    glMultMatrixf ( mvmat.data ); 
-    
-    // calculate view-frustum
-    float viewfrustum_minmax[4];
-    r2d_get_viewport_rect ( viewfrustum_minmax );
-    viewfrustum_minmax[2] += viewfrustum_minmax[0];
-    viewfrustum_minmax[3] += viewfrustum_minmax[1];
-    
-//    cout << "length =  " << length << endl;
     for ( int i=0; i<length; i++ )
     {
-//	cout << "ids[" << i << "] = " << ids[i] << ", globalLC.size() = " << globalLC.size() << endl;
-	if ( ids[i]<0 || 
-	     ids[i]>=globalLC.size() ||
-	     globalLC[ids[i]] == 0 )
+	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
 	    continue;
 	
 	clock_t t = clock();
@@ -125,7 +108,109 @@ void r2d_update_scenes ( int* ids, int length )
 	}
 	cout << endl;
     }
-    cout << "======================================== " << endl;
+}
+
+void draw2 ( int* ids, int length, float* viewfrustum_minmax )
+{
+    list<StateSet*> opaques, transparents;
+    int cleantime = 0;
+    int culltime = 0;
+    int cullobjcnt = 0;
+    int ssbuildtime = 0;
+
+    cout << "length = " << length << endl;
+    for ( int i=0; i<length; i++ )
+    {
+	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
+	    continue;
+	
+	clock_t t = clock();
+	vfculler::clear ();
+	StateSetBuilder2::clear();
+	cleantime += clock() - t;
+
+	t = clock();
+	LC* lc = globalLC[ids[i]];
+	lc->toElement ( ROOT );
+	vfculler::cull ( *lc, viewfrustum_minmax, currentScale );
+	culltime += clock() - t;
+	cullobjcnt += vfculler::renderObjects.size();
+
+	t = clock();
+	// collect opaque objects & transparent objects
+	StateSetBuilder2::build ( lc, vfculler::renderObjects, opaques, transparents );
+	ssbuildtime += clock() - t;
+    }
+
+    string opxml, trxml;
+    for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	opxml += (*pp)->toXML();
+    for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	trxml += (*pp)->toXML();
+    ofstream o;
+    o.open ( "op.xml" );
+    o << opxml;
+    o.close ();
+
+    o.open ( "tr.xml" );
+    o << trxml;
+    o.close ();
+
+
+    cout << "cull finished, elapse " << culltime << "(ms), object count = " << cullobjcnt << endl;
+    cout << "stateset build finished, elapse " << ssbuildtime << "(ms)" << endl;
+    
+    // render opaques
+    clock_t t = clock();
+    if ( opaques.empty() == false )
+    {
+	glEnable ( GL_DEPTH_TEST );
+	for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	{
+	    (*pp)->render();
+	}
+    }
+    // render transparents
+    if ( transparents.empty() == false )
+    {
+	glDisable ( GL_DEPTH_TEST );
+	for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	{
+	    (*pp)->render();
+	}
+    }
+    cout << "render finished, elapse " << clock() - t << "(ms)" << endl;
+
+    t = clock();
+    for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	delete *pp;
+    for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	delete *pp;
+    cout << "clean finished, elapse " << cleantime + clock() - t<< "(ms)" << endl;
+}
+
+// ================================================================================
+
+void r2d_update_scenes ( int* ids, int length )
+{
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    if ( length == 0 )
+	return;
+
+    // set modelview matrix
+    glLoadIdentity ();
+    gluLookAt ( 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0 );
+    glMultMatrixf ( mvmat.data ); 
+    
+    // calculate view-frustum
+    float viewfrustum_minmax[4];
+    r2d_get_viewport_rect ( viewfrustum_minmax );
+    viewfrustum_minmax[2] += viewfrustum_minmax[0];
+    viewfrustum_minmax[3] += viewfrustum_minmax[1];
+    
+    draw2 ( ids, length, viewfrustum_minmax );
+    // render opaque bin
+    // render transparent bin
 }
 
 // ================================================================================

@@ -60,6 +60,7 @@ void MainWindow::open()
 
 void MainWindow::open ( const char* filename )
 {
+    displayer->widget->makeCurrent ();
     doc->openScene ( filename );
     layerManagerWidget->loadFromScene ( doc->sceneid );
     displayer->homeposition();

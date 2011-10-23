@@ -29,15 +29,15 @@ int main ( int argc, char* argv[] )
     SLCSceneNode scene ( "test_scene");
 
     SLCMaterial* mat_layer = new SLCMaterial ( "layer_material");
-    mat_layer->foreground_color = vec3i(155, 0, 0);
-    mat_layer->background_color = vec3i(155, 0, 155);
+    mat_layer->foreground_color = vec4i(155, 0, 0, 255);
+    mat_layer->background_color = vec4i(155, 0, 155, 255);
     mat_layer->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
     mat_layer->linewidth = 0;
     mat_layer->fontfilename = "simsun.ttc";
     mat_layer->texturefilename = "hands.jpg";
     SLCMaterial* mat = new SLCMaterial ( "mat" );
-    mat->foreground_color = vec3i(155, 144, 0);
-    mat->background_color = vec3i(44, 155, 155);
+    mat->foreground_color = vec4i(155, 144, 0, 255);
+    mat->background_color = vec4i(44, 155, 155, 255);
     mat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_DASH;
     mat->linewidth = 1;
     mat->fontfilename = "simhei.ttf";

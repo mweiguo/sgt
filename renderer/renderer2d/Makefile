@@ -1,4 +1,4 @@
-TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder
+TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder test_statesetbuilder2
 BIN    = librender2d.so buildchip buildmisc buildlod buildline buildbirdviewmisc buildlayout buildlayoutitem buildtext
 OBJS   = sgr_nodes.o test_nodes.o 
 SRC    = $(OBJS:%.o=%.cpp)
@@ -29,6 +29,9 @@ test_vfculler : sgr_lc.o test_vfculler.o sgr_vfculler.o ../../graphbase/sgr_math
 
 test_statesetbuilder : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o
 	$(CXX) sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o -o $@ $(LINKOPT)
+
+test_statesetbuilder2 : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder2.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o
+	$(CXX) sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder2.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o -o $@ $(LINKOPT)
 
 # all bin
 #librender2d.a : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o
@@ -86,3 +89,4 @@ runtest : all
 	./test_node2lc geos.slc
 	./test_vfculler geos.slc
 	./test_statesetbuilder geos.slc ss.xml
+	./test_statesetbuilder2 geos.slc op.xml tr.xml
