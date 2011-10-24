@@ -20,9 +20,14 @@ MainWindow::MainWindow()
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
     // displayer
-    displayer = new GLScrollWidget ( this, new GLMainView(this, &(doc->sceneid), fmt) );
+    mainviewtools = new Tools ( this, 0 );
+    mainviewtools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
+    GLMainView* mainview = new GLMainView(this, mainviewtools, &(doc->sceneid), fmt);
+    displayer = new GLScrollWidget ( this, mainview );
+    mainviewtools->parent = displayer;
+
     // birdview
-    birdview = new GLBirdView (this, &(doc->sceneid), fmt);
+    birdview = new GLBirdView (this, 0, &(doc->sceneid), fmt);
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
 	      this,
@@ -40,6 +45,11 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
     setMouseTracking ( false );
     r2d_init ();
+}
+
+MainWindow::~MainWindow()
+{
+    delete mainviewtools;
 }
 
 void MainWindow::open()

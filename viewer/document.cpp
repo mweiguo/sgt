@@ -40,6 +40,10 @@ Document::~Document ()
 void Document::openScene ( const char* filename )
 {
     clock_t t = clock();
+    if ( sceneid != -1 ) {
+	sceneid = -1;
+	r2d_unload_scene ( sceneid );
+    }
     sceneid = r2d_load_scene ( filename );
     cout << "load " << filename << " finished, ellapse " << clock() - t << endl;
 }

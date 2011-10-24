@@ -14,7 +14,7 @@ class QActionGroup;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
-
+class Tools;
 //! [0]
 class MainWindow : public QMainWindow
 {
@@ -22,6 +22,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow();
+    ~MainWindow();
 
     void open( const char* filename );
     Document *doc;
@@ -33,6 +34,7 @@ private slots:
     void actionEvent( QAction* action );
     void onMainViewTransformChanged(float,float,float,float);
 private:
+    Tools* mainviewtools;
     void createActions();
     void createMenus();
     void createToolBars();

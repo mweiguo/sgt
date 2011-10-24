@@ -27,6 +27,10 @@ LayoutDocument::~LayoutDocument()
 void LayoutDocument::openLayoutScene ( const char* filename )
 {
 	clock_t t = clock();
+	if ( layoutSceneId != -1 ) {
+	    layoutSceneId = -1;
+	    r2d_unload_scene ( layoutSceneId );
+	}
 	layoutSceneId = r2d_load_scene ( filename );
 	cout << "load " << filename << " finished, ellapse " << clock() - t << endl;
 }

@@ -16,14 +16,14 @@
 
 using namespace std;
 
-GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+GLWidget::GLWidget ( MainWindow* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     pMainSceneId = mainSceneId;
     context = cont;
     setMouseTracking ( true );
     document = context->doc;
-    tools = NULL;
+    tools = t;
     scale = 1;
     translate[0] = translate[1] = 0;
 }
@@ -102,6 +102,16 @@ void GLWidget::initializeGL ()
     r2d_init ();
 }
 
+void GLWidget::showMouseLocationOnStatusbar( int x, int y )
+{
+    makeCurrent();
+    float pos[2];
+    r2d_get_scene_position ( x, y, pos[0], pos[1] );
+    stringstream ss;
+    ss << "(x,y) : (" << pos[0] << ", " << pos[1] << ")";
+    context->statusBar()->showMessage(ss.str().c_str());
+}
+
 void GLWidget::setTransform()
 {
     r2d_loadidentity ();
@@ -138,8 +148,9 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools && tools->currentTool )
 	{
+	    makeCurrent();
 	    int modifiers = fromQtModifiers ( event->modifiers() );
 	    tools->currentTool->OnKeyPress ( event->key(), modifiers );
 	}
@@ -152,29 +163,29 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 //================================================================================
 
-GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
+GLMainView::GLMainView ( MainWindow* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 {
-    tools = new Tools ( context );
-    tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
+//     tools = new Tools ( context );
+//     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
 }
 
 void GLMainView::paintGL ()
 {
-    cout << "GLMainView::paintGL ()" << endl;
+//    cout << "GLMainView::paintGL ()" << endl;
     setTransform();
     int ids[] = {document->sceneid, document->miscsceneid, document->birdviewmiscid };
     r2d_update_scenes ( ids, 1 );
-    swapBuffers ();
+//    swapBuffers ();
 }
 
 //================================================================================
 
-GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
+GLBirdView::GLBirdView ( MainWindow* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 {
-    tools = new Tools ( context );
-    tools->setTools ( Tools::NONE_TOOL );
+//     tools = new Tools ( context );
+//     tools->setTools ( Tools::NONE_TOOL );
     rectid = -1;
     int sid = document->birdviewmiscid;
     if ( sid != -1 )
@@ -189,11 +200,11 @@ GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat&
 
 void GLBirdView::paintGL ()
 {
-    cout << "GLBirdView::paintGL ()" << endl;
+//    cout << "GLBirdView::paintGL ()" << endl;
     setTransform();
     int ids[] = {document->sceneid, document->birdviewmiscid };
     r2d_update_scenes ( ids, 2 );
-    swapBuffers ();
+//    swapBuffers ();
 }
 
 void GLBirdView::resizeGL ( int width, int height )
@@ -207,8 +218,9 @@ void GLWidget::keyReleaseEvent ( QKeyEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools && tools->currentTool )
 	{
+	    makeCurrent();
 	    int modifiers = fromQtModifiers ( event->modifiers() );
 	    tools->currentTool->OnKeyRelease ( event->key(), modifiers );
 	}
@@ -225,15 +237,21 @@ void GLWidget::mouseMoveEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools )
 	{
-	    if ( (Qt::LeftButton & event->buttons()) != 0 )
-		tools->currentTool->OnLMouseMove ( event->x(), event->y() );
-	    else if ( (Qt::MidButton & event->buttons()) != 0 )
-		tools->currentTool->OnMMouseMove ( event->x(), event->y() );
-	} else {
-	    if ( Qt::MidButton & event->buttons() )
-		tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( (Qt::LeftButton & event->buttons()) != 0 )
+		    tools->currentTool->OnLMouseMove ( event->x(), event->y() );
+		else if ( (Qt::MidButton & event->buttons()) != 0 )
+		    tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+	    } else {
+		if ( Qt::MidButton & event->buttons() )
+		    tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+		else
+		    showMouseLocationOnStatusbar( event->x(), event->y() );
+	    }
 	}
     }
     catch ( exception& ex )
@@ -248,20 +266,26 @@ void GLWidget::mousePressEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+//	cout << "begin GLWidget::mousePressEvent" << endl;
+	if ( tools )
 	{
-	    if ( Qt::LeftButton & event->buttons() ) {
-		tools->currentTool->OnLButtonDown ( event->x(), event->y() );
-	    } else if ( Qt::MidButton & event->buttons() ) {
-		_oldTool = tools->selectTool ( Tools::HAND_TOOL );
-		tools->currentTool->OnMButtonDown ( event->x(), event->y() );
-	    }
-	} else {
-	    if ( Qt::MidButton & event->buttons() ) {
-		_oldTool = tools->selectTool ( Tools::HAND_TOOL );
-		tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( Qt::LeftButton & event->buttons() ) {
+		    tools->currentTool->OnLButtonDown ( event->x(), event->y() );
+		} else if ( Qt::MidButton & event->buttons() ) {
+		    _oldTool = tools->selectTool ( Tools::HAND_TOOL );
+		    tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+		}
+	    } else {
+		if ( Qt::MidButton & event->buttons() ) {
+		    _oldTool = tools->selectTool ( Tools::HAND_TOOL );
+		    tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+		}
 	    }
 	}
+//	cout << "finished GLWidget::mousePressEvent" << endl;
     }
     catch ( exception& ex )
     {
@@ -275,20 +299,26 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+//	cout << "begin GLWidget::mouseReleaseEvent" << endl;
+	if ( tools )
 	{
-	    if ( Qt::LeftButton == event->button() ) {
-		tools->currentTool->OnLButtonUp ( event->x(), event->y() );
-	    } else if ( Qt::MidButton == event->button() ) {
-		tools->currentTool->OnMButtonUp ( event->x(), event->y() );
-		tools->selectTool ( _oldTool );
-	    }
-	} else {
-	    if ( Qt::MidButton == event->button() ) {
-		tools->currentTool->OnMButtonUp ( event->x(), event->y() );
-		tools->selectTool ( _oldTool );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( Qt::LeftButton == event->button() ) {
+		    tools->currentTool->OnLButtonUp ( event->x(), event->y() );
+		} else if ( Qt::MidButton == event->button() ) {
+		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
+		    tools->selectTool ( _oldTool );
+		}
+	    } else {
+		if ( Qt::MidButton == event->button() ) {
+		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
+		    tools->selectTool ( _oldTool );
+		}
 	    }
 	}
+//	cout << "end GLWidget::mouseReleaseEvent" << endl;
     }
     catch ( exception& ex )
     {
@@ -298,7 +328,7 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 //================================================================================
 
-GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
+GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLWidget* w )
 {
     context = cont;
     widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );
@@ -368,9 +398,9 @@ void GLScrollWidget::setViewportTransform ( float scale, float transx, float tra
     widget->translate[1] = transy;
     widget->updateGL ();
 
-    stringstream ss;
-    ss << "scale : " << scale;
-    context->statusBar()->showMessage(ss.str().c_str());
+//     stringstream ss;
+//     ss << "scale : " << scale;
+//     context->statusBar()->showMessage(ss.str().c_str());
 
 //     // calculate scrollbar
      float sminmax[4], vxywh[4], swh[2];

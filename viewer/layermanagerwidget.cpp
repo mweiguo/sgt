@@ -183,7 +183,7 @@ void LayerManagerWidget::setLayerVisible ( int layeridx, bool visible )
 void LayerManagerWidget::updateGUI ( int* layerbegin, int* layerend )
 {
     LayerItems.clear();
-    _model->removeRows ( 1, _model->rowCount()-1  );
+    _model->removeRows ( 0, _model->rowCount()  );
 
     int i = 0;
     for ( int* p=layerbegin; p!=layerend; ++p, ++i )

@@ -118,7 +118,6 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     int cullobjcnt = 0;
     int ssbuildtime = 0;
 
-    cout << "length = " << length << endl;
     for ( int i=0; i<length; i++ )
     {
 	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
@@ -142,20 +141,18 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
 	ssbuildtime += clock() - t;
     }
 
-    string opxml, trxml;
-    for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
-	opxml += (*pp)->toXML();
-    for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
-	trxml += (*pp)->toXML();
-    ofstream o;
-    o.open ( "op.xml" );
-    o << opxml;
-    o.close ();
-
-    o.open ( "tr.xml" );
-    o << trxml;
-    o.close ();
-
+//     string opxml, trxml;
+//     for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+// 	opxml += (*pp)->toXML();
+//     for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+// 	trxml += (*pp)->toXML();
+//     ofstream o;
+//     o.open ( "op.xml" );
+//     o << opxml;
+//     o.close ();
+//     o.open ( "tr.xml" );
+//     o << trxml;
+//     o.close ();
 
     cout << "cull finished, elapse " << culltime << "(ms), object count = " << cullobjcnt << endl;
     cout << "stateset build finished, elapse " << ssbuildtime << "(ms)" << endl;

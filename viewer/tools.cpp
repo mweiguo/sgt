@@ -165,19 +165,19 @@ void ZoomTool::OnLButtonUp ( int x, int y )
     float center[2] = { (lastPos[0] + startPos[0]) / 2, (lastPos[1] + startPos[1]) / 2 };
     float size[2]   = { fabs(lastPos[0] - startPos[0]) / 2, fabs(lastPos[1] - startPos[1]) / 2 };
     r2d_loadidentity ();
-    _tools->context->displayer->widget->scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
-    _tools->context->displayer->widget->translate[0] = -center[0];
-    _tools->context->displayer->widget->translate[1] = -center[1];
+    _tools->parent->widget->scale = size[0] > size[1] ? 1.0 / size[0] : 1.0 / size[1];
+    _tools->parent->widget->translate[0] = -center[0];
+    _tools->parent->widget->translate[1] = -center[1];
 
-    _tools->context->displayer->setViewportTransform ( _tools->context->displayer->widget->scale,
-					       _tools->context->displayer->widget->translate[0], 
-					       _tools->context->displayer->widget->translate[1] );
+    _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
+					   _tools->parent->widget->translate[0], 
+					   _tools->parent->widget->translate[1] );
 }
 
 void ZoomTool::OnLMouseMove ( int x, int y )
 {
     RubberBoxTool::OnLMouseMove ( x, y );
-    _tools->context->displayer->widget->updateGL ();
+    _tools->parent->widget->updateGL ();
 }
 
 //--------------------------------------------------------------------------------
@@ -186,20 +186,26 @@ HandTool::HandTool ( Tools* tools ) : Tool ( tools )
 {
 }
 
+//================================================================================
+
 void HandTool::OnLButtonDown ( int x, int y )
 {
-    _tools->context->displayer->widget->setCursor ( Qt::ClosedHandCursor );
+    _tools->parent->widget->setCursor ( Qt::ClosedHandCursor );
     r2d_get_scene_position ( x, y, startPos[0], startPos[1] );
 }
 
+//================================================================================
+
 void HandTool::OnLButtonUp ( int x, int y )
 {    
-    _tools->context->displayer->widget->setCursor ( Qt::OpenHandCursor );
+    _tools->parent->widget->setCursor ( Qt::OpenHandCursor );
     OnLMouseMove ( x, y );
-    _tools->context->displayer->setViewportTransform ( _tools->context->displayer->widget->scale,
-					       _tools->context->displayer->widget->translate[0], 
-					       _tools->context->displayer->widget->translate[1] );
+    _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
+					   _tools->parent->widget->translate[0], 
+					   _tools->parent->widget->translate[1] );
 }
+
+//================================================================================
 
 void HandTool::OnLMouseMove ( int x, int y )
 {
@@ -207,20 +213,26 @@ void HandTool::OnLMouseMove ( int x, int y )
     r2d_get_scene_position ( x, y, ScenePos[0], ScenePos[1] );
     float dx = ScenePos[0] - startPos[0];
     float dy = ScenePos[1] - startPos[1];
-    _tools->context->displayer->widget->translate[0] += dx;
-    _tools->context->displayer->widget->translate[1] += dy;
-    _tools->context->displayer->widget->update();
+    _tools->parent->widget->translate[0] += dx;
+    _tools->parent->widget->translate[1] += dy;
+    _tools->parent->widget->update();
 }
+
+//================================================================================
 
 void HandTool::OnMButtonDown ( int x, int y )
 {
     OnLButtonDown ( x, y );
 }
 
+//================================================================================
+
 void HandTool::OnMButtonUp ( int x, int y )
 {
     OnLButtonUp ( x, y );
 }
+
+//================================================================================
 
 void HandTool::OnMMouseMove ( int x, int y )
 {
@@ -229,20 +241,22 @@ void HandTool::OnMMouseMove ( int x, int y )
 
 //--------------------------------------------------------------------------------
 
-Tools::Tools ( MainWindow* cont)
+Tools::Tools ( MainWindow* cont, GLScrollWidget* p)
 {
     context = cont;
     currentTool = NULL;
     currentToolType = NONE_TOOL;
+    parent = p;
 }
+
+//================================================================================
 
 Tools::~Tools ()
 {
-    for ( map<int, Tool*>::iterator pp=tools.begin();
-	  pp!=tools.end();
-	  ++pp )
-	delete pp->second;
+    clearTools ();
 }
+
+//================================================================================
 
 void Tools::setTools ( int toolType )
 {
@@ -254,6 +268,8 @@ void Tools::setTools ( int toolType )
 	tools.insert ( pair<int,Tool*>(HAND_TOOL,new HandTool(this)) );
 }
 
+//================================================================================
+
 int Tools::selectTool ( int tooltype )
 {
     map<int, Tool*>::iterator pp = tools.find ( tooltype );
@@ -264,15 +280,15 @@ int Tools::selectTool ( int tooltype )
     switch ( tooltype )
     {
     case NONE_TOOL:
-	context->displayer->widget->setCursor ( Qt::ArrowCursor );
+	parent->widget->setCursor ( Qt::ArrowCursor );
 	currentToolType = NONE_TOOL;
 	break;
     case HAND_TOOL:
-	context->displayer->widget->setCursor ( Qt::OpenHandCursor );
+	parent->widget->setCursor ( Qt::OpenHandCursor );
 	currentToolType = HAND_TOOL;
 	break;
     case ZOOM_TOOL:
-	context->displayer->widget->setCursor ( Qt::CrossCursor );
+	parent->widget->setCursor ( Qt::CrossCursor );
 	currentToolType = ZOOM_TOOL;
 	break;
     default:
@@ -284,3 +300,15 @@ int Tools::selectTool ( int tooltype )
 }
 
 //================================================================================
+
+void Tools::clearTools ()
+{
+    for ( map<int, Tool*>::iterator pp=tools.begin();
+	  pp!=tools.end();
+	  ++pp )
+	delete pp->second;
+    tools.clear();
+}
+
+//================================================================================
+

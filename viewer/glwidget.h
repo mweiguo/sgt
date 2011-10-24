@@ -11,7 +11,7 @@ class QScrollBar;
 class GLWidget : public QGLWidget
 {
 public:
-    GLWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLWidget ( MainWindow* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     void zoomin();
     void zoomout();
     void lefttranslate();
@@ -27,6 +27,7 @@ public:
     float translate[2];
     int* pMainSceneId;
 protected:
+    void showMouseLocationOnStatusbar( int x, int y );
     void setTransform();
     virtual void initializeGL ();
     virtual void resizeGL ( int width, int height );
@@ -43,14 +44,14 @@ protected:
 class GLMainView : public GLWidget
 {
 public:
-    GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLMainView ( MainWindow* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
 };
 
 class GLBirdView : public GLWidget
 {
 public:
-    GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+    GLBirdView ( MainWindow* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
     int rectid;
@@ -61,9 +62,9 @@ class GLScrollWidget : public QWidget
 {
     Q_OBJECT
 public:
-    GLScrollWidget ( MainWindow* context, GLMainView* widget );
+    GLScrollWidget ( MainWindow* context, GLWidget* widget );
     void setViewportTransform ( float scale, float transx, float transy );
-    GLMainView* widget;
+    GLWidget* widget;
     QScrollBar *hbar, *vbar;
     MainWindow* context;
 signals:

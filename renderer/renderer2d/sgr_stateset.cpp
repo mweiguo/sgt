@@ -526,10 +526,16 @@ void StateSet::render ()
 
     // draw rects
     if ( false == rects.empty() ) {
-	cout << "draw rects " << rects.size()/3 << endl;
 	glDisable ( GL_TEXTURE_2D );
 	glVertexPointer ( 3, GL_FLOAT, 0, &(rects[0]) );
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
 	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE );
+        glColor3f ( 1, 1, 1 );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+        glPopAttrib ();
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
+
 	glEnable ( GL_TEXTURE_2D );
     }
 

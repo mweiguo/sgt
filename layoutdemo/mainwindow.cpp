@@ -27,11 +27,16 @@ MainWindow::MainWindow()
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
     // displayer
-    displayer = new CenterWidget (this, 
-                                  new GLItemsWidget(this,&(doc->layoutSceneId),fmt), 
-                                  new GLMainView(this,&(doc->sceneid),fmt) );
+    GLScrollWidget* itemscrollview = new GLScrollWidget(this, new GLItemsWidget(this,0,&(doc->layoutSceneId),fmt) );
+    mainviewtools = new Tools ( this, 0 );
+    mainviewtools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
+    GLScrollWidget* mainscrollview = new GLScrollWidget(this, new GLMainView(this,mainviewtools,&(doc->sceneid),fmt) );
+    mainviewtools->parent = mainscrollview;
+
+    displayer = new CenterWidget (this, itemscrollview, mainscrollview );
+
     // birdview
-    birdview = new GLBirdView (this, &(doc->sceneid), fmt);
+    birdview = new GLBirdView (this, 0, &(doc->sceneid), fmt);
     connect ( displayer->bottom, 
               SIGNAL(transformChanged(float,float,float,float)),
               this,
@@ -50,6 +55,11 @@ MainWindow::MainWindow()
     setMouseTracking ( false );
 }
 
+MainWindow::~MainWindow()
+{
+    delete mainviewtools;
+}
+
 void MainWindow::open()
 {
     try
@@ -57,12 +67,11 @@ void MainWindow::open()
         QString fileName = QFileDialog::getOpenFileName(this, tr("Choose a file name"), ".", tr("SLC (*.slc *.slc)"));
         if (fileName.isEmpty())
             return;
-        cout << "file name = " << fileName.toStdString() << endl;
         open ( fileName.toStdString().c_str() );
     }
     catch ( exception& ex )
     {
-        cout << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
 }
 
@@ -78,7 +87,7 @@ void MainWindow::open ( const char* filename )
     }
     catch ( exception& ex )
     {
-        cout << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
 }
 
@@ -92,7 +101,7 @@ void MainWindow::opentop( const char* filename )
     }
     catch ( exception& ex )
     {
-        cout << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
 }
 
@@ -127,7 +136,6 @@ void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float 
 {
     try
     {
-	cout << "-----------------MainWindow::onMainViewTransformChanged" << doc->birdviewmiscid << ", " << birdview->rectid << endl;
         if ( doc->birdviewmiscid != -1 )
         {
             if ( birdview->rectid == -1 )
@@ -142,8 +150,6 @@ void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float 
             float pnts[] = {x1, y1, 2.1, x2, y2, 2.1 };
 
             r2d_rect_points ( doc->birdviewmiscid, birdview->rectid, pnts );
-            cout << "r2d_rect_points (" << doc->birdviewmiscid << ", " << birdview->rectid << ", " << x1 << ", " << y1 << ", " <<
-                50 << ", " << x2 << ", " << y2 << ", " << 50 << " )" << endl;
             birdview->update();
         }
     }
@@ -237,7 +243,7 @@ void MainWindow::createActions()
     connect(fullextentAct, SIGNAL(triggered()), displayer->bottom, SLOT(homeposition()));
 
     layoutAct = new QAction(QIcon("./images/right_32.png"), tr("&run layout"), this);
-    layoutAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_L ) );
+    layoutAct->setShortcut( QKeySequence( Qt::Key_F5 ) );
     layoutAct->setStatusTip(tr("run layout"));
     connect(layoutAct, SIGNAL(triggered()), this, SLOT(runlayout()));
 }
@@ -310,40 +316,11 @@ void MainWindow::createDockWindows()
 
 void MainWindow::runlayout ()
 {
-    cout << "MainWindow::runlayout ()" << endl;
-    // prepare 3 xml files
-    // layoutitems
-    // plate
-    // optfile
-    // outfile
     try
     {
-        //// buildlayout
-        //doc->setShapeCount ( 1, 2 );
-        //doc->setShapeCount ( 2, 2 );
-        //// buildplate
-        //doc->setPlateSize ( 400, 300 );
-        // optfile
-        doc->saveShapeFile ( "objects.xml", "objects.slc" );
-        doc->savePlateFile ( "plate.xml" );
-
-/*        // outfile
-          string plateFile = "plate.xml";
-          string objFile = "objects.xml";
-          string optFile = "";
-          string outFile = "outFile.slc";
-          nestSys nestingSys(plateFile,objFile,optFile,outFile);
-          nestingSys.run();
-          doc->openScene ( "outFile.slc" );
-          layerManagerWidget->loadFromScene ( doc->sceneid );
-          displayer->bottom->homeposition();
-          birdview->homeposition();
-*/    }
+    }
     catch ( exception& ex )
     {
-        cout << ex.what() << endl;
+        cerr << ex.what() << endl;
     }
-
-
-    QProcess::execute ("calc");
 }

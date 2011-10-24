@@ -15,6 +15,7 @@ class LayerManagerWidget;
 class CenterWidget;
 class GLBirdView;
 class LayoutDocument;
+class Tools;
 //! [0]
 
 class MainWindow : public QMainWindow
@@ -23,6 +24,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow();
+    ~MainWindow();
 
     void open( const char* filename );
     void opentop( const char* filename );
@@ -36,6 +38,7 @@ private slots:
     void onMainViewTransformChanged(float,float,float,float);
     void runlayout ();
 private:
+    Tools* mainviewtools;
     void createActions();
     void createMenus();
     void createToolBars();

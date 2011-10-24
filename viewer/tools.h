@@ -95,6 +95,7 @@ public:
 };
 
 class MainWindow;
+class GLScrollWidget;
 class Tools
 {
 public:
@@ -104,14 +105,16 @@ public:
 	ZOOM_TOOL     = 2,
 	HAND_TOOL     = 4
     };
-    Tools ( MainWindow* cont );
+    Tools ( MainWindow* cont, GLScrollWidget* parent );
     ~Tools ();
     void setTools ( int toolType );
     int selectTool ( int tooltype );
+    void clearTools ();
     std::map<int, Tool*> tools;
     Tool* currentTool;
     int currentToolType;
     MainWindow* context;
+    GLScrollWidget* parent;
 };
 
 #endif // _TOOLS_H_
