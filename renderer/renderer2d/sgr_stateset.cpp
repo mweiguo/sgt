@@ -76,8 +76,8 @@ void State::applyState ()
 // 	glColor3f ( vec4iValue.x()/255.0f, vec4iValue.x()/255.0f, vec4iValue.z()/255.0f );
 	break;
     case BACKGROUND_COLOR:
- 	//cout << "State::applyState, BACKGROUND_COLOR : " << 
-	 //   vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
+//  	cout << "State::applyState, BACKGROUND_COLOR : " << 
+// 	   vec4iValue.x() << ", " << vec4iValue.y() << ", " << vec4iValue.z() << ", " << vec4iValue.w() << endl;
 	glColor4f ( vec4iValue.x()/255.0f, vec4iValue.y()/255.0f, vec4iValue.z()/255.0f, vec4iValue.w()/255.0f );
 	break;
     case LINE_TYPE:
@@ -107,6 +107,27 @@ void State::applyState ()
 StateSet::StateSet ()
 {
     parent = NULL;
+}
+
+//================================================================================
+
+StateSet::StateSet ( LC* c, MaterialRecord* mat, list<int> objs )
+{
+    parent = NULL;
+    lc = c;
+    renderObjects.assign ( objs.begin(), objs.end() );
+    
+    addState ( State(State::BACKGROUND_COLOR, mat->background_color, State::INHERIT) );
+    addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::INHERIT) );
+    addState ( State(State::LINE_TYPE, (int)MAKELONG(mat->linetype,mat->linetypefactor), State::INHERIT) );
+    addState ( State(State::LINE_WIDTH, mat->linewidth, State::INHERIT) );
+    if ( mat->textureIdx<0 || mat->textureIdx>=lc->textures.size() ) {
+	addState ( State(State::TEXTURE, -1, State::INHERIT) );
+    } else {
+	Texture* tex = lc->textures[mat->textureIdx];
+	addState ( State(State::TEXTURE, (int)tex->texture, State::INHERIT) );
+    }
+
 }
 
 //================================================================================
@@ -281,8 +302,6 @@ void StateSet::addChild ( StateSet* ss )
 string StateSet::toXML () const
 {
     stringstream ss;
-    if ( parent == NULL )
-	ss << "<stateset_root>" << endl;
 
     ss << "<ss";
     for ( int i=0; i<states.size(); i++ ) {
@@ -315,9 +334,6 @@ string StateSet::toXML () const
 	ss << (*pp)->toXML();
     ss << "</ss>" << endl;
 
-    if ( parent == NULL )
-	ss << "</stateset_root>" << endl;
-
     return ss.str();
 }
 
@@ -325,8 +341,8 @@ string StateSet::toXML () const
 
 void StateSet::pushAttributes ()
 {
-    if ( parent == NULL )
-	return;
+//     if ( parent == NULL )
+// 	return;
     glPushAttrib ( GL_CURRENT_BIT | GL_LINE_BIT );
 }
 
@@ -334,8 +350,8 @@ void StateSet::pushAttributes ()
 
 void StateSet::popAttributes ()
 {
-    if ( parent == NULL )
-	return;
+//     if ( parent == NULL )
+// 	return;
     glPopAttrib ();
 }
 
@@ -343,8 +359,8 @@ void StateSet::popAttributes ()
 
 void StateSet::applyStates ()
 {
-    if ( parent == NULL )
-	return;
+//     if ( parent == NULL )
+// 	return;
     for ( vector<State>::iterator pp=states.begin(); pp!=states.end(); ++pp )
 	pp->applyState ();
 }
@@ -453,6 +469,95 @@ void StateSet::render ( LC* lc )
 	glDisable ( GL_TEXTURE_2D );
 //	cout << "glDisable ( GL_TEXTURE_2D );" << endl;
     }
+}
+
+//================================================================================
+
+void StateSet::render ()
+{
+    pushAttributes ();
+    applyStates ();
+
+    vector<float> rects;
+    vector<float> polys;
+    vector<TextRecord*> texts;
+    for ( vector<int>::iterator pp=renderObjects.begin(); pp!=renderObjects.end(); ++pp )
+    {
+	// get primitive
+	GlobalLCRecord& g = lc->globalLCEntry->LCRecords[*pp];
+	switch ( g.type )
+	{ 
+	case SLC_RECT:
+	{
+	    RectRecord& r = lc->rectEntry->LCRecords[g.value];
+	    float* begin = (float*)&(r.data[0]);
+	    float* end   = begin + 12;
+	    copy ( begin, end, back_inserter(rects) );
+	    break;
+	}
+	case SLC_TEXT:
+	{
+	    texts.push_back ( &lc->textEntry->LCRecords[g.value] );
+	    break;
+	}
+	case SLC_PLINE:
+	{
+	    glDisable ( GL_TEXTURE_2D );
+	    PLineRecord& pline = lc->plineEntry->LCRecords[g.value];
+	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->plineBufferEntry->LCRecords + pline.start) );
+	    glDrawArrays ( GL_LINE_STRIP, 0, pline.end - pline.start );
+	    glEnable ( GL_TEXTURE_2D );
+	    break;
+	}
+	case SLC_POLY:
+	{
+	    glDisable ( GL_TEXTURE_2D );
+//	    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
+	    PolyRecord& poly = lc->polyEntry->LCRecords[g.value];
+	    glVertexPointer ( 3, GL_FLOAT, 0, (float*)(lc->polyTessellationBufferEntry->LCRecords + poly.tessellationstart) );
+//	    glTexCoordPointer ( 2, GL_FLOAT, 0, (float*)(lc->texCoordBufferEntry->LCRecords + poly.texcoordstart) );
+	    glDrawArrays ( GL_TRIANGLES, 0, poly.tessellationend - poly.tessellationstart );
+//	    glDisableClientState ( GL_TEXTURE_COORD_ARRAY );
+	    glEnable ( GL_TEXTURE_2D );
+	    break;
+	}
+	}
+    }
+
+    // draw rects
+    if ( false == rects.empty() ) {
+	glDisable ( GL_TEXTURE_2D );
+	glVertexPointer ( 3, GL_FLOAT, 0, &(rects[0]) );
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE );
+        glColor3f ( 1, 1, 1 );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+        glPopAttrib ();
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
+
+	glEnable ( GL_TEXTURE_2D );
+    }
+
+    // draw text
+    for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
+    {
+	glEnable ( GL_TEXTURE_2D );
+	TextRecord* tr = *pp;
+	glPushMatrix ();
+	glTranslatef ( tr->pos.x(), tr->pos.y(), tr->pos.z() );
+	glScalef ( tr->scale, tr->scale, tr->scale );
+	glRotatef ( tr->rotz, 0, 0, 1 );
+	// get material
+	MaterialRecord& mr = lc->materialEntry->LCRecords[ tr->materialIdx ];
+	// get font
+	Font* font = lc->fonts[ mr.fontIdx ];
+	font->drawText ( lc->textBufferEntry->LCRecords + tr->start );
+
+	glPopMatrix ();
+	glDisable ( GL_TEXTURE_2D );
+    }
+    popAttributes ();
 }
 
 //================================================================================

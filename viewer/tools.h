@@ -91,7 +91,10 @@ private:
 
 class MainWindow;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> layoutdemo
 class GLScrollWidget;
 struct ToolsEntry
 {
@@ -110,9 +113,12 @@ struct ToolsEntry
 
 class ViewerContext;
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 47b45ba... fix some bugs
 =======
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
 class Tools
 {
 public:
@@ -125,6 +131,7 @@ public:
     };
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     Tools ( MainWindow* cont );
 =======
     Tools ( ViewerContext* cont, GLScrollWidget* parent );
@@ -132,12 +139,16 @@ public:
 =======
     Tools ( ViewerContext* cont, GLScrollWidget* parent );
 >>>>>>> 47b45ba... fix some bugs
+=======
+    Tools ( ViewerContext* cont, GLScrollWidget* parent );
+>>>>>>> layoutdemo
     ~Tools ();
     void setTools ( ToolsEntry* entry );
     int selectTool ( int tooltype );
     std::map<int, Tool*> tools;
     Tool* currentTool;
     int currentToolType;
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
     MainWindow* context;
@@ -148,6 +159,11 @@ public:
 //    MainWindow* context;
     GLScrollWidget* parent;
 >>>>>>> 47b45ba... fix some bugs
+=======
+    ViewerContext* context;
+//    MainWindow* context;
+    GLScrollWidget* parent;
+>>>>>>> layoutdemo
 };
 
 #endif // _TOOLS_H_

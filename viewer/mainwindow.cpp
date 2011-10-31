@@ -27,6 +27,7 @@ MainWindow::MainWindow()
     // displayer
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     displayer = new GLScrollWidget ( this, new GLMainView(this, &(doc->sceneid), fmt) );
     // birdview
     birdview = new GLBirdView (this, &(doc->sceneid), fmt);
@@ -51,6 +52,22 @@ MainWindow::MainWindow()
 >>>>>>> 47b45ba... fix some bugs
 =======
 >>>>>>> 47b45ba... fix some bugs
+=======
+    mainviewtools = new Tools ( context, 0 );
+    ToolsEntry entry[] = {
+	{Tools::NONE_TOOL, new NoneTool(mainviewtools)},
+	{Tools::ZOOM_TOOL, new ZoomTool(mainviewtools)},
+	{Tools::HAND_TOOL, new HandTool(mainviewtools)},
+	{0, 0}
+    };
+    mainviewtools->setTools ( entry );
+    GLMainView* mainview = new GLMainView(context, mainviewtools, &(doc->sceneid), fmt, 0, shareWidget );
+    displayer = new GLScrollWidget ( context, mainview );
+    mainviewtools->parent = displayer;
+
+    // birdview
+    birdview = new GLBirdView (context, 0, &(doc->sceneid), fmt, 0, shareWidget );
+>>>>>>> layoutdemo
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
 	      this,
@@ -71,7 +88,10 @@ MainWindow::MainWindow()
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> layoutdemo
 MainWindow::~MainWindow()
 {
     delete context;
@@ -85,7 +105,10 @@ void MainWindow::init ()
     doc->init ( displayer->widget, shareWidget );
 }
 
+<<<<<<< HEAD
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
 void MainWindow::open()
 {
     try
@@ -106,6 +129,7 @@ void MainWindow::open ( const char* filename )
 {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     doc->openScene ( filename );
 =======
     doc->openScene ( displayer->widget, filename );
@@ -113,6 +137,9 @@ void MainWindow::open ( const char* filename )
 =======
     doc->openScene ( displayer->widget, filename );
 >>>>>>> 47b45ba... fix some bugs
+=======
+    doc->openScene ( displayer->widget, filename );
+>>>>>>> layoutdemo
     layerManagerWidget->loadFromScene ( doc->sceneid );
     displayer->homeposition();
     birdview->homeposition();

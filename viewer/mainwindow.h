@@ -15,6 +15,7 @@ QT_END_NAMESPACE
 
 class LayerManagerWidget;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 class Tools;
@@ -23,6 +24,10 @@ struct ViewerContext;
 >>>>>>> 47b45ba... fix some bugs
 =======
 >>>>>>> 47b45ba... fix some bugs
+=======
+class Tools;
+struct ViewerContext;
+>>>>>>> layoutdemo
 //! [0]
 class MainWindow : public QMainWindow
 {
@@ -30,6 +35,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow();
+    ~MainWindow();
 
     void open( const char* filename );
     void init ();
@@ -44,6 +50,7 @@ private slots:
     void actionEvent( QAction* action );
     void onMainViewTransformChanged(float,float,float,float);
 private:
+    Tools* mainviewtools;
     void createActions();
     void createMenus();
     void createToolBars();

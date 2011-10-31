@@ -6,6 +6,8 @@
 #include "sgr_nodetypes.h"
 #include "sgr_bboxupdater.h"
 #include <vector>
+#include <fstream>
+
 #include <windows.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -28,9 +30,14 @@ void r2d_init ()
 
     glEnable ( GL_BLEND );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
+<<<<<<< HEAD
 
     glEnable ( GL_ALPHA_TEST );
     glAlphaFunc ( GL_GREATER, 0.01 );
+=======
+//     glEnable ( GL_ALPHA_TEST );
+//     glAlphaFunc ( GL_GREATER, 0.01 );
+>>>>>>> layoutdemo
     glEnableClientState ( GL_VERTEX_ARRAY );
     mvmat.loadIdentity ();
 
@@ -111,7 +118,10 @@ void draw ( int* ids, int length, float* viewfrustum_minmax )
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> layoutdemo
 void draw2 ( int* ids, int length, float* viewfrustum_minmax )
 {
     list<StateSet*> opaques, transparents;
@@ -189,7 +199,10 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     cout << "clean finished, elapse " << cleantime + clock() - t<< "(ms)" << endl;
 }
 
+<<<<<<< HEAD
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
 // ================================================================================
 
 void r2d_update_scenes ( int* ids, int length )
@@ -209,6 +222,7 @@ void r2d_update_scenes ( int* ids, int length )
     viewfrustum_minmax[2] += viewfrustum_minmax[0];
     viewfrustum_minmax[3] += viewfrustum_minmax[1];
     
+<<<<<<< HEAD
     // draw performance
 //    glDepthMask ( true );
 //    glAlphaFunc ( GL_EQUAL, 1 );
@@ -221,6 +235,11 @@ void r2d_update_scenes ( int* ids, int length )
 // //     glEnable ( GL_BLEND );
 // //     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ); 
 //     draw ( ids, length, viewfrustum_minmax );
+=======
+    draw2 ( ids, length, viewfrustum_minmax );
+    // render opaque bin
+    // render transparent bin
+>>>>>>> layoutdemo
 }
 
 // ================================================================================

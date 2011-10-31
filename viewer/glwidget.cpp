@@ -18,6 +18,7 @@ using namespace std;
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
 =======
 GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
@@ -25,13 +26,16 @@ GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLF
 =======
 GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
 >>>>>>> 47b45ba... fix some bugs
+=======
+GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+>>>>>>> layoutdemo
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     pMainSceneId = mainSceneId;
     context = cont;
     setMouseTracking ( true );
     document = context->doc;
-    tools = NULL;
+    tools = t;
     scale = 1;
     translate[0] = translate[1] = 0;
 }
@@ -111,7 +115,10 @@ void GLWidget::initializeGL ()
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> layoutdemo
 void GLWidget::showMouseLocationOnStatusbar( int x, int y )
 {
     makeCurrent();
@@ -122,7 +129,10 @@ void GLWidget::showMouseLocationOnStatusbar( int x, int y )
     context->mainwindow->statusBar()->showMessage(ss.str().c_str());
 }
 
+<<<<<<< HEAD
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
 void GLWidget::setTransform()
 {
     r2d_loadidentity ();
@@ -159,8 +169,9 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools && tools->currentTool )
 	{
+	    makeCurrent();
 	    int modifiers = fromQtModifiers ( event->modifiers() );
 	    tools->currentTool->OnKeyPress ( event->key(), modifiers );
 	}
@@ -175,6 +186,7 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
 =======
@@ -183,22 +195,27 @@ GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat&
 GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 >>>>>>> 47b45ba... fix some bugs
+=======
+GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
+>>>>>>> layoutdemo
 {
-    tools = new Tools ( context );
-    tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
+//     tools = new Tools ( context );
+//     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
 }
 
 void GLMainView::paintGL ()
 {
-    cout << "GLMainView::paintGL ()" << endl;
+//    cout << "GLMainView::paintGL ()" << endl;
     setTransform();
     int ids[] = {document->sceneid, document->miscsceneid, document->birdviewmiscid };
     r2d_update_scenes ( ids, 1 );
-    swapBuffers ();
+//    swapBuffers ();
 }
 
 //================================================================================
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
@@ -209,9 +226,13 @@ GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat&
 GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 >>>>>>> 47b45ba... fix some bugs
+=======
+GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
+>>>>>>> layoutdemo
 {
-    tools = new Tools ( context );
-    tools->setTools ( Tools::NONE_TOOL );
+//     tools = new Tools ( context );
+//     tools->setTools ( Tools::NONE_TOOL );
     rectid = -1;
     int sid = document->birdviewmiscid;
     if ( sid != -1 )
@@ -226,11 +247,11 @@ GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, con
 
 void GLBirdView::paintGL ()
 {
-    cout << "GLBirdView::paintGL ()" << endl;
+//    cout << "GLBirdView::paintGL ()" << endl;
     setTransform();
     int ids[] = {document->sceneid, document->birdviewmiscid };
     r2d_update_scenes ( ids, 2 );
-    swapBuffers ();
+//    swapBuffers ();
 }
 
 void GLBirdView::resizeGL ( int width, int height )
@@ -244,8 +265,9 @@ void GLWidget::keyReleaseEvent ( QKeyEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools && tools->currentTool )
 	{
+	    makeCurrent();
 	    int modifiers = fromQtModifiers ( event->modifiers() );
 	    tools->currentTool->OnKeyRelease ( event->key(), modifiers );
 	}
@@ -262,15 +284,21 @@ void GLWidget::mouseMoveEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+	if ( tools )
 	{
-	    if ( (Qt::LeftButton & event->buttons()) != 0 )
-		tools->currentTool->OnLMouseMove ( event->x(), event->y() );
-	    else if ( (Qt::MidButton & event->buttons()) != 0 )
-		tools->currentTool->OnMMouseMove ( event->x(), event->y() );
-	} else {
-	    if ( Qt::MidButton & event->buttons() )
-		tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( (Qt::LeftButton & event->buttons()) != 0 )
+		    tools->currentTool->OnLMouseMove ( event->x(), event->y() );
+		else if ( (Qt::MidButton & event->buttons()) != 0 )
+		    tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+	    } else {
+		if ( Qt::MidButton & event->buttons() )
+		    tools->currentTool->OnMMouseMove ( event->x(), event->y() );
+		else
+		    showMouseLocationOnStatusbar( event->x(), event->y() );
+	    }
 	}
     }
     catch ( exception& ex )
@@ -285,20 +313,26 @@ void GLWidget::mousePressEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+//	cout << "begin GLWidget::mousePressEvent" << endl;
+	if ( tools )
 	{
-	    if ( Qt::LeftButton & event->buttons() ) {
-		tools->currentTool->OnLButtonDown ( event->x(), event->y() );
-	    } else if ( Qt::MidButton & event->buttons() ) {
-		_oldTool = tools->selectTool ( Tools::HAND_TOOL );
-		tools->currentTool->OnMButtonDown ( event->x(), event->y() );
-	    }
-	} else {
-	    if ( Qt::MidButton & event->buttons() ) {
-		_oldTool = tools->selectTool ( Tools::HAND_TOOL );
-		tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( Qt::LeftButton & event->buttons() ) {
+		    tools->currentTool->OnLButtonDown ( event->x(), event->y() );
+		} else if ( Qt::MidButton & event->buttons() ) {
+		    _oldTool = tools->selectTool ( Tools::HAND_TOOL );
+		    tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+		}
+	    } else {
+		if ( Qt::MidButton & event->buttons() ) {
+		    _oldTool = tools->selectTool ( Tools::HAND_TOOL );
+		    tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+		}
 	    }
 	}
+//	cout << "finished GLWidget::mousePressEvent" << endl;
     }
     catch ( exception& ex )
     {
@@ -312,20 +346,26 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 {
     try
     {
-	if ( tools->currentTool )
+//	cout << "begin GLWidget::mouseReleaseEvent" << endl;
+	if ( tools )
 	{
-	    if ( Qt::LeftButton == event->button() ) {
-		tools->currentTool->OnLButtonUp ( event->x(), event->y() );
-	    } else if ( Qt::MidButton == event->button() ) {
-		tools->currentTool->OnMButtonUp ( event->x(), event->y() );
-		tools->selectTool ( _oldTool );
-	    }
-	} else {
-	    if ( Qt::MidButton == event->button() ) {
-		tools->currentTool->OnMButtonUp ( event->x(), event->y() );
-		tools->selectTool ( _oldTool );
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( Qt::LeftButton == event->button() ) {
+		    tools->currentTool->OnLButtonUp ( event->x(), event->y() );
+		} else if ( Qt::MidButton == event->button() ) {
+		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
+		    tools->selectTool ( _oldTool );
+		}
+	    } else {
+		if ( Qt::MidButton == event->button() ) {
+		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
+		    tools->selectTool ( _oldTool );
+		}
 	    }
 	}
+//	cout << "end GLWidget::mouseReleaseEvent" << endl;
     }
     catch ( exception& ex )
     {
@@ -337,6 +377,7 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
 =======
 GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
@@ -344,6 +385,9 @@ GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
 =======
 GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
 >>>>>>> 47b45ba... fix some bugs
+=======
+GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
+>>>>>>> layoutdemo
 {
     context = cont;
     widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );
@@ -413,9 +457,9 @@ void GLScrollWidget::setViewportTransform ( float scale, float transx, float tra
     widget->translate[1] = transy;
     widget->updateGL ();
 
-    stringstream ss;
-    ss << "scale : " << scale;
-    context->statusBar()->showMessage(ss.str().c_str());
+//     stringstream ss;
+//     ss << "scale : " << scale;
+//     context->statusBar()->showMessage(ss.str().c_str());
 
 //     // calculate scrollbar
      float sminmax[4], vxywh[4], swh[2];

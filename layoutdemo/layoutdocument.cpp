@@ -30,11 +30,14 @@ void LayoutDocument::openLayoutScene ( GLWidget* widget, const char* filename )
 {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	clock_t t = clock();
 	layoutSceneId = r2d_load_scene ( filename );
 =======
 =======
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
     clock_t t = clock();
 
     widget->makeCurrent();
@@ -42,9 +45,12 @@ void LayoutDocument::openLayoutScene ( GLWidget* widget, const char* filename )
     if ( (layoutSceneId = r2d_load_scene ( filename )) != -1 ) {
 //	r2d_continue_load_resources ( layoutSceneId );
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 47b45ba... fix some bugs
 =======
 >>>>>>> 47b45ba... fix some bugs
+=======
+>>>>>>> layoutdemo
 	cout << "load " << filename << " finished, ellapse " << clock() - t << endl;
     } else {
 	cerr << "load " << filename << " failed, ellapse " << clock() - t << endl;

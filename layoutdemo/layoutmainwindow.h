@@ -16,14 +16,8 @@ class LayerManagerWidget;
 class CenterWidget;
 class GLBirdView;
 class LayoutDocument;
-<<<<<<< HEAD:layoutdemo/mainwindow.h
-=======
 class Tools;
 struct ViewerContext;
-<<<<<<< HEAD:layoutdemo/layoutmainwindow.h
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
-=======
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
 //! [0]
 
 class LayoutMainWindow : public QMainWindow
@@ -31,17 +25,8 @@ class LayoutMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-<<<<<<< HEAD:layoutdemo/layoutmainwindow.h
-<<<<<<< HEAD:layoutdemo/mainwindow.h
-    MainWindow();
-=======
     LayoutMainWindow();
     ~LayoutMainWindow();
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
-=======
-    LayoutMainWindow();
-    ~LayoutMainWindow();
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
 
     void open( const char* filename );
     void opentop( const char* filename );
@@ -58,14 +43,8 @@ private slots:
     void onMainViewTransformChanged(float,float,float,float);
     void runlayout ();
 private:
-<<<<<<< HEAD:layoutdemo/layoutmainwindow.h
-<<<<<<< HEAD:layoutdemo/mainwindow.h
-=======
-=======
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
     Tools* itemviewtools;
     Tools* mainviewtools;
->>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
     void createActions();
     void createMenus();
     void createToolBars();
