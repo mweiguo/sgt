@@ -208,7 +208,7 @@ void r2d_update_scenes ( int* ids, int length )
     viewfrustum_minmax[2] += viewfrustum_minmax[0];
     viewfrustum_minmax[3] += viewfrustum_minmax[1];
     
-    draw ( ids, length, viewfrustum_minmax );
+    draw2 ( ids, length, viewfrustum_minmax );
 }
 
 // ================================================================================
