@@ -16,7 +16,7 @@
 
 using namespace std;
 
-GLWidget::GLWidget ( MainWindow* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     pMainSceneId = mainSceneId;
@@ -109,7 +109,7 @@ void GLWidget::showMouseLocationOnStatusbar( int x, int y )
     r2d_get_scene_position ( x, y, pos[0], pos[1] );
     stringstream ss;
     ss << "(x,y) : (" << pos[0] << ", " << pos[1] << ")";
-    context->statusBar()->showMessage(ss.str().c_str());
+    context->mainwindow->statusBar()->showMessage(ss.str().c_str());
 }
 
 void GLWidget::setTransform()
@@ -163,7 +163,7 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 //================================================================================
 
-GLMainView::GLMainView ( MainWindow* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 {
 //     tools = new Tools ( context );
@@ -181,7 +181,7 @@ void GLMainView::paintGL ()
 
 //================================================================================
 
-GLBirdView::GLBirdView ( MainWindow* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 {
 //     tools = new Tools ( context );
@@ -328,7 +328,7 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 //================================================================================
 
-GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLWidget* w )
+GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
 {
     context = cont;
     widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );
@@ -517,6 +517,7 @@ void GLScrollWidget::homeposition()
 {
     try
     {
+	widget->makeCurrent();
  	widget->homeposition();
 	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
     }
@@ -530,6 +531,7 @@ void GLScrollWidget::homeposition1()
 {
     try
     {
+	widget->makeCurrent();
  	widget->homeposition1();
 	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
     }

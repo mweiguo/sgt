@@ -49,8 +49,11 @@ void LayerItemEditor::changeState ()
 {
     myLayerItem.isVisible = !myLayerItem.isVisible;
     r2d_layer_visible ( myLayerItem.sceneid, myLayerItem.id, myLayerItem.isVisible );
-    if ( myLayerItem.context ) {
-	myLayerItem.context->displayer->widget->update();
+    if ( myLayerItem.layerManager ) {
+	for ( list<QGLWidget*>::iterator pp=myLayerItem.layerManager->_views.begin();
+	      pp!=myLayerItem.layerManager->_views.end(); ++pp )
+	    (*pp)->updateGL();
+//	myLayerItem.layerManager->updateGL();
     }
 }
 
@@ -138,8 +141,8 @@ void StarDelegate::commitAndCloseEditor()
 
 //============================================================
 
-LayerManagerWidget::LayerManagerWidget ( MainWindow* context, QWidget *parent )
-    : QTreeView ( parent ), _sceneid(-1), _context(context)
+LayerManagerWidget::LayerManagerWidget ( std::list<QGLWidget*> views, QWidget *parent )
+    : QTreeView ( parent ), _sceneid(-1), _views(views)
 {
     _model = new QStandardItemModel;
     _model->setColumnCount ( 2 );
@@ -190,7 +193,7 @@ void LayerManagerWidget::updateGUI ( int* layerbegin, int* layerend )
     {
 	LayerItems.push_back ( LayerItem() );
 	LayerItem& layerItem = LayerItems.back();
-	layerItem.context = _context;
+	layerItem.layerManager = this;
 	layerItem.sceneid = _sceneid;
 	layerItem.id = *p;
 	layerItem.name = r2d_get_layer_name ( _sceneid, *p );

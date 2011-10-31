@@ -15,7 +15,7 @@ binary.files = debug/layout.exe
 INSTALLS += binary
 
 # Input
-#HEADERS += glwidget.h mainwindow.h document.h tools.h layermanagerwidget.h
-HEADERS += mainwindow.h centerwidget.h layoutdocument.h
-SOURCES += main.cpp mainwindow.cpp centerwidget.cpp layoutdocument.cpp ../graphbase/mat4f.c
+#HEADERS += glwidget.h layoutmainwindow.h document.h tools.h layermanagerwidget.h
+HEADERS += layoutmainwindow.h centerwidget.h layoutdocument.h layouttools.h
+SOURCES += main.cpp layoutmainwindow.cpp centerwidget.cpp layoutdocument.cpp layouttools.cpp ../graphbase/mat4f.c
 #RESOURCES += dockwidgets.qrc

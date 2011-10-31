@@ -1,7 +1,9 @@
 #include "tools.h"
-#include <utility>
-#include "mainwindow.h"
+#include "document.h"
+#include "glwidget.h"
 #include <sgr_render2d.h>
+
+#include <utility>
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -241,7 +243,7 @@ void HandTool::OnMMouseMove ( int x, int y )
 
 //--------------------------------------------------------------------------------
 
-Tools::Tools ( MainWindow* cont, GLScrollWidget* p)
+Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
 {
     context = cont;
     currentTool = NULL;
@@ -253,19 +255,19 @@ Tools::Tools ( MainWindow* cont, GLScrollWidget* p)
 
 Tools::~Tools ()
 {
-    clearTools ();
+    for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
+	delete pp->second;
+    tools.clear();
 }
 
 //================================================================================
 
-void Tools::setTools ( int toolType )
+void Tools::setTools ( ToolsEntry* entry )
 {
-    if ( toolType & NONE_TOOL )
-	tools.insert ( pair<int,Tool*>(NONE_TOOL,new NoneTool(this)) );
-    if ( toolType & ZOOM_TOOL )
-	tools.insert ( pair<int,Tool*>(ZOOM_TOOL,new ZoomTool(this)) );
-    if ( toolType & HAND_TOOL )
-	tools.insert ( pair<int,Tool*>(HAND_TOOL,new HandTool(this)) );
+    while ( entry->type != 0 || entry->ptr != 0 ) {
+	tools.insert ( pair<int,Tool*>(entry->type, entry->ptr) );
+	entry++;
+    }
 }
 
 //================================================================================
@@ -281,34 +283,30 @@ int Tools::selectTool ( int tooltype )
     {
     case NONE_TOOL:
 	parent->widget->setCursor ( Qt::ArrowCursor );
-	currentToolType = NONE_TOOL;
 	break;
     case HAND_TOOL:
 	parent->widget->setCursor ( Qt::OpenHandCursor );
-	currentToolType = HAND_TOOL;
 	break;
     case ZOOM_TOOL:
 	parent->widget->setCursor ( Qt::CrossCursor );
-	currentToolType = ZOOM_TOOL;
 	break;
     default:
 	break;
     }
 
+    currentToolType = tooltype;
     currentTool = pp->second;
     return oldType;
 }
 
 //================================================================================
 
-void Tools::clearTools ()
-{
-    for ( map<int, Tool*>::iterator pp=tools.begin();
-	  pp!=tools.end();
-	  ++pp )
-	delete pp->second;
-    tools.clear();
-}
+// void Tools::clearTools ()
+// {
+//     for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
+// 	delete pp->second;
+//     tools.clear();
+// }
 
 //================================================================================
 

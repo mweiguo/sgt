@@ -104,6 +104,13 @@ Font::Font ( const char* filename )
     FT_Done_FreeType(library);
 }
 
+Font::~Font ()
+{
+    cout << "~~~~~~~~~~~~~~~~~~~~~~~~Font::~Font ()" << endl;
+    glDeleteLists ( list_base, chnum );
+    glDeleteTextures ( chnum, texture_base );
+    chnum = 0;
+}
 
 void Font::drawText ( const char* str )
 {

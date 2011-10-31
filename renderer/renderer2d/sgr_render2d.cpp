@@ -55,7 +55,7 @@ int r2d_load_scene ( const char* filename )
 void r2d_unload_scene ( int sceneid )
 {
     if ( sceneid >= globalLC.size() )
-	return;
+        return;
     globalLC[sceneid]->free ();
     delete globalLC[sceneid];
     globalLC[sceneid] = NULL;
@@ -118,6 +118,7 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     int cullobjcnt = 0;
     int ssbuildtime = 0;
 
+    cout << "length = " << length << endl;
     for ( int i=0; i<length; i++ )
     {
 	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )

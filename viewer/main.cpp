@@ -19,10 +19,12 @@ int main ( int argc, char *argv[] )
     }
 
     Q_INIT_RESOURCE(dockwidgets);
+    // load fonts & textures to share widget
     MainWindow mainWin;
     mainWin.resize ( 800, 600 );
     mainWin.show();
-    mainWin.doc->init ();
+    mainWin.init ();
+//    mainWin.doc->init ( mainWin.displayer->widget, mainWin.displayer->shareWidget );
     if ( filename != "" )
 	mainWin.open ( filename.c_str() );
     return app.exec();

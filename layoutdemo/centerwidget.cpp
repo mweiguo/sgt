@@ -5,9 +5,9 @@
 #include <sgr_render2d.h>
 #include <QHBoxLayout>
 #include <iostream>
-#include "mainwindow.h"
+#include "layoutmainwindow.h"
 
-GLItemsWidget::GLItemsWidget ( MainWindow* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+GLItemsWidget::GLItemsWidget ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLMainView ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 {
 }
@@ -19,9 +19,9 @@ void GLItemsWidget::paintGL ()
     setTransform();
     LayoutDocument* doc = dynamic_cast<LayoutDocument*>(document);
     if ( doc ) {
-	int ids[] = { doc->layoutSceneId };
-	r2d_update_scenes ( ids, 1 );
-// 	swapBuffers ();
+        int ids[] = { doc->layoutSceneId };
+        r2d_update_scenes ( ids, 1 );
+//      swapBuffers ();
     }
 }
 
@@ -29,13 +29,13 @@ void GLItemsWidget::paintGL ()
 
 void GLItemsWidget::resizeGL ( int width, int height )
 {
-	GLMainView::resizeGL(width,height);
-	homeposition1();
+    GLMainView::resizeGL(width,height);
+    homeposition1();
 }
 
 //================================================================================
 
-CenterWidget::CenterWidget ( MainWindow* context, GLScrollWidget* t, GLScrollWidget* b, QWidget* p )
+CenterWidget::CenterWidget ( ViewerContext* context, GLScrollWidget* t, GLScrollWidget* b, QWidget* p )
     : QWidget ( p )
 {
     top    = t;

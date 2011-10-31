@@ -9,6 +9,7 @@ class QListWidget;
 class QMenu;
 class QTextEdit;
 class QActionGroup;
+class QGLWidget;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
@@ -16,21 +17,25 @@ class CenterWidget;
 class GLBirdView;
 class LayoutDocument;
 class Tools;
+struct ViewerContext;
 //! [0]
 
-class MainWindow : public QMainWindow
+class LayoutMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow();
-    ~MainWindow();
+    LayoutMainWindow();
+    ~LayoutMainWindow();
 
     void open( const char* filename );
     void opentop( const char* filename );
+    void init ();
     LayoutDocument *doc;
     CenterWidget *displayer;
     GLBirdView *birdview;
+    QGLWidget* shareWidget;
+    ViewerContext* context;
 private slots:
     void open();
     void about();
@@ -38,6 +43,7 @@ private slots:
     void onMainViewTransformChanged(float,float,float,float);
     void runlayout ();
 private:
+    Tools* itemviewtools;
     Tools* mainviewtools;
     void createActions();
     void createMenus();
@@ -45,6 +51,7 @@ private:
     void createStatusBar();
     void createDockWindows();
 
+    void txt2slc ( const char* filename, const char* outfilename );
 //    QTextEdit *textEdit;
     QListWidget *customerList;
     QListWidget *paragraphsList;
