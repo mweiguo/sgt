@@ -88,13 +88,28 @@ private:
     float startPos[2];
 };
 
-class FullContentTool : public Tool
-{
-public:
-    
-};
 
 class MainWindow;
+<<<<<<< HEAD
+=======
+class GLScrollWidget;
+struct ToolsEntry
+{
+    int type;
+    Tool* ptr;
+};
+
+/* ToolsEntry entry[] = */
+/* { */
+/*     {Tools::NONE_TOOL, new NoneTool(tools)}, */
+/*     {Tools::ZOOM_TOOL, new ZoomTool(tools)}, */
+/*     {Tools::HAND_TOOL, new HandTool(tools)}, */
+/*     {Tools::KEY_TOOL, new KeyboardTool(tools)}, */
+/*     {0, 0} */
+/* }; */
+
+class ViewerContext;
+>>>>>>> 47b45ba... fix some bugs
 class Tools
 {
 public:
@@ -102,16 +117,27 @@ public:
     {
 	NONE_TOOL     = 1,
 	ZOOM_TOOL     = 2,
-	HAND_TOOL     = 4
+	HAND_TOOL     = 4,
+	KEY_TOOL      = 8
     };
+<<<<<<< HEAD
     Tools ( MainWindow* cont );
+=======
+    Tools ( ViewerContext* cont, GLScrollWidget* parent );
+>>>>>>> 47b45ba... fix some bugs
     ~Tools ();
-    void setTools ( int toolType );
+    void setTools ( ToolsEntry* entry );
     int selectTool ( int tooltype );
     std::map<int, Tool*> tools;
     Tool* currentTool;
     int currentToolType;
+<<<<<<< HEAD
     MainWindow* context;
+=======
+    ViewerContext* context;
+//    MainWindow* context;
+    GLScrollWidget* parent;
+>>>>>>> 47b45ba... fix some bugs
 };
 
 #endif // _TOOLS_H_

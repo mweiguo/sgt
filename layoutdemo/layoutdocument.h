@@ -2,9 +2,11 @@
 #define _LAYOUT_DOCUMENT_H_
 #include <document.h>
 #include <map>
+#include <string>
 
 class SLCPrimitiveNode;
 class SLCTextNode;
+class SLCMaterial;
 
 struct PlateInfo
 {
@@ -32,19 +34,19 @@ struct PlateInfo
 
 struct ShapeInfo
 {
-        ShapeInfo()
-        {
-                node = 0;
-                cntnode = 0;
-                sizenode = 0;
-                colornode = 0;
-                primitiveCount = 0;
-        }
+    ShapeInfo()
+    {
+        node = 0;
+        cntnode = 0;
+        sizenode = 0;
+        colornode = 0;
+//        primitiveCount = 0;
+    }
     SLCPrimitiveNode* node;
     SLCTextNode* cntnode;
     SLCTextNode* sizenode;
     SLCPrimitiveNode* colornode;
-    int primitiveCount;
+//    int primitiveCount;
 };
 
 class SLCRectNode;
@@ -54,10 +56,11 @@ class LayoutDocument : public Document
 public:
     LayoutDocument ();
     virtual ~LayoutDocument();
-    
+
     /** viewer interface
      */
-    void openLayoutScene ( const char* filename );
+    void openLayoutScene ( GLWidget* widget, const char* filename );
+    void closeLayoutScene ();
     int layoutSceneId;
 
     /** eidtor interface
@@ -65,22 +68,24 @@ public:
     void buildDemoShapes(); // will be replaced by follow two functions
     void clearShapes ();
 
-//     int addShape ( const char* filename );
-//     void removeShape ( int shapeid );
+    //     int addShape ( const char* filename );
+    //     void removeShape ( int shapeid );
     void setShapeCount ( int shapeid, int count );
     void setPlateSize ( float width, float height );
-    void saveShapeFile ( const char* filename, const char* slcFileName );
+    void saveShapeXMLFile ( const char* filename );
+    void saveShapeSLCFile ( const char* filename );
     void savePlateFile ( const char* filename );
 
+    std::map<std::string,SLCMaterial*> materials;
     std::map<int, ShapeInfo> shapesInfo;
-        PlateInfo plateInfo;
+    PlateInfo plateInfo;
     SLCRectNode* plate;
 
     SLCMaterial* objmat;
-        SLCMaterial* objmat1;
-        SLCMaterial* objmat2;
-        SLCMaterial* objmat3;
-        SLCMaterial* objmat4;
+    SLCMaterial* objmat1;
+    SLCMaterial* objmat2;
+    SLCMaterial* objmat3;
+    SLCMaterial* objmat4;
     SLCMaterial* platemat;
 };
 

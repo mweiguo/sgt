@@ -8,14 +8,17 @@
 #include <QVector>
 #include <QWidget>
 #include <QImage>
+#include <QtOpenGL/QGLWidget>
 
-#include "mainwindow.h"
+//#include "mainwindow.h"
 
+class LayerManagerWidget;
 class LayerItem
 {
 public:
     LayerItem ();
-    MainWindow* context;
+    LayerManagerWidget* layerManager;
+//    QGLWidget* context;
     int sceneid;
     int id;
     QString name;
@@ -80,7 +83,7 @@ class LayerManagerWidget : public QTreeView
 {
     Q_OBJECT
 public:
-    LayerManagerWidget( MainWindow* context, QWidget *parent = 0);
+    LayerManagerWidget( std::list<QGLWidget*> views, QWidget *parent = 0);
     void loadFromScene ( int sceneid );
 
     /** for GUI user
@@ -93,9 +96,10 @@ public:
     /** for CUI user
      */
     void updateGUI ( int* layerbegin, int* layerend );
+    std::list<QGLWidget*> _views;
 private:
     int _sceneid;
     QStandardItemModel*  _model;
-    MainWindow* _context;
+//    QGLWidget* _context;
 };
 

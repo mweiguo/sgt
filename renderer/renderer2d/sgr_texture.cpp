@@ -8,4 +8,10 @@ Texture::Texture ( const char* texfilename )
     texture = ilutGLLoadImage ( const_cast<char*>(texfilename) );
 }
 
+Texture::~Texture()
+{
+    if ( texture != 0 )
+        glDeleteTextures ( 1, &texture );
+    texture = 0;
+}
 

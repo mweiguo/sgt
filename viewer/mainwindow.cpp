@@ -9,20 +9,42 @@
 
 #include <exception>
 #include <iostream>
+#include <list>
 using namespace std;
 
 MainWindow::MainWindow()
 {
     doc = new Document;
+    context = new ViewerContext;
+    context->doc = doc;
+    context->mainwindow = this;
 
     QGLFormat fmt;
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
+    shareWidget = new QGLWidget ( fmt );
     // displayer
+<<<<<<< HEAD
     displayer = new GLScrollWidget ( this, new GLMainView(this, &(doc->sceneid), fmt) );
     // birdview
     birdview = new GLBirdView (this, &(doc->sceneid), fmt);
+=======
+    mainviewtools = new Tools ( context, 0 );
+    ToolsEntry entry[] = {
+	{Tools::NONE_TOOL, new NoneTool(mainviewtools)},
+	{Tools::ZOOM_TOOL, new ZoomTool(mainviewtools)},
+	{Tools::HAND_TOOL, new HandTool(mainviewtools)},
+	{0, 0}
+    };
+    mainviewtools->setTools ( entry );
+    GLMainView* mainview = new GLMainView(context, mainviewtools, &(doc->sceneid), fmt, 0, shareWidget );
+    displayer = new GLScrollWidget ( context, mainview );
+    mainviewtools->parent = displayer;
+
+    // birdview
+    birdview = new GLBirdView (context, 0, &(doc->sceneid), fmt, 0, shareWidget );
+>>>>>>> 47b45ba... fix some bugs
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
 	      this,
@@ -42,6 +64,22 @@ MainWindow::MainWindow()
     r2d_init ();
 }
 
+<<<<<<< HEAD
+=======
+MainWindow::~MainWindow()
+{
+    delete context;
+    delete doc;
+    delete mainviewtools;
+    delete shareWidget;
+}
+
+void MainWindow::init ()
+{
+    doc->init ( displayer->widget, shareWidget );
+}
+
+>>>>>>> 47b45ba... fix some bugs
 void MainWindow::open()
 {
     try
@@ -60,7 +98,11 @@ void MainWindow::open()
 
 void MainWindow::open ( const char* filename )
 {
+<<<<<<< HEAD
     doc->openScene ( filename );
+=======
+    doc->openScene ( displayer->widget, filename );
+>>>>>>> 47b45ba... fix some bugs
     layerManagerWidget->loadFromScene ( doc->sceneid );
     displayer->homeposition();
     birdview->homeposition();
@@ -255,7 +297,10 @@ void MainWindow::createStatusBar()
 void MainWindow::createDockWindows()
 {
     QDockWidget *dock = new QDockWidget(tr("Layers"), this);
-    layerManagerWidget = new LayerManagerWidget(this, dock);
+    list<QGLWidget*> lst;
+    lst.push_back ( displayer->widget );
+    lst.push_back ( birdview );
+    layerManagerWidget = new LayerManagerWidget(lst, dock);
 
     dock->setWidget(layerManagerWidget);
     addDockWidget(Qt::RightDockWidgetArea, dock);

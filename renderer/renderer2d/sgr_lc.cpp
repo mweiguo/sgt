@@ -600,6 +600,12 @@ void LC::free ()
     polyTessellationBufferEntry = 0;
     texCoordBufferEntry = 0;
     globalLCEntry = 0;
+
+    for ( vector<Font*>::iterator pp=fonts.begin(); pp!=fonts.end(); ++pp )
+        delete *pp;
+    for ( vector<Texture*>::iterator pp=textures.begin(); pp!=textures.end(); ++pp )
+        delete *pp;
+
 }
 
 void LC::buildLevelLC ()

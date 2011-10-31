@@ -14,7 +14,12 @@ class QActionGroup;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
+<<<<<<< HEAD
 
+=======
+class Tools;
+struct ViewerContext;
+>>>>>>> 47b45ba... fix some bugs
 //! [0]
 class MainWindow : public QMainWindow
 {
@@ -24,9 +29,12 @@ public:
     MainWindow();
 
     void open( const char* filename );
+    void init ();
     Document *doc;
     GLScrollWidget *displayer;
     GLBirdView *birdview;
+    QGLWidget* shareWidget;
+    ViewerContext* context;
 private slots:
     void open();
     void about();

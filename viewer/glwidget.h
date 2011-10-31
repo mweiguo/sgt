@@ -7,11 +7,16 @@ class Document;
 class Tools;
 class MainWindow;
 class QScrollBar;
+struct ViewerContext;
 
 class GLWidget : public QGLWidget
 {
 public:
+<<<<<<< HEAD
     GLWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLWidget ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
     void zoomin();
     void zoomout();
     void lefttranslate();
@@ -20,7 +25,7 @@ public:
     void downtranslate();
     void homeposition();
     void homeposition1();
-    MainWindow* context;
+    ViewerContext* context;
     Document* document;
     Tools* tools;
     float scale;
@@ -43,14 +48,22 @@ protected:
 class GLMainView : public GLWidget
 {
 public:
+<<<<<<< HEAD
     GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLMainView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
     virtual void paintGL ();
 };
 
 class GLBirdView : public GLWidget
 {
 public:
+<<<<<<< HEAD
     GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLBirdView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
     int rectid;
@@ -61,11 +74,15 @@ class GLScrollWidget : public QWidget
 {
     Q_OBJECT
 public:
+<<<<<<< HEAD
     GLScrollWidget ( MainWindow* context, GLMainView* widget );
+=======
+    GLScrollWidget ( ViewerContext* context, GLWidget* widget );
+>>>>>>> 47b45ba... fix some bugs
     void setViewportTransform ( float scale, float transx, float transy );
     GLMainView* widget;
     QScrollBar *hbar, *vbar;
-    MainWindow* context;
+    ViewerContext* context;
 signals:
     void transformChanged(float,float,float,float);
 public slots:

@@ -55,7 +55,7 @@ int r2d_load_scene ( const char* filename )
 void r2d_unload_scene ( int sceneid )
 {
     if ( sceneid >= globalLC.size() )
-	return;
+        return;
     globalLC[sceneid]->free ();
     delete globalLC[sceneid];
     globalLC[sceneid] = NULL;
@@ -110,6 +110,86 @@ void draw ( int* ids, int length, float* viewfrustum_minmax )
     }
 }
 
+<<<<<<< HEAD
+=======
+void draw2 ( int* ids, int length, float* viewfrustum_minmax )
+{
+    list<StateSet*> opaques, transparents;
+    int cleantime = 0;
+    int culltime = 0;
+    int cullobjcnt = 0;
+    int ssbuildtime = 0;
+
+    cout << "length = " << length << endl;
+    for ( int i=0; i<length; i++ )
+    {
+	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
+	    continue;
+	
+	clock_t t = clock();
+	vfculler::clear ();
+	StateSetBuilder2::clear();
+	cleantime += clock() - t;
+
+	t = clock();
+	LC* lc = globalLC[ids[i]];
+	lc->toElement ( ROOT );
+	vfculler::cull ( *lc, viewfrustum_minmax, currentScale );
+	culltime += clock() - t;
+	cullobjcnt += vfculler::renderObjects.size();
+
+	t = clock();
+	// collect opaque objects & transparent objects
+	StateSetBuilder2::build ( lc, vfculler::renderObjects, opaques, transparents );
+	ssbuildtime += clock() - t;
+    }
+
+//     string opxml, trxml;
+//     for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+// 	opxml += (*pp)->toXML();
+//     for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+// 	trxml += (*pp)->toXML();
+//     ofstream o;
+//     o.open ( "op.xml" );
+//     o << opxml;
+//     o.close ();
+//     o.open ( "tr.xml" );
+//     o << trxml;
+//     o.close ();
+
+    cout << "cull finished, elapse " << culltime << "(ms), object count = " << cullobjcnt << endl;
+    cout << "stateset build finished, elapse " << ssbuildtime << "(ms)" << endl;
+    
+    // render opaques
+    clock_t t = clock();
+    if ( opaques.empty() == false )
+    {
+	glEnable ( GL_DEPTH_TEST );
+	for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	{
+	    (*pp)->render();
+	}
+    }
+    // render transparents
+    if ( transparents.empty() == false )
+    {
+	glDisable ( GL_DEPTH_TEST );
+	for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	{
+	    (*pp)->render();
+	}
+    }
+    cout << "render finished, elapse " << clock() - t << "(ms)" << endl;
+
+    t = clock();
+    for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	delete *pp;
+    for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	delete *pp;
+    cout << "clean finished, elapse " << cleantime + clock() - t<< "(ms)" << endl;
+}
+
+>>>>>>> 47b45ba... fix some bugs
 // ================================================================================
 
 void r2d_update_scenes ( int* ids, int length )

@@ -16,7 +16,11 @@
 
 using namespace std;
 
+<<<<<<< HEAD
 GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+=======
+GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+>>>>>>> 47b45ba... fix some bugs
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     pMainSceneId = mainSceneId;
@@ -102,6 +106,19 @@ void GLWidget::initializeGL ()
     r2d_init ();
 }
 
+<<<<<<< HEAD
+=======
+void GLWidget::showMouseLocationOnStatusbar( int x, int y )
+{
+    makeCurrent();
+    float pos[2];
+    r2d_get_scene_position ( x, y, pos[0], pos[1] );
+    stringstream ss;
+    ss << "(x,y) : (" << pos[0] << ", " << pos[1] << ")";
+    context->mainwindow->statusBar()->showMessage(ss.str().c_str());
+}
+
+>>>>>>> 47b45ba... fix some bugs
 void GLWidget::setTransform()
 {
     r2d_loadidentity ();
@@ -152,8 +169,13 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 //================================================================================
 
+<<<<<<< HEAD
 GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
+=======
+GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
+>>>>>>> 47b45ba... fix some bugs
 {
     tools = new Tools ( context );
     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
@@ -170,8 +192,13 @@ void GLMainView::paintGL ()
 
 //================================================================================
 
+<<<<<<< HEAD
 GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
+=======
+GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
+    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
+>>>>>>> 47b45ba... fix some bugs
 {
     tools = new Tools ( context );
     tools->setTools ( Tools::NONE_TOOL );
@@ -298,7 +325,11 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 //================================================================================
 
+<<<<<<< HEAD
 GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
+=======
+GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
+>>>>>>> 47b45ba... fix some bugs
 {
     context = cont;
     widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );
@@ -487,6 +518,7 @@ void GLScrollWidget::homeposition()
 {
     try
     {
+	widget->makeCurrent();
  	widget->homeposition();
 	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
     }
@@ -500,6 +532,7 @@ void GLScrollWidget::homeposition1()
 {
     try
     {
+	widget->makeCurrent();
  	widget->homeposition1();
 	setViewportTransform ( widget->scale, widget->translate[0], widget->translate[1] );
     }

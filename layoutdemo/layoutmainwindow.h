@@ -9,26 +9,40 @@ class QListWidget;
 class QMenu;
 class QTextEdit;
 class QActionGroup;
+class QGLWidget;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
 class CenterWidget;
 class GLBirdView;
 class LayoutDocument;
+<<<<<<< HEAD:layoutdemo/mainwindow.h
+=======
+class Tools;
+struct ViewerContext;
+>>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
 //! [0]
 
-class MainWindow : public QMainWindow
+class LayoutMainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+<<<<<<< HEAD:layoutdemo/mainwindow.h
     MainWindow();
+=======
+    LayoutMainWindow();
+    ~LayoutMainWindow();
+>>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
 
     void open( const char* filename );
     void opentop( const char* filename );
+    void init ();
     LayoutDocument *doc;
     CenterWidget *displayer;
     GLBirdView *birdview;
+    QGLWidget* shareWidget;
+    ViewerContext* context;
 private slots:
     void open();
     void about();
@@ -36,12 +50,18 @@ private slots:
     void onMainViewTransformChanged(float,float,float,float);
     void runlayout ();
 private:
+<<<<<<< HEAD:layoutdemo/mainwindow.h
+=======
+    Tools* itemviewtools;
+    Tools* mainviewtools;
+>>>>>>> 47b45ba... fix some bugs:layoutdemo/layoutmainwindow.h
     void createActions();
     void createMenus();
     void createToolBars();
     void createStatusBar();
     void createDockWindows();
 
+    void txt2slc ( const char* filename, const char* outfilename );
 //    QTextEdit *textEdit;
     QListWidget *customerList;
     QListWidget *paragraphsList;

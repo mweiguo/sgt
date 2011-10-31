@@ -1,7 +1,9 @@
 #include "tools.h"
-#include <utility>
-#include "mainwindow.h"
+#include "document.h"
+#include "glwidget.h"
 #include <sgr_render2d.h>
+
+#include <utility>
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -229,7 +231,11 @@ void HandTool::OnMMouseMove ( int x, int y )
 
 //--------------------------------------------------------------------------------
 
+<<<<<<< HEAD
 Tools::Tools ( MainWindow* cont)
+=======
+Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
+>>>>>>> 47b45ba... fix some bugs
 {
     context = cont;
     currentTool = NULL;
@@ -238,6 +244,7 @@ Tools::Tools ( MainWindow* cont)
 
 Tools::~Tools ()
 {
+<<<<<<< HEAD
     for ( map<int, Tool*>::iterator pp=tools.begin();
 	  pp!=tools.end();
 	  ++pp )
@@ -245,13 +252,21 @@ Tools::~Tools ()
 }
 
 void Tools::setTools ( int toolType )
+=======
+    for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
+	delete pp->second;
+    tools.clear();
+}
+
+//================================================================================
+
+void Tools::setTools ( ToolsEntry* entry )
+>>>>>>> 47b45ba... fix some bugs
 {
-    if ( toolType & NONE_TOOL )
-	tools.insert ( pair<int,Tool*>(NONE_TOOL,new NoneTool(this)) );
-    if ( toolType & ZOOM_TOOL )
-	tools.insert ( pair<int,Tool*>(ZOOM_TOOL,new ZoomTool(this)) );
-    if ( toolType & HAND_TOOL )
-	tools.insert ( pair<int,Tool*>(HAND_TOOL,new HandTool(this)) );
+    while ( entry->type != 0 || entry->ptr != 0 ) {
+	tools.insert ( pair<int,Tool*>(entry->type, entry->ptr) );
+	entry++;
+    }
 }
 
 int Tools::selectTool ( int tooltype )
@@ -264,6 +279,7 @@ int Tools::selectTool ( int tooltype )
     switch ( tooltype )
     {
     case NONE_TOOL:
+<<<<<<< HEAD
 	context->displayer->widget->setCursor ( Qt::ArrowCursor );
 	currentToolType = NONE_TOOL;
 	break;
@@ -274,13 +290,36 @@ int Tools::selectTool ( int tooltype )
     case ZOOM_TOOL:
 	context->displayer->widget->setCursor ( Qt::CrossCursor );
 	currentToolType = ZOOM_TOOL;
+=======
+	parent->widget->setCursor ( Qt::ArrowCursor );
+	break;
+    case HAND_TOOL:
+	parent->widget->setCursor ( Qt::OpenHandCursor );
+	break;
+    case ZOOM_TOOL:
+	parent->widget->setCursor ( Qt::CrossCursor );
+>>>>>>> 47b45ba... fix some bugs
 	break;
     default:
 	break;
     }
 
+    currentToolType = tooltype;
     currentTool = pp->second;
     return oldType;
 }
 
 //================================================================================
+<<<<<<< HEAD
+=======
+
+// void Tools::clearTools ()
+// {
+//     for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
+// 	delete pp->second;
+//     tools.clear();
+// }
+
+//================================================================================
+
+>>>>>>> 47b45ba... fix some bugs

@@ -7,6 +7,7 @@ class Texture
 {
 public:
     Texture ( const char* texfilename );
+    ~Texture();
     std::string texturefilename;
     unsigned int texture;
 };

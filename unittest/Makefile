@@ -124,7 +124,7 @@ sgr_math.o : $(USER_DIR2)/sgr_math.h $(USER_DIR2)/sgr_math.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/sgr_math.cpp
 
 mat4f.o : $(USER_DIR2)/mat4f.h $(USER_DIR2)/mat4f.c
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/mat4f.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR2)/mat4f.c -o mat4f.o
 
 sgr_texture.o : $(USER_DIR)/sgr_texture.h $(USER_DIR)/sgr_texture.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_texture.cpp
