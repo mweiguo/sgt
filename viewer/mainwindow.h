@@ -14,20 +14,8 @@ class QActionGroup;
 QT_END_NAMESPACE
 
 class LayerManagerWidget;
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
 class Tools;
 struct ViewerContext;
-<<<<<<< HEAD
->>>>>>> 47b45ba... fix some bugs
-=======
->>>>>>> 47b45ba... fix some bugs
-=======
-class Tools;
-struct ViewerContext;
->>>>>>> layoutdemo
 //! [0]
 class MainWindow : public QMainWindow
 {

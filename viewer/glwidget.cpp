@@ -16,19 +16,7 @@
 
 using namespace std;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
-=======
 GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
->>>>>>> 47b45ba... fix some bugs
-=======
-GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
->>>>>>> 47b45ba... fix some bugs
-=======
-GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
->>>>>>> layoutdemo
     QGLWidget ( fmt, parent, shareWidget, f )
 {
     pMainSceneId = mainSceneId;
@@ -114,11 +102,6 @@ void GLWidget::initializeGL ()
     r2d_init ();
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> layoutdemo
 void GLWidget::showMouseLocationOnStatusbar( int x, int y )
 {
     makeCurrent();
@@ -129,10 +112,6 @@ void GLWidget::showMouseLocationOnStatusbar( int x, int y )
     context->mainwindow->statusBar()->showMessage(ss.str().c_str());
 }
 
-<<<<<<< HEAD
->>>>>>> 47b45ba... fix some bugs
-=======
->>>>>>> layoutdemo
 void GLWidget::setTransform()
 {
     r2d_loadidentity ();
@@ -184,21 +163,8 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 
 //================================================================================
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
-=======
-=======
->>>>>>> 47b45ba... fix some bugs
 GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
->>>>>>> 47b45ba... fix some bugs
-=======
-GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
->>>>>>> layoutdemo
 {
 //     tools = new Tools ( context );
 //     tools->setTools ( Tools::NONE_TOOL | Tools::HAND_TOOL | Tools::ZOOM_TOOL );
@@ -215,21 +181,8 @@ void GLMainView::paintGL ()
 
 //================================================================================
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
-=======
-=======
->>>>>>> 47b45ba... fix some bugs
 GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
->>>>>>> 47b45ba... fix some bugs
-=======
-GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
-    : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
->>>>>>> layoutdemo
 {
 //     tools = new Tools ( context );
 //     tools->setTools ( Tools::NONE_TOOL );
@@ -375,19 +328,7 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 
 //================================================================================
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
-=======
 GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
->>>>>>> 47b45ba... fix some bugs
-=======
-GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
->>>>>>> 47b45ba... fix some bugs
-=======
-GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
->>>>>>> layoutdemo
 {
     context = cont;
     widget = w;//new GLMainView(context, fmt, parent, shareWidget, f );

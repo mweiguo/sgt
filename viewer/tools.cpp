@@ -243,19 +243,7 @@ void HandTool::OnMMouseMove ( int x, int y )
 
 //--------------------------------------------------------------------------------
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-Tools::Tools ( MainWindow* cont)
-=======
 Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
->>>>>>> 47b45ba... fix some bugs
-=======
-Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
->>>>>>> 47b45ba... fix some bugs
-=======
-Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
->>>>>>> layoutdemo
 {
     context = cont;
     currentTool = NULL;
@@ -267,26 +255,6 @@ Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
 
 Tools::~Tools ()
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-    for ( map<int, Tool*>::iterator pp=tools.begin();
-	  pp!=tools.end();
-	  ++pp )
-=======
-    for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
->>>>>>> layoutdemo
-	delete pp->second;
-    tools.clear();
-}
-
-<<<<<<< HEAD
-void Tools::setTools ( int toolType )
-=======
-    for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
-	delete pp->second;
-    tools.clear();
-=======
     for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
 	delete pp->second;
     tools.clear();
@@ -295,23 +263,6 @@ void Tools::setTools ( int toolType )
 //================================================================================
 
 void Tools::setTools ( ToolsEntry* entry )
-{
-    while ( entry->type != 0 || entry->ptr != 0 ) {
-	tools.insert ( pair<int,Tool*>(entry->type, entry->ptr) );
-	entry++;
-    }
->>>>>>> 47b45ba... fix some bugs
-}
-
-//================================================================================
-
-void Tools::setTools ( ToolsEntry* entry )
->>>>>>> 47b45ba... fix some bugs
-=======
-//================================================================================
-
-void Tools::setTools ( ToolsEntry* entry )
->>>>>>> layoutdemo
 {
     while ( entry->type != 0 || entry->ptr != 0 ) {
 	tools.insert ( pair<int,Tool*>(entry->type, entry->ptr) );
@@ -331,23 +282,6 @@ int Tools::selectTool ( int tooltype )
     switch ( tooltype )
     {
     case NONE_TOOL:
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-	context->displayer->widget->setCursor ( Qt::ArrowCursor );
-	currentToolType = NONE_TOOL;
-=======
-	parent->widget->setCursor ( Qt::ArrowCursor );
->>>>>>> layoutdemo
-	break;
-    case HAND_TOOL:
-	parent->widget->setCursor ( Qt::OpenHandCursor );
-	break;
-    case ZOOM_TOOL:
-<<<<<<< HEAD
-	context->displayer->widget->setCursor ( Qt::CrossCursor );
-	currentToolType = ZOOM_TOOL;
-=======
 	parent->widget->setCursor ( Qt::ArrowCursor );
 	break;
     case HAND_TOOL:
@@ -355,19 +289,6 @@ int Tools::selectTool ( int tooltype )
 	break;
     case ZOOM_TOOL:
 	parent->widget->setCursor ( Qt::CrossCursor );
->>>>>>> 47b45ba... fix some bugs
-=======
-	parent->widget->setCursor ( Qt::ArrowCursor );
-	break;
-    case HAND_TOOL:
-	parent->widget->setCursor ( Qt::OpenHandCursor );
-	break;
-    case ZOOM_TOOL:
-	parent->widget->setCursor ( Qt::CrossCursor );
->>>>>>> 47b45ba... fix some bugs
-=======
-	parent->widget->setCursor ( Qt::CrossCursor );
->>>>>>> layoutdemo
 	break;
     default:
 	break;
@@ -379,22 +300,3 @@ int Tools::selectTool ( int tooltype )
 }
 
 //================================================================================
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> layoutdemo
-
-// void Tools::clearTools ()
-// {
-//     for ( map<int, Tool*>::iterator pp=tools.begin(); pp!=tools.end(); ++pp )
-// 	delete pp->second;
-//     tools.clear();
-// }
-
-//================================================================================
-
-<<<<<<< HEAD
->>>>>>> 47b45ba... fix some bugs
-=======
->>>>>>> layoutdemo

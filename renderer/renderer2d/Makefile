@@ -1,12 +1,5 @@
 TESTS  = test_nodes test_lc2kdtree test_node2lc test_vfculler test_statesetbuilder
-<<<<<<< HEAD
-<<<<<<< HEAD
 BIN    = librender2d.so buildchip buildmisc buildlod buildline buildbirdviewmisc buildlayout buildlayoutitem buildtext buildimage
-=======
-=======
->>>>>>> 47b45ba... fix some bugs
-BIN    = librender2d.so buildchip buildmisc buildlod buildline buildbirdviewmisc buildlayout buildlayoutitem buildtext
->>>>>>> 47b45ba... fix some bugs
 OBJS   = sgr_nodes.o test_nodes.o 
 SRC    = $(OBJS:%.o=%.cpp)
 INC    = $(OBJS:%.o=%.h)
@@ -34,35 +27,18 @@ test_node2lc : sgr_nodes.o test_node2lc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o 
 test_vfculler : sgr_lc.o test_vfculler.o sgr_vfculler.o sgr_math.o sgr_bboxupdater.o sgr_lcreport.o sgr_font.o sgr_texture.o
 	$(CXX) sgr_lc.o test_vfculler.o sgr_vfculler.o sgr_math.o sgr_bboxupdater.o sgr_lcreport.o sgr_font.o sgr_texture.o -o $@ $(LINKOPT)
 
-<<<<<<< HEAD
 test_statesetbuilder : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o
 	$(CXX) sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o -o $@ $(LINKOPT)
-=======
-test_statesetbuilder : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o
-	$(CXX) sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_statesetbuilder.o sgr_vfculler.o sgr_lcreport.o ../../graphbase/sgr_math.o sgr_font.o sgr_bboxupdater.o sgr_texture.o -o $@ $(LINKOPT)
-<<<<<<< HEAD
->>>>>>> 47b45ba... fix some bugs
-=======
->>>>>>> 47b45ba... fix some bugs
 
 # all bin
 #librender2d.a : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o
 #	ar cq $@ sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o
 
-<<<<<<< HEAD
 librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o
 	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o -o $@ $(SHARELINKOPT)
 
-<<<<<<< HEAD
 # libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o sgr_math.o mat4f.o
 # 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o sgr_math.o mat4f.o -o $@ $(SHARELINKOPT)
-=======
-librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o
-	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o -o $@ $(SHARELINKOPT)
-
-# libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o
-# 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o -o $@ $(SHARELINKOPT)
->>>>>>> layoutdemo
 
 buildchip : sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
@@ -76,10 +52,6 @@ buildlod : sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2k
 buildline : sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> layoutdemo
 buildbirdviewmisc : sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
 
@@ -91,74 +63,9 @@ buildlayoutitem : sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcrep
 
 buildtext : sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-<<<<<<< HEAD
 
 buildimage : sgr_nodes.o buildimage.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) sgr_nodes.o buildimage.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-=======
-librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o
-	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o -o $@ $(SHARELINKOPT)
-
-# libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o
-# 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o -o $@ $(SHARELINKOPT)
-
-buildchip : sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildmisc : sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlod : sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildline : sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildbirdviewmisc : sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlayout : sgr_nodes.o buildlayout.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlayout.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlayoutitem : sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildtext : sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
->>>>>>> 47b45ba... fix some bugs
-=======
-librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o
-	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o ../../graphbase/sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o -o $@ $(SHARELINKOPT)
-
-# libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o
-# 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o ../../graphbase/sgr_math.o mat4f.o -o $@ $(SHARELINKOPT)
-
-buildchip : sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildchip.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildmisc : sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlod : sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlod.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildline : sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildline.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildbirdviewmisc : sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildbirdviewmisc.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlayout : sgr_nodes.o buildlayout.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlayout.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildlayoutitem : sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildlayoutitem.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
-
-buildtext : sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o
-	$(CXX) sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc2kdtree.o sgr_bboxupdater.o sgr_font.o sgr_texture.o mat4f.o -o $@ $(LINKOPT)
->>>>>>> 47b45ba... fix some bugs
-=======
->>>>>>> layoutdemo
 
 # all src
 .cpp.o:
@@ -167,26 +74,11 @@ buildtext : sgr_nodes.o buildtext.o sgr_lc.o sgr_node2lc.o sgr_lcreport.o sgr_lc
 .c.o:
 	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ $<
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 mat4f.o : ../../graphbase/mat4f.c ../../graphbase/mat4f.h
 	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ ../../graphbase/mat4f.c
 
 sgr_math.o : ../../graphbase/sgr_math.cpp ../../graphbase/sgr_math.h
 	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@ ../../graphbase/sgr_math.cpp
-=======
-mat4f.o : ../../graphbase/mat4f.h ../../graphbase/mat4f.c
-	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@  ../../graphbase/mat4f.c
->>>>>>> 47b45ba... fix some bugs
-=======
-mat4f.o : ../../graphbase/mat4f.h ../../graphbase/mat4f.c
-	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@  ../../graphbase/mat4f.c
->>>>>>> 47b45ba... fix some bugs
-=======
-mat4f.o : ../../graphbase/mat4f.h ../../graphbase/mat4f.c
-	$(CXX) $(CXXFLAGS) $(INCPATH) -o $@  ../../graphbase/mat4f.c
->>>>>>> layoutdemo
 
 clean :
 	rm -rf *.o *.so *.a *.exe *.idx *~ *.xml *.slc
