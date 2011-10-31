@@ -17,7 +17,11 @@
 using namespace std;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLWidget::GLWidget ( MainWindow* cont, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+=======
+GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
+>>>>>>> 47b45ba... fix some bugs
 =======
 GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
 >>>>>>> 47b45ba... fix some bugs
@@ -170,9 +174,12 @@ void GLWidget::keyPressEvent ( QKeyEvent * event )
 //================================================================================
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLMainView::GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
 =======
+=======
+>>>>>>> 47b45ba... fix some bugs
 GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 >>>>>>> 47b45ba... fix some bugs
@@ -193,9 +200,12 @@ void GLMainView::paintGL ()
 //================================================================================
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLBirdView::GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, mainSceneId, fmt, parent, shareWidget, f )
 =======
+=======
+>>>>>>> 47b45ba... fix some bugs
 GLBirdView::GLBirdView ( ViewerContext* context, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f )
     : GLWidget ( context, t, mainSceneId, fmt, parent, shareWidget, f )
 >>>>>>> 47b45ba... fix some bugs
@@ -326,7 +336,11 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 //================================================================================
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 GLScrollWidget::GLScrollWidget ( MainWindow* cont, GLMainView* w )
+=======
+GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
+>>>>>>> 47b45ba... fix some bugs
 =======
 GLScrollWidget::GLScrollWidget ( ViewerContext* cont, GLWidget* w )
 >>>>>>> 47b45ba... fix some bugs

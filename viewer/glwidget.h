@@ -13,7 +13,11 @@ class GLWidget : public QGLWidget
 {
 public:
 <<<<<<< HEAD
+<<<<<<< HEAD
     GLWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLWidget ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
 =======
     GLWidget ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
 >>>>>>> 47b45ba... fix some bugs
@@ -49,7 +53,11 @@ class GLMainView : public GLWidget
 {
 public:
 <<<<<<< HEAD
+<<<<<<< HEAD
     GLMainView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLMainView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
 =======
     GLMainView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
 >>>>>>> 47b45ba... fix some bugs
@@ -60,7 +68,11 @@ class GLBirdView : public GLWidget
 {
 public:
 <<<<<<< HEAD
+<<<<<<< HEAD
     GLBirdView ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLBirdView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
 =======
     GLBirdView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
 >>>>>>> 47b45ba... fix some bugs
@@ -75,7 +87,11 @@ class GLScrollWidget : public QWidget
     Q_OBJECT
 public:
 <<<<<<< HEAD
+<<<<<<< HEAD
     GLScrollWidget ( MainWindow* context, GLMainView* widget );
+=======
+    GLScrollWidget ( ViewerContext* context, GLWidget* widget );
+>>>>>>> 47b45ba... fix some bugs
 =======
     GLScrollWidget ( ViewerContext* context, GLWidget* widget );
 >>>>>>> 47b45ba... fix some bugs

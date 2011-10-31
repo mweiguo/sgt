@@ -52,9 +52,12 @@ void Document::openScene ( GLWidget* widget, const char* filename )
 
     clock_t t = clock();
 <<<<<<< HEAD
+<<<<<<< HEAD
     sceneid = r2d_load_scene ( filename );
     cout << "load " << filename << " finished, ellapse " << clock() - t << endl;
 =======
+=======
+>>>>>>> 47b45ba... fix some bugs
     closeScene();
     if ( (sceneid = r2d_load_scene ( filename )) != -1 ) {
 //        r2d_continue_load_resources ( sceneid );
@@ -62,6 +65,9 @@ void Document::openScene ( GLWidget* widget, const char* filename )
     } else {
         cerr << "load " << filename << " failed, ellapse " << clock() - t << endl;
     }
+<<<<<<< HEAD
+>>>>>>> 47b45ba... fix some bugs
+=======
 >>>>>>> 47b45ba... fix some bugs
 }
 

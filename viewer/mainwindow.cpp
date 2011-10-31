@@ -26,10 +26,13 @@ MainWindow::MainWindow()
     shareWidget = new QGLWidget ( fmt );
     // displayer
 <<<<<<< HEAD
+<<<<<<< HEAD
     displayer = new GLScrollWidget ( this, new GLMainView(this, &(doc->sceneid), fmt) );
     // birdview
     birdview = new GLBirdView (this, &(doc->sceneid), fmt);
 =======
+=======
+>>>>>>> 47b45ba... fix some bugs
     mainviewtools = new Tools ( context, 0 );
     ToolsEntry entry[] = {
 	{Tools::NONE_TOOL, new NoneTool(mainviewtools)},
@@ -44,6 +47,9 @@ MainWindow::MainWindow()
 
     // birdview
     birdview = new GLBirdView (context, 0, &(doc->sceneid), fmt, 0, shareWidget );
+<<<<<<< HEAD
+>>>>>>> 47b45ba... fix some bugs
+=======
 >>>>>>> 47b45ba... fix some bugs
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
@@ -99,7 +105,11 @@ void MainWindow::open()
 void MainWindow::open ( const char* filename )
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
     doc->openScene ( filename );
+=======
+    doc->openScene ( displayer->widget, filename );
+>>>>>>> 47b45ba... fix some bugs
 =======
     doc->openScene ( displayer->widget, filename );
 >>>>>>> 47b45ba... fix some bugs

@@ -109,6 +109,9 @@ struct ToolsEntry
 /* }; */
 
 class ViewerContext;
+<<<<<<< HEAD
+>>>>>>> 47b45ba... fix some bugs
+=======
 >>>>>>> 47b45ba... fix some bugs
 class Tools
 {
@@ -121,7 +124,11 @@ public:
 	KEY_TOOL      = 8
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
     Tools ( MainWindow* cont );
+=======
+    Tools ( ViewerContext* cont, GLScrollWidget* parent );
+>>>>>>> 47b45ba... fix some bugs
 =======
     Tools ( ViewerContext* cont, GLScrollWidget* parent );
 >>>>>>> 47b45ba... fix some bugs
@@ -132,8 +139,11 @@ public:
     Tool* currentTool;
     int currentToolType;
 <<<<<<< HEAD
+<<<<<<< HEAD
     MainWindow* context;
 =======
+=======
+>>>>>>> 47b45ba... fix some bugs
     ViewerContext* context;
 //    MainWindow* context;
     GLScrollWidget* parent;

@@ -16,7 +16,11 @@ class GLItemsWidget : public GLMainView
 {
 public:
 <<<<<<< HEAD
+<<<<<<< HEAD
     GLItemsWidget ( MainWindow* context, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+=======
+    GLItemsWidget ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
+>>>>>>> 47b45ba... fix some bugs
 =======
     GLItemsWidget ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
 >>>>>>> 47b45ba... fix some bugs
@@ -43,6 +47,9 @@ public:
 =======
 //    CenterWidget ( MainWindow* context, GLMainView* t, GLMainView* b, QWidget* p=0 );
     CenterWidget ( ViewerContext* context, GLScrollWidget* t, GLScrollWidget* b, QWidget* p=0 );
+<<<<<<< HEAD
+>>>>>>> 47b45ba... fix some bugs
+=======
 >>>>>>> 47b45ba... fix some bugs
     GLScrollWidget *top;
     GLScrollWidget *bottom;

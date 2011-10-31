@@ -19,6 +19,9 @@ class LayerManagerWidget;
 =======
 class Tools;
 struct ViewerContext;
+<<<<<<< HEAD
+>>>>>>> 47b45ba... fix some bugs
+=======
 >>>>>>> 47b45ba... fix some bugs
 //! [0]
 class MainWindow : public QMainWindow
