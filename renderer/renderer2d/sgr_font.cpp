@@ -106,7 +106,6 @@ Font::Font ( const char* filename )
 
 Font::~Font ()
 {
-    cout << "~~~~~~~~~~~~~~~~~~~~~~~~Font::~Font ()" << endl;
     glDeleteLists ( list_base, chnum );
     glDeleteTextures ( chnum, texture_base );
     chnum = 0;
