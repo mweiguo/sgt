@@ -34,8 +34,8 @@ test_statesetbuilder : sgr_lc.o sgr_stateset.o sgr_statesetbuilder.o test_states
 #librender2d.a : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o
 #	ar cq $@ sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o
 
-librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o
-	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o -o $@ $(SHARELINKOPT)
+librender2d.so : sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o sgr_smartiles.o
+	$(CXX) sgr_render2d.o sgr_lc.o sgr_vfculler.o sgr_statesetbuilder.o sgr_math.o sgr_stateset.o sgr_renderer.o sgr_font.o sgr_texture.o sgr_bboxupdater.o sgr_nodes.o sgr_node2lc.o mat4f.o sgr_lc2kdtree.o sgr_smartiles.o -o $@ $(SHARELINKOPT)
 
 # libslcconverter.so : sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o sgr_math.o mat4f.o
 # 	$(CXX) sgr_slcconverter.o sgr_nodes.o sgr_lc.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o sgr_node2lc.o sgr_lcreport.o sgr_bboxupdater.o sgr_stateset.o sgr_statesetbuilder.o sgr_vfculler.o sgr_math.o mat4f.o -o $@ $(SHARELINKOPT)
