@@ -3,12 +3,15 @@
 
 struct Tile
 {
-    double minmax[4];
+    float minmax[4];
     unsigned int id;
     unsigned short level;
     int texid;
+    char filename[256];
 };
 
+struct SmartTileRecord;
+/*
 struct SmartTiles
 {
     int levelcount;
@@ -16,8 +19,9 @@ struct SmartTiles
 };
 
 void InitSmartTiles ();
-void SetupTiles ( int levelcnt, double size );
-int GetTiles ( double* minmax, Tile* tiles );
+void SetupTiles ( int levelcnt, float size );
+*/
+int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles );
 
 #endif// _SGR_SMARTILES_H_
 

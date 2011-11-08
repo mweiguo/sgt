@@ -577,6 +577,7 @@ int main ( int argc, char* argv[] )
 
     {
 	SLCLayerNode* layer = new SLCLayerNode ( "background", gmat );
+        layer->pickable = false;
 	nodes.push_back ( layer );
 	SLCLODNode* lod = new SLCLODNode();
 	nodes.push_back ( lod );

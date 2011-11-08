@@ -54,10 +54,19 @@ void SLCNode::push_front_child ( SLCNode* node )
 
 SLCSceneNode::SLCSceneNode ( const char* gname ) : SLCNode(), name(gname)
 {
+//     hightlight_mat = new SLCMaterial ("hightlight_mat");
+//     hightlight_mat->background_color = vec4i ( 255, 255, 0, 255 );
+//     addChild ( hightlight_mat );
+}
+
+SLCSceneNode::~SLCSceneNode ()
+{
+//    delete hightlight_mat;
 }
 
 string SLCSceneNode::toXML () const
 {
+    calcCurrentMatrix ();
     stringstream ss;
     ss << "<scene name=\"" << name << "\">" << endl;
 
@@ -101,6 +110,7 @@ string SLCMaterial::toXML () const
 SLCLayerNode::SLCLayerNode ( const char* lname, SLCMaterial* bindmaterial ) : SLCNode(), name(lname), bindmat(bindmaterial)
 {
     visible = true;
+    pickable = true;
 }
 
 string SLCLayerNode::toXML () const
@@ -350,7 +360,7 @@ SLCPrimitiveNode* SLCTextNode::copy()
     return new SLCTextNode(*this);
 }
 
-void SLCTextNode::getMinMax ( float* minmaxabc )
+void SLCTextNode::getMinMax ( float* /*minmaxabc*/ )
 {
 }
 
@@ -456,6 +466,58 @@ void SLCPolyNode::getMinMax ( float* minmax )
 
 // --------------------------------------------------------------------------------
 
+SLCSmartTilesNode::SLCSmartTilesNode ( SLCMaterial* mat ) : SLCPrimitiveNode (mat)
+{
+    z = 0;
+    levelcnt = 0;
+}
+
+SLCSmartTilesNode::SLCSmartTilesNode ( const SLCSmartTilesNode& rhs )
+    : SLCPrimitiveNode(rhs)
+{
+    pnts[0] = rhs.pnts[0];
+    pnts[1] = rhs.pnts[1];
+    pnts[2] = rhs.pnts[2];
+    pnts[3] = rhs.pnts[3];
+    z = rhs.z;
+    levelcnt = rhs.levelcnt;
+}
+
+string SLCSmartTilesNode::toXML () const
+{
+    stringstream ss;
+    ss << "<primitive type=\"smartiles\" bindmaterial=\"" << bindmat->name << "\" levelcnt=\"" << levelcnt << "\">";
+    for ( int i=0; i<4; i++ ) {
+	float v[] = { pnts[i].x(), pnts[i].y(), z, 1 };
+	mat_multvector ( _current_matrix, v );
+	ss << v[0] << ' ' << v[1] << ' ' << v[2] << ' ';
+    }
+    ss <<"</primitive>" << endl;
+    return ss.str();
+}
+
+SLCPrimitiveNode* SLCSmartTilesNode::copy()
+{
+    return new SLCSmartTilesNode(*this);
+}
+
+void SLCSmartTilesNode::getMinMax ( float* minmax )
+{
+    BBox2d box;
+    box.init ( pnts[0] );
+    box.expandby ( pnts[1] );
+    box.expandby ( pnts[2] );
+    box.expandby ( pnts[3] );
+    minmax[0] = box.minvec().x();
+    minmax[1] = box.minvec().y();
+    minmax[2] = z;
+    minmax[3] = box.maxvec().x();
+    minmax[4] = box.maxvec().y();
+    minmax[5] = z;
+}
+
+// --------------------------------------------------------------------------------
+
 SLCTransformNode::SLCTransformNode () : SLCNode()
 {
     mat_loadidentity ( mat );
@@ -478,6 +540,8 @@ string SLCTransformNode::toXML () const
     for ( list<SLCNode*>::const_iterator pp=children.begin(); pp!=children.end(); ++pp )
 	ss << (*pp)->toXML();
 
+    _current_matrix_stack.pop_back ();
+    calcCurrentMatrix ();
 //     ss <<"</transform>" << endl;
     return ss.str();
 }

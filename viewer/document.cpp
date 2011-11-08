@@ -16,23 +16,23 @@ Document::Document()
 
 void Document::init ( GLWidget* widget, QGLWidget* birdwidget )
 {
-	widget->makeCurrent();
-	if ( (miscsceneid = r2d_load_scene ( "miscscene.slc" )) == -1 )
-		cerr << "load miscscene.slc failed" << endl;
-	else {
-		//sharewidget->makeCurrent();
-		//r2d_continue_load_resources ( miscsceneid );
-		cout << "load miscscene.slc succeeded" << endl;
-	}
+    widget->makeCurrent();
+    if ( (miscsceneid = r2d_load_scene ( "miscscene.slc" )) == -1 )
+        cerr << "load miscscene.slc failed" << endl;
+    else {
+        //sharewidget->makeCurrent();
+        //r2d_continue_load_resources ( miscsceneid );
+        cout << "load miscscene.slc succeeded." << miscsceneid << endl;
+    }
 
-	birdwidget->makeCurrent();
-	if ( (birdviewmiscid = r2d_load_scene ( "birdviewmisc.slc" )) == -1 )
-		cerr << "load birdviewmisc.slc failed" << endl;
-	else {
-		//sharewidget->makeCurrent();
-		//r2d_continue_load_resources ( birdviewmiscid );
-		cerr << "load birdviewmisc.slc succeeded" << endl;
-	}
+    birdwidget->makeCurrent();
+    if ( (birdviewmiscid = r2d_load_scene ( "birdviewmisc.slc" )) == -1 )
+        cerr << "load birdviewmisc.slc failed" << endl;
+    else {
+        //sharewidget->makeCurrent();
+        //r2d_continue_load_resources ( birdviewmiscid );
+        cout << "load birdviewmisc.slc succeeded. " << birdviewmiscid << endl;
+    }
 }
 
 Document::~Document ()

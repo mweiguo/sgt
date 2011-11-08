@@ -2,6 +2,8 @@
 #include <iostream>
 using namespace std; 
 
+/** check wether rhs outside lhs
+ */
 bool is_outside ( const BBox2d& lhs, const BBox2d& rhs )
 {
     if (lhs.maxvec().x() < rhs.minvec().x() || 
@@ -12,12 +14,14 @@ bool is_outside ( const BBox2d& lhs, const BBox2d& rhs )
     return false;
 }
 
+/** check if rhs inside lhs
+ */
 bool is_inside ( const BBox2d& lhs, const BBox2d& rhs )
 {
-    if (lhs.maxvec().x() <= rhs.maxvec().x() &&
-        lhs.minvec().x() >= rhs.minvec().x() &&
-        lhs.maxvec().y() <= rhs.maxvec().y() &&
-        lhs.minvec().y() >= rhs.minvec().y() )
+    if (lhs.minvec().x() <= rhs.minvec().x() &&
+        lhs.maxvec().x() >= rhs.maxvec().x() &&
+        lhs.minvec().y() <= rhs.minvec().y() &&
+        lhs.maxvec().y() >= rhs.maxvec().y() )
         return true;
     return false;
 }
@@ -118,6 +122,36 @@ bool line_outside25 ( float* line, const BBox2d& rhs )
         return true;
 }
 
+bool line_inside ( float* line, const BBox2d& rhs )
+{
+    float x1 = *line;
+    float y1 = *(line+1);
+    float x2 = *(line+2);
+    float y2 = *(line+3);
+
+    if ( x1>=rhs.minvec().x() && x1<=rhs.maxvec().x() &&
+         y1>=rhs.minvec().y() && y1<=rhs.maxvec().y() &&
+         x2>=rhs.minvec().x() && x2<=rhs.maxvec().x() &&
+         y2>=rhs.minvec().y() && y2<=rhs.maxvec().y() )
+        return true;
+    return false;
+}
+
+bool line_inside25 ( float* line, const BBox2d& rhs )
+{
+    float x1 = *line;
+    float y1 = *(line+1);
+    float x2 = *(line+3);
+    float y2 = *(line+4);
+
+    if ( x1>=rhs.minvec().x() && x1<=rhs.maxvec().x() &&
+         y1>=rhs.minvec().y() && y1<=rhs.maxvec().y() &&
+         x2>=rhs.minvec().x() && x2<=rhs.maxvec().x() &&
+         y2>=rhs.minvec().y() && y2<=rhs.maxvec().y() )
+        return true;
+    return false;
+}
+
 bool tri_outside ( float* tri, const BBox2d& rhs )
 {
     // 1. do box_outside test
@@ -126,6 +160,25 @@ bool tri_outside ( float* tri, const BBox2d& rhs )
     if ( line_outside ( tri, rhs ) &&
          line_outside ( tri+2, rhs ) &&
          line_outside ( tmp, rhs ) )
+        return true;
+    return false;
+}
+
+bool tri_inside ( float* tri, const BBox2d& rhs )
+{
+    float x1 = *tri;
+    float y1 = *(tri+1);
+    float x2 = *(tri+2);
+    float y2 = *(tri+3);
+    float x3 = *(tri+4);
+    float y3 = *(tri+5);
+
+    if ( x1>=rhs.minvec().x() && x1<=rhs.maxvec().x() &&
+         y1>=rhs.minvec().y() && y1<=rhs.maxvec().y() &&
+         x2>=rhs.minvec().x() && x2<=rhs.maxvec().x() &&
+         y2>=rhs.minvec().y() && y2<=rhs.maxvec().y() &&
+         x3>=rhs.minvec().x() && x3<=rhs.maxvec().x() &&
+         y3>=rhs.minvec().y() && y3<=rhs.maxvec().y() )
         return true;
     return false;
 }
@@ -148,6 +201,29 @@ bool rect_outside ( float* rc, const BBox2d& rhs )
     return false;
 }
 
+bool rect_inside ( float* rc, const BBox2d& rhs )
+{
+    float x1 = *rc;
+    float y1 = *(rc+1);
+    float x2 = *(rc+2);
+    float y2 = *(rc+3);
+    float x3 = *(rc+4);
+    float y3 = *(rc+5);
+    float x4 = *(rc+6);
+    float y4 = *(rc+7);
+
+    if ( x1>=rhs.minvec().x() && x1<=rhs.maxvec().x() &&
+         y1>=rhs.minvec().y() && y1<=rhs.maxvec().y() &&
+         x2>=rhs.minvec().x() && x2<=rhs.maxvec().x() &&
+         y2>=rhs.minvec().y() && y2<=rhs.maxvec().y() &&
+         x3>=rhs.minvec().x() && x3<=rhs.maxvec().x() &&
+         y3>=rhs.minvec().y() && y3<=rhs.maxvec().y() &&
+         x4>=rhs.minvec().x() && x4<=rhs.maxvec().x() &&
+         y4>=rhs.minvec().y() && y4<=rhs.maxvec().y() )
+        return true;
+    return false;
+}
+
 bool rect_outside25 ( float* rc, const BBox2d& rhs )
 {
     // 1. do box_outside test
@@ -166,10 +242,32 @@ bool rect_outside25 ( float* rc, const BBox2d& rhs )
     return false;
 }
 
+bool rect_inside25 ( float* rc, const BBox2d& rhs )
+{
+    float x1 = *rc;
+    float y1 = *(rc+1);
+    float x2 = *(rc+3);
+    float y2 = *(rc+4);
+    float x3 = *(rc+6);
+    float y3 = *(rc+7);
+    float x4 = *(rc+9);
+    float y4 = *(rc+10);
+
+    if ( x1>=rhs.minvec().x() && x1<=rhs.maxvec().x() &&
+         y1>=rhs.minvec().y() && y1<=rhs.maxvec().y() &&
+         x2>=rhs.minvec().x() && x2<=rhs.maxvec().x() &&
+         y2>=rhs.minvec().y() && y2<=rhs.maxvec().y() &&
+         x3>=rhs.minvec().x() && x3<=rhs.maxvec().x() &&
+         y3>=rhs.minvec().y() && y3<=rhs.maxvec().y() &&
+         x4>=rhs.minvec().x() && x4<=rhs.maxvec().x() &&
+         y4>=rhs.minvec().y() && y4<=rhs.maxvec().y() )
+        return true;
+    return false;
+}
+
 bool poly_outside ( float* poly, int pntcnt, const BBox2d& rhs )
 {
     int cnt = pntcnt * 2;
-//    pntcnt--;
     for ( int i=0; i<cnt; i+=2 )
     {
         if ( false == line_outside ( poly+i, rhs ) ){
@@ -179,15 +277,42 @@ bool poly_outside ( float* poly, int pntcnt, const BBox2d& rhs )
     return true;
 }
 
+bool poly_inside ( float* poly, int pntcnt, const BBox2d& rhs )
+{
+    int cnt = pntcnt * 2;
+    for ( int i=0; i<cnt; i+=2 )
+    {
+        float x = *(poly+i);
+        float y = *(poly+i+1);
+        if ( x<rhs.minvec().x() || x>rhs.maxvec().x() ||
+             y<rhs.minvec().y() || y>rhs.maxvec().y() )
+            return false;
+    }
+    return true;
+}
+
 bool poly_outside25 ( float* poly, int pntcnt, const BBox2d& rhs )
 {
     int cnt = pntcnt * 2;
-//    pntcnt--;
     for ( int i=0; i<cnt; i+=3 )
     {
         if ( false == line_outside25 ( poly+i, rhs ) ){
 	    return false;
 	}
+    }
+    return true;
+}
+
+bool poly_inside25 ( float* poly, int pntcnt, const BBox2d& rhs )
+{
+    int cnt = pntcnt * 3;
+    for ( int i=0; i<cnt; i+=3 )
+    {
+        float x = *(poly+i);
+        float y = *(poly+i+1);
+        if ( x<rhs.minvec().x() || x>rhs.maxvec().x() ||
+             y<rhs.minvec().y() || y>rhs.maxvec().y() )
+            return false;
     }
     return true;
 }

@@ -23,22 +23,28 @@ MainWindow::MainWindow()
     fmt.setDepth ( true );
     fmt.setDoubleBuffer ( true );
     fmt.setRgba ( true );
-    shareWidget = new QGLWidget ( fmt );
+    resWidget = new GLResourceWidget ( this );
+    resWidget->setFormat ( fmt );
+    resWidget->setMinimumSize ( 0, 0 );
+    resWidget->setMaximumSize ( 0, 0 );
+//    shareWidget = new QGLWidget ( fmt );
     // displayer
     mainviewtools = new Tools ( context, 0 );
     ToolsEntry entry[] = {
 	{Tools::NONE_TOOL, new NoneTool(mainviewtools)},
 	{Tools::ZOOM_TOOL, new ZoomTool(mainviewtools)},
 	{Tools::HAND_TOOL, new HandTool(mainviewtools)},
+	{Tools::ARROW_TOOL, new ArrowTool(mainviewtools)},
 	{0, 0}
     };
     mainviewtools->setTools ( entry );
-    GLMainView* mainview = new GLMainView(context, mainviewtools, &(doc->sceneid), fmt, 0, shareWidget );
+    GLMainView* mainview = new GLMainView(context, mainviewtools, &(doc->sceneid), fmt, this, resWidget );
+//    GLMainView* mainview = new GLMainView(context, mainviewtools, &(doc->sceneid), fmt, this );
     displayer = new GLScrollWidget ( context, mainview );
     mainviewtools->parent = displayer;
 
     // birdview
-    birdview = new GLBirdView (context, 0, &(doc->sceneid), fmt, 0, shareWidget );
+    birdview = new GLBirdView (context, 0, &(doc->sceneid), fmt );
     connect ( displayer, 
 	      SIGNAL(transformChanged(float,float,float,float)),
 	      this,
@@ -56,6 +62,9 @@ MainWindow::MainWindow()
     setUnifiedTitleAndToolBarOnMac(true);
     setMouseTracking ( false );
     r2d_init ();
+
+    arrowAct->setChecked(true);
+    actionEvent( arrowAct );
 }
 
 MainWindow::~MainWindow()
@@ -63,12 +72,17 @@ MainWindow::~MainWindow()
     delete context;
     delete doc;
     delete mainviewtools;
-    delete shareWidget;
+//    delete shareWidget;
+}
+
+void MainWindow::postLoadTexture ( Tile* tile, int cnt )
+{
+    emit onLoadTexture ( resWidget, tile, cnt );
 }
 
 void MainWindow::init ()
 {
-    doc->init ( displayer->widget, shareWidget );
+    doc->init ( displayer->widget, birdview );
 }
 
 void MainWindow::open()
@@ -83,16 +97,23 @@ void MainWindow::open()
     }
     catch ( exception& ex )
     {
-	cout << ex.what() << endl;
+	cerr << ex.what() << endl;
     }
 }
 
 void MainWindow::open ( const char* filename )
 {
-    doc->openScene ( displayer->widget, filename );
-    layerManagerWidget->loadFromScene ( doc->sceneid );
-    displayer->homeposition();
-    birdview->homeposition();
+    try
+    {
+        doc->openScene ( displayer->widget, filename );
+        layerManagerWidget->loadFromScene ( doc->sceneid );
+        displayer->homeposition();
+        birdview->homeposition();
+    }
+    catch ( exception& ex )
+    {
+	cerr << ex.what() << endl;
+    }
 }
 
 void MainWindow::about()
@@ -112,6 +133,8 @@ void MainWindow::actionEvent( QAction* action )
 	    displayer->widget->tools->selectTool ( Tools::ZOOM_TOOL );
 	else if ( action == handAct )
 	    displayer->widget->tools->selectTool ( Tools::HAND_TOOL );
+	else if ( action == arrowAct )
+	    displayer->widget->tools->selectTool ( Tools::ARROW_TOOL );
     }
     catch ( exception& ex )
     {
@@ -125,7 +148,6 @@ void MainWindow::onMainViewTransformChanged(float x1, float y1, float x2, float 
 {
     try
     {
-//	cout << "-----------------MainWindow::onMainViewTransformChanged" << endl;
 	if ( doc->birdviewmiscid != -1 )
 	{
 	    if ( birdview->rectid == -1 )
@@ -175,7 +197,7 @@ void MainWindow::createActions()
     aboutQtAct = new QAction(tr("About &Qt"), this);
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-
+    
     lst.clear();
     lst.push_back ( QKeySequence::ZoomIn );
     lst.push_back ( QKeySequence (Qt::CTRL + Qt::Key_PageUp) );
@@ -203,10 +225,16 @@ void MainWindow::createActions()
     handAct->setStatusTip(tr("use a hand tool to move the canvas"));
     handAct->setCheckable ( true );
 
+    arrowAct = new QAction(QIcon("images/arrow.png"), tr("&Arrow..."), this);
+    arrowAct->setShortcut( QKeySequence( Qt::CTRL + Qt::Key_J ) );
+    arrowAct->setStatusTip(tr("Arrow tool"));
+    arrowAct->setCheckable ( true );
+
     navigroup = new QActionGroup( this );
     navigroup->setExclusive ( true );
     navigroup->addAction ( winzoomAct );
     navigroup->addAction ( handAct );
+    navigroup->addAction ( arrowAct );
     connect(navigroup, SIGNAL(triggered(QAction*)), this, SLOT(actionEvent(QAction*)));
 
     leftAct = new QAction(tr("Left Translate "), this);
@@ -297,5 +325,33 @@ void MainWindow::createDockWindows()
     dock->setMaximumSize ( 230, 200 );
     dock->setWidget(birdview);
     addDockWidget(Qt::RightDockWidgetArea, dock);
+}
+
+//--------------------------------------------------------------------------------
+
+void MyThread::onLoadTexture (GLResourceWidget* widget, Tile* tile, int cnt)
+{
+    cout << "-------------------MyThread::onLoadTexture cnt = " << cnt << endl;
+    for ( int i=0; i<cnt; i++ ) {
+        map<string,int>::iterator pp = textures.find ( tile->filename );
+        if ( pp != textures.end() ) {
+            tile->texid = pp->second;
+            cout << "found texture " << tile->filename << endl;
+        } else {
+            cout << "not found texture " << tile->filename << " in memory. ";
+            tile->texid = widget->loadTexture ( tile->filename ); 
+            if ( tile->texid == 0 ) {
+                tile->texid = -1;
+                cout << " load texture failed " << endl;
+            } else {
+                textures.insert ( pair<string,int>(tile->filename, tile->texid) );
+                cout << " load texture success " << tile->texid << endl;
+            }
+        }
+
+        if ( tile->texid != -1 )
+            emit UpdateWidget();
+        tile ++;
+    }
 }
 

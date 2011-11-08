@@ -9,10 +9,9 @@ int main ( int argc, char* argv[] )
     if ( argc != 2 )
     {
 	cout << "usage : " << argv[0] << " outputFileName" << endl;
-	cout << argv[0] << " will generate xml format for a simple scene" << endl;
+	cout << argv[0] << " will generate xml format for a simple scene." << endl;
 	return 0;
     }
-
     list<SLCNode*> nodes;
     SLCSceneNode scene ("test_scene");
     {
@@ -28,7 +27,7 @@ int main ( int argc, char* argv[] )
 	mat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_DASH;
 	mat->linewidth = 1;
 	mat->fontfilename = "simhei.ttf";
-	SLCLayerNode* layer = new SLCLayerNode ( "layer1", mat_layer );
+	SLCLayerNode* layer = new SLCLayerNode ( "layer11", mat_layer );
 	SLCLODNode* lod = new SLCLODNode();
 	SLCLODPageNode* lodpage = new SLCLODPageNode();
 	lodpage->delayloading = false;
@@ -47,7 +46,7 @@ int main ( int argc, char* argv[] )
 	txt->pos.xy ( 10, 20 );
 	txt->scale = 1.5;
 	txt->rotz = 45;
-	txt->text = "china中国";
+	txt->text = "chi中国";
 	SLCPLineNode* pline = new SLCPLineNode ( mat_layer );
 	pline->pnts.push_back ( vec2f(0,0) );
 	pline->pnts.push_back ( vec2f(1,0) );
@@ -66,7 +65,7 @@ int main ( int argc, char* argv[] )
 	lodpage2->kdtree = "lodpage2.xml";
 	lodpage2->imposter = false;
 
-	SLCLayerNode* layer2 = new SLCLayerNode ( "layer2", mat_layer );
+	SLCLayerNode* layer2 = new SLCLayerNode ( "layer21", mat_layer );
 	SLCLODNode* lod2 = new SLCLODNode ();
 	SLCLODPageNode* lodpage3 = new SLCLODPageNode();
 	lodpage3->delayloading = false;
@@ -76,6 +75,14 @@ int main ( int argc, char* argv[] )
 	rc4->pnts[0] = vec2f (0, 0); rc4->pnts[1] = vec2f (1, 1);
 	rc4->pnts[2] = vec2f (2, 2); rc4->pnts[3] = vec2f (3, 3);
 
+        SLCSmartTilesNode* tiles = new SLCSmartTilesNode ( mat );
+        tiles->pnts[0] = vec2f ( 0, 0 );
+        tiles->pnts[1] = vec2f ( 25600, 0 );
+        tiles->pnts[2] = vec2f ( 25600, 25600 );
+        tiles->pnts[3] = vec2f ( 0, 25600 );
+        tiles->z = 0;
+        tiles->levelcnt = 6;
+  
 	scene.addChild ( mat_layer );
 	scene.addChild ( mat );
 	scene.addChild ( layer );
@@ -91,6 +98,7 @@ int main ( int argc, char* argv[] )
 	lodpage->addChild ( pline );
 	lodpage->addChild ( poly );
 
+        layer2->addChild ( tiles );
 	layer2->addChild ( lod2 );
 	lod2->addChild ( lodpage3 );
 	lodpage3->addChild ( rc4 );
@@ -111,6 +119,7 @@ int main ( int argc, char* argv[] )
 	nodes.push_back ( lod2 );
 	nodes.push_back ( lodpage3 );
 	nodes.push_back ( rc4 );
+        nodes.push_back ( tiles );
     }
     
     ofstream o;

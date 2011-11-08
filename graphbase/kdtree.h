@@ -115,6 +115,9 @@ public:
     template<class Output>
     bool intersect ( LC* lc, const float* minmax, Output out, int nodeidx=0 );
 
+    template<class Output>
+    bool contain ( LC* lc, const float* minmax, Output out, int nodeidx=0 );
+
     void clear ();
 
     void save ( const char* filename );
@@ -171,7 +174,7 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 	 
     if ( node.first >= 0 ) // if node is not leaf
     {
-	if ( true == is_inside ( node.minmax, minmax ) )
+	if ( true == is_inside ( minmax, node.minmax ) )
 	{
 	    // find most left leaf node
 	    KdNode* leftnode = &node;
@@ -279,6 +282,139 @@ bool KdTree<T>::intersect ( LC* lc, const float* minmax, Output out, int nodeidx
 		{
 		    TextRecord& text = lc->textEntry->LCRecords[grd.value];
 		    if ( false == poly_outside25 ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
+						 text.silhouetteEnd - text.silhouetteStart , minmax ) ) {
+			*out++ = _primitives[i];
+			isHit = true;
+		    }
+		    break;
+		}
+		default:
+		    break;
+		}
+	    }
+	    return isHit;
+	}
+    }
+
+    return true;
+}
+
+//================================================================================
+
+/** this function will find all objects which complete inside minmax
+ */
+template<class T>
+template<class Output >
+bool KdTree<T>::contain ( LC* lc, const float* minmax, Output out, int nodeidx )
+{
+    intersect_cnt ++;
+    KdNode& node = _nodes[nodeidx];
+
+    if ( true == is_outside ( node.minmax, minmax ) )
+	return false;
+	 
+    if ( node.first >= 0 ) // if node is not leaf
+    {
+	if ( true == is_inside ( minmax, node.minmax ) )
+	{
+	    // find most left leaf node
+	    KdNode* leftnode = &node;
+	    KdNode* rightnode = &node;
+	    do {
+		leftnode = &(_nodes[leftnode->first]); 
+	    } while ( leftnode->first >= 0 );
+	    
+	    // find most right leaf node
+	    do {
+		rightnode = &(_nodes[rightnode->second]); 
+	    } while ( rightnode->first >= 0 );
+	    
+	    int istart = -rightnode->first-1;
+	    int iend = istart + rightnode->second;
+	    istart = -leftnode->first-1;
+	    for ( int i=istart; i!=iend; i++ ) 
+		*out++ = _primitives[i];
+	    return true;
+	}
+	else
+	{
+	    bool isHit = false;
+	    if ( true == contain ( lc, minmax, out, node.first) )
+		isHit = true;
+	    if ( true == contain ( lc, minmax, out, node.second ) )
+		isHit = true;
+	    return isHit;
+	}
+    }
+    else   // if node is leaf 
+    {
+	if ( node.second > 0 ) // there have primitives in this leaf
+	{
+	    int istart = -node.first-1;
+	    int iend = istart + node.second;
+	    bool isHit = false;
+	    for ( int i=istart; i!=iend; i++ ) 
+	    {
+		GlobalLCRecord& grd = lc->globalLCEntry->LCRecords[ _primitives[i] ];
+		switch ( grd.type )
+		{
+		case SLC_LINE:
+		{
+		    LineRecord& lrd = lc->lineEntry->LCRecords[grd.value];
+		    if ( true == line_inside ( (float*)lrd.data, minmax ) ) {
+			*out++ = _primitives[i];
+			isHit = true;
+		    }
+		    break;
+		}
+		case SLC_PLINE:
+		{
+		    PLineRecord& pline = lc->plineEntry->LCRecords[grd.value];
+		    for ( int ii=pline.start; ii<pline.end; ii++ )
+		    {
+			if ( true == line_inside25 ( (float*)(&lc->plineBufferEntry->LCRecords[ii]), minmax ) ) {
+			    *out++ = _primitives[i];
+			    isHit = true;
+			    break;
+			}
+		    }
+		    break;
+		}
+		case SLC_POLY:
+		{
+		    PolyRecord& poly = lc->polyEntry->LCRecords[grd.value];
+		    for ( int ii=poly.start; ii<poly.end; ii++ )
+		    {
+			if ( true == line_inside25 ( (float*)(&lc->plineBufferEntry->LCRecords[ii]), minmax ) ) {
+			    *out++ = _primitives[i];
+			    isHit = true;
+			    break;
+			}
+		    }
+		    break;
+		}
+		case SLC_TRIANGLE:
+		{
+		    TriangleRecord& trd = lc->triangleEntry->LCRecords[grd.value];
+		    if ( true == tri_inside ( (float*)trd.data, minmax ) ) {
+			*out++ = _primitives[i];
+			isHit = true;
+		    }
+		    break;
+		}
+		case SLC_RECT:
+		{
+		    RectRecord& rrd = lc->rectEntry->LCRecords[grd.value];
+		    if ( true == rect_inside25 ( (float*)(&(rrd.data[0])), minmax ) ) {
+			*out++ = _primitives[i];
+			isHit = true;
+		    }
+		    break;
+		}
+		case SLC_TEXT:
+		{
+		    TextRecord& text = lc->textEntry->LCRecords[grd.value];
+		    if ( true == poly_inside25 ( (float*)(lc->textSilhouetteBufferEntry->LCRecords + text.silhouetteStart),
 						 text.silhouetteEnd - text.silhouetteStart , minmax ) ) {
 			*out++ = _primitives[i];
 			isHit = true;

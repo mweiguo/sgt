@@ -11,6 +11,7 @@
 #define SLC_RECT            7
 #define SLC_TEXT            8
 #define SLC_IMAGE           9
+#define SLC_SMARTILES       10
 
 #define SLC_MODEL           100
 #define SLC_APPEARANCE      110

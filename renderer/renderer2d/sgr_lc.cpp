@@ -19,6 +19,8 @@ using namespace std;
 #include <IL/il.h>
 #include <IL/ilut.h>
 
+LoadTex_Proc loadtex_proc = 0;
+
 void initLC ()
 {
     ilInit();
@@ -78,12 +80,13 @@ MaterialRecord::MaterialRecord ( const char* nm, const vec4i& bg, const vec4i& f
 
 // --------------------------------------------------------------------------------
 
-LayerRecord::LayerRecord ( const char* nm, bool isVisible, int matIdx )
+LayerRecord::LayerRecord ( const char* nm, bool isVisible, bool isPickable, int matIdx )
 {
     memset  ( name,  0, 32 * sizeof(char) ); 
     strncpy ( name, nm, 32 ); 
     materialIdx = matIdx;
     visible = isVisible;
+    pickable = isPickable;
 }
 
 // --------------------------------------------------------------------------------
@@ -210,6 +213,25 @@ PolyRecord::PolyRecord ( int s, int e, int ts, int te, int tessStart, int tessEn
 
 // --------------------------------------------------------------------------------
 
+SmartTileRecord::SmartTileRecord ()
+{
+    levelcnt = 0;
+    tilecnt = 0;    
+}
+
+SmartTileRecord::SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int l, int matidx )
+    : DrawableRecord ( matidx )
+{
+    data[0] = p0;
+    data[1] = p1;
+    data[2] = p2;
+    data[3] = p3;
+    levelcnt = l;
+    tilecnt = 0;
+}
+
+// --------------------------------------------------------------------------------
+
 LC::LC ()
 {
     globalLCEntry = 0;
@@ -228,6 +250,7 @@ LC::LC ()
     plineBufferEntry   = 0;
     polyTessellationBufferEntry = 0;
     texCoordBufferEntry = 0;
+    smartTilesEntry     = 0;
 
     cursorDepth = 0;
     memset ( cursor, 0, sizeof(int)*256);
@@ -250,8 +273,10 @@ void LC::save ( const char* filename )
     // write meterial data
     if ( NULL==materialEntry || 0==materialEntry->LCLen ) {
         MaterialEntry tmp; out.write ( (char*)&tmp, sizeof(MaterialEntry) );
-    } else
+    } else {
+        materialEntry->LCLen /= 2;
         out.write ( (char*)materialEntry, materialEntry->LCLen * sizeof(MaterialRecord) + sizeof(int) );
+    }
     // write layer data
     if ( NULL==layerEntry || 0==layerEntry->LCLen ) {
         LayerEntry tmp; out.write ( (char*)&tmp, sizeof(LayerEntry) );
@@ -330,6 +355,14 @@ void LC::save ( const char* filename )
     } else {
         out.write ( (char*)texCoordBufferEntry, texCoordBufferEntry->LCLen * sizeof(vec2f) + sizeof(int) );
     }
+    // write smartiles data
+    if ( NULL==smartTilesEntry || 0==smartTilesEntry->LCLen ) {
+	SmartTilesEntry tmp;
+	out.write ( (char*)&tmp, sizeof(SmartTilesEntry) );
+    } else {
+        out.write ( (char*)smartTilesEntry, smartTilesEntry->LCLen * sizeof(SmartTileRecord) + sizeof(int) );
+    }
+
 
     // write globalLCEntry
     out.write ( (char*)globalLCEntry, globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) );
@@ -382,11 +415,14 @@ bool LC::load ( const char* filename )
     // read material data
     in.read ( (char*)&length, sizeof(int) );
     sz = length==0 ? sizeof(MaterialRecord) : sizeof(MaterialRecord) * length;
-    materialEntry = (MaterialEntry*)malloc ( sizeof(int) + sz );
-    materialEntry->LCLen = length;
+    if ( length == 0 ) materialEntry = (MaterialEntry*)malloc ( sizeof(int) + sz );
+    else               materialEntry = (MaterialEntry*)malloc ( sizeof(int) + sz * 2 );
+    materialEntry->LCLen = length * 2;
     in.read ( (char*)materialEntry->LCRecords, sz );
+    if ( length != 0 )
+        memcpy ( materialEntry->LCRecords+length, materialEntry->LCRecords, sz );
       // process fonts
-    for ( int ii=0; ii<materialEntry->LCLen; ii++ )
+    for ( int ii=0; ii<length; ii++ )
     {
 	Font* ft = 0;
 	MaterialRecord& mr = materialEntry->LCRecords[ii];
@@ -408,7 +444,7 @@ bool LC::load ( const char* filename )
 	}
     }
       // process textures
-    for ( int ii=0; ii<materialEntry->LCLen; ii++ )
+    for ( int ii=0; ii<length; ii++ )
     {
 	Texture* tex = 0;
 	MaterialRecord& mr = materialEntry->LCRecords[ii];
@@ -515,6 +551,12 @@ bool LC::load ( const char* filename )
     texCoordBufferEntry = (TexCoordBufferEntry*)malloc ( sz );
     texCoordBufferEntry->LCLen = length;
     in.read ( (char*)texCoordBufferEntry->LCRecords, sz-sizeof(int) );
+    // read smartiles data
+    in.read ( (char*)&length, sizeof(int) );
+    sz = length==0 ? sizeof(SmartTilesEntry) : (sizeof(int) + sizeof(SmartTileRecord) * length);
+    smartTilesEntry = (SmartTilesEntry*)malloc ( sz );
+    smartTilesEntry->LCLen = length;
+    in.read ( (char*)smartTilesEntry->LCRecords, sz-sizeof(int) );
 
     // read GlobalLCEntry
     in.read ( (char*)&length, sizeof(int) );
@@ -573,6 +615,7 @@ void LC::free ()
     ::free ( plineBufferEntry );
     ::free ( polyTessellationBufferEntry );
     ::free ( texCoordBufferEntry );
+    ::free ( smartTilesEntry );
     ::free ( globalLCEntry );
     for ( int i=0; i<256; i++ )
     {
@@ -599,6 +642,7 @@ void LC::free ()
     plineBufferEntry = 0;
     polyTessellationBufferEntry = 0;
     texCoordBufferEntry = 0;
+    smartTilesEntry = 0;
     globalLCEntry = 0;
 
     for ( vector<Font*>::iterator pp=fonts.begin(); pp!=fonts.end(); ++pp )
@@ -752,6 +796,8 @@ string LC::getTypeStr ()
         return "RectNode";
     case SLC_TEXT:
         return "TextNode";
+    case SLC_SMARTILES:
+        return "SmartTiles";
     default:
         return "Unknown Type";
     }
@@ -835,32 +881,35 @@ void LC::updateMinMax ()
     BBox2d bbox;
     switch ( grecord.type )
     {
+    case SLC_SMARTILES:
+    {
+        SmartTileRecord& quad = smartTilesEntry->LCRecords[grecord.value];
+        vec3f& p0 = quad.data[0];
+        vec3f& p1 = quad.data[1];
+        vec3f& p2 = quad.data[2];
+        vec3f& p3 = quad.data[3];
+        bbox.init ( p0.xy() );
+        bbox.expandby ( p1.xy() );
+        bbox.expandby ( p2.xy() );
+        bbox.expandby ( p3.xy() );
+        break;
+    }
     case SLC_PLINE:
     {
-//	cout << "updateBBox pline" << endl;
 	PLineRecord& pline = plineEntry->LCRecords[grecord.value];
-//	cout << "updateBBox pline1" << endl;
 	if ( pline.start < pline.end )
 	{
-//	    cout << "updateBBox pline2" << endl;
 	    bbox.init ( plineBufferEntry->LCRecords[pline.start].xy() );
-//	    cout << "updateBBox pline3" << endl;
 	    for ( int i=pline.start; i<pline.end; i++ )
 	    {
-//		cout << "updateBBox pline4 i=" << i << ", plineBufferEntry->LCLen = " << plineBufferEntry->LCLen << endl;
 		bbox.expandby ( plineBufferEntry->LCRecords[i].xy() );
-//		cout << "updateBBox pline4.1" << endl;
 	    }
-//	    cout << "updateBBox pline5" << endl;
 	}
-//	cout << "updateBBox pline ok" << endl;
 	break;
     }
     case SLC_POLY:
     {
-//	vector<vec2f> input, output;
 	// update minmax
-//	cout << "updateBBox poly" << endl;
 	PolyRecord& poly = polyEntry->LCRecords[grecord.value];
 	if ( poly.start < poly.end )
 	{
@@ -870,25 +919,15 @@ void LC::updateMinMax ()
 		bbox.expandby ( plineBufferEntry->LCRecords[i].xy() );
 	    }
 	}
-//	cout << "updateBBox poly ok" << endl;
-// 	// update tessellation points
-// 	Triangulate::Process ( input, back_inserter(output) );
-// 	int j = 0;
-// 	for ( int i=poly.tessellationstart; i!=poly.tessellationend; i++ )
-// 	{
-// 	    polyTessellationBufferEntry->LCRecords[i] = output[j++];
-// 	}
 	break;
     }
     case SLC_LINE:
     {
-//	cout << "updateBBox line" << endl;
         LineRecord& line = lineEntry->LCRecords[grecord.value];
         vec2f& p0 = line.data[0];
         vec2f& p1 = line.data[1];
         bbox.init ( p0 );
         bbox.expandby ( p1 );
-//	cout << "updateBBox line ok" << endl;
         break;
     }
     case SLC_TRIANGLE:
@@ -904,7 +943,6 @@ void LC::updateMinMax ()
     }
     case SLC_RECT:
     {
-//	cout << "updateBBox rect" << endl;
         RectRecord& quad = rectEntry->LCRecords[grecord.value];
         vec3f& p0 = quad.data[0];
         vec3f& p1 = quad.data[1];
@@ -914,12 +952,10 @@ void LC::updateMinMax ()
         bbox.expandby ( p1.xy() );
         bbox.expandby ( p2.xy() );
         bbox.expandby ( p3.xy() );
-//	cout << "updateBBox rect ok" << endl;
         break;
     }
     case SLC_TEXT:
     {
-//	cout << "updateBBox text" << endl;
         TextRecord& text = textEntry->LCRecords[grecord.value];
 	MaterialRecord& mat = materialEntry->LCRecords[text.materialIdx];
 	Font* font = fonts[mat.fontIdx];
@@ -927,15 +963,12 @@ void LC::updateMinMax ()
 	vec3f& v1 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+1];
 	vec3f& v2 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+2];
 	vec3f& v3 = textSilhouetteBufferEntry->LCRecords[text.silhouetteStart+3];
-//	TextSilhouetteRecord& silhouette = textSilhouettes[grecord.value];
 	
 	string content = textBufferEntry->LCRecords + text.start;
 	
 	bbox.init ( text.pos.xy() );
 	float w=0, h=0;
 	font->getSize (content.c_str(), w, h );
-//	cout << "x,y,w,h = " << text.pos.x() << "," << text.pos.y() << "," << w << "," << h << ". text.rotz:" << text.rotz << ".text.scale:" << text.scale << endl;
-// 	unsigned int strcnt = utf8_strlen ( content.c_str() );
 	bbox.expandby ( text.pos.xy() + vec2f(w, h ) );
 	mat4f m;
 	m *= mat4f::translate_matrix ( text.pos.x(), text.pos.y(), 0 );
@@ -945,25 +978,20 @@ void LC::updateMinMax ()
 	// set bbox & silhouette
 	vec4f tmp = m * vec4f(0, 0, text.pos.z(), 1);
 	v0 = tmp.xy();
-//	cout << v0.x() << "," << v0.y() << endl;
 	bbox.init ( v0 );
 
 	tmp = m * vec4f ( w, 0, text.pos.z(), 1 );
 	v1 = tmp.xy();
-//	cout << v1.x() << "," << v1.y() << endl;
 	bbox.expandby ( v1 );
 
 	tmp = m * vec4f ( w, h, text.pos.z(), 1);
 	v2 = tmp.xy();
-//	cout << v2.x() << "," << v2.y() << endl;
 	bbox.expandby ( v2 );
 
 	tmp = m * vec4f ( 0, h, text.pos.z(), 1 );
 	v3 = tmp.xy();
 	cout << v3.x() << "," << v3.y() << endl;
 	bbox.expandby ( v3 );
-//	cout << bbox.minvec().x() << "," << bbox.minvec().y() << "," << bbox.maxvec().x() << "," <<  bbox.maxvec().y() << endl;
-//	cout << "updateBBox text ok" << endl;
         break;
     }
     }

@@ -2,7 +2,16 @@
 #include "mainwindow.h"
 #include <iostream>
 #include <string>
+#include <sgr_render2d.h>
+
 using namespace std;
+
+MainWindow* gMainWin = 0;
+void loadtexture1 ( Tile* tile, int cnt )
+{
+    if ( gMainWin )
+        gMainWin->postLoadTexture ( tile, cnt );
+}
 
 int main ( int argc, char *argv[] )
 {
@@ -24,8 +33,20 @@ int main ( int argc, char *argv[] )
     mainWin.resize ( 800, 600 );
     mainWin.show();
     mainWin.init ();
-//    mainWin.doc->init ( mainWin.displayer->widget, mainWin.displayer->shareWidget );
-    if ( filename != "" )
+    gMainWin = &mainWin;
+
+    MyThread* thread = new MyThread();
+    thread->start();
+    // bind texture loading
+    r2d_loadtexture_callback ( loadtexture1 );
+    QObject::connect ( &mainWin, 
+                       SIGNAL(onLoadTexture(GLResourceWidget*,Tile*,int)),
+                       thread,
+                       SLOT(onLoadTexture(GLResourceWidget*,Tile*,int)) );
+
+    if ( filename != "" ) {
 	mainWin.open ( filename.c_str() );
+    }
     return app.exec();
 }
+

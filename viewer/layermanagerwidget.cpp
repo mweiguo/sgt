@@ -142,7 +142,7 @@ void StarDelegate::commitAndCloseEditor()
 //============================================================
 
 LayerManagerWidget::LayerManagerWidget ( std::list<QGLWidget*> views, QWidget *parent )
-    : QTreeView ( parent ), _sceneid(-1), _views(views)
+    : QTreeView ( parent ), _views(views), _sceneid(-1)
 {
     _model = new QStandardItemModel;
     _model->setColumnCount ( 2 );

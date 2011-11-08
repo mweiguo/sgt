@@ -2,9 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QThread>
 #include "glwidget.h"
 #include "document.h"
-
+#include <map>
+#include <string>
 QT_BEGIN_NAMESPACE
 class QAction;
 class QListWidget;
@@ -15,6 +17,7 @@ QT_END_NAMESPACE
 
 class LayerManagerWidget;
 class Tools;
+class Tile;
 struct ViewerContext;
 //! [0]
 class MainWindow : public QMainWindow
@@ -27,11 +30,17 @@ public:
 
     void open( const char* filename );
     void init ();
+
+    void postLoadTexture ( Tile* tile, int cnt );
+
     Document *doc;
     GLScrollWidget *displayer;
     GLBirdView *birdview;
-    QGLWidget* shareWidget;
+//    QGLWidget* shareWidget;
     ViewerContext* context;
+    GLResourceWidget* resWidget;
+signals:
+    void onLoadTexture(GLResourceWidget*,Tile*,int);
 private slots:
     void open();
     void about();
@@ -58,6 +67,7 @@ private:
     QToolBar *navToolBar;
 
     QAction *openAct;
+    QAction *arrowAct;
     QAction *zoominAct;
     QAction *zoomoutAct;
     QAction *winzoomAct;
@@ -75,5 +85,17 @@ private:
 //    Tools* tools;
 };
 //! [0]
+
+class MyThread : public QThread
+{
+    Q_OBJECT
+public slots:
+    void onLoadTexture (GLResourceWidget* widget, Tile* tile, int cnt);
+signals:
+    void UpdateWidget();
+private:
+    std::map<std::string,int> textures;
+};
+
 
 #endif

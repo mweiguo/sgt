@@ -5,26 +5,27 @@
 #include "sgr_stateset.h"
 
 #include <map>
+#include <vector>
 #include <list>
-using namespace std;
+//using namespace std;
 
 class StateSetBuilder
 {
 public:
-    static void build ( LC* lc, list<int>& input );
+    static void build ( LC* lc, std::vector<int>& input );
     static void clear ();
     static StateSet* root;
 private:
-    static map<StateSet*,StateSet*> _nodes;
+    static std::map<StateSet*,StateSet*> _nodes;
 };
 
 class StateSetBuilder2
 {
 public:
-    static void build ( LC* lc, list<int>& input, list<StateSet*>& opaques, list<StateSet*>& transparents );
+    static void build ( LC* lc, std::vector<int>& input, std::vector<StateSet*>& opaques, std::vector<StateSet*>& transparents );
     static void clear ();
-    static std::map<MaterialRecord*,std::list<int> > onodes; // opaque nodes
-    static std::map<MaterialRecord*,std::list<int> > tnodes; // transparent nodes
+    static std::map<MaterialRecord*,std::vector<int> > onodes; // opaque nodes
+    static std::map<MaterialRecord*,std::vector<int> > tnodes; // transparent nodes
 };
 
 #endif// _SGR_STATESETBUILDER_H_

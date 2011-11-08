@@ -2,6 +2,7 @@
 #include "document.h"
 #include "glwidget.h"
 #include <sgr_render2d.h>
+#include <bbox2d.h>
 
 #include <utility>
 #include <iostream>
@@ -138,6 +139,7 @@ void RubberBoxTool::OnLMouseMove ( int x, int y )
     minmax[4] = startPos[1] > lastPos[1] ? startPos[1] : lastPos[1];
 
     int sid = _tools->context->doc->miscsceneid;
+//    cout << "-------===============================+++++++++" << endl;
     if ( sid != -1 )
     {
 	sid = _tools->context->doc->miscsceneid;
@@ -147,6 +149,7 @@ void RubberBoxTool::OnLMouseMove ( int x, int y )
 	r2d_to_element ( sid, R2D_FIRST_CHILD ); // lodpage
 	rectid = r2d_to_element ( sid, R2D_FIRST_CHILD ); // rect
 	r2d_rect_points ( sid, rectid, minmax );
+//        cout << "===============================+++++++++" << endl;
     }
 }
 
@@ -243,6 +246,62 @@ void HandTool::OnMMouseMove ( int x, int y )
 
 //--------------------------------------------------------------------------------
 
+ArrowTool::ArrowTool ( Tools* tools ) : RubberBoxTool ( tools )
+{
+}
+
+//================================================================================
+
+void ArrowTool::OnLButtonDown ( int x, int y )
+{
+    RubberBoxTool::OnLButtonDown ( x, y );
+}
+
+//================================================================================
+
+vector<int> oldIDs;
+void ArrowTool::OnLButtonUp ( int x, int y )
+{    
+    RubberBoxTool::OnLButtonUp ( x, y );
+    BBox2d bb;
+    bb.init ( vec2f(startPos) );
+    bb.expandby ( vec2f(lastPos) );
+    float minmax[] = { bb.minvec().x(), bb.minvec().y(),
+                       bb.maxvec().x(), bb.maxvec().y() };
+    int* ids;
+    int idcnt = 0;
+    // unhighlight old selections
+    for ( size_t i=0; i<oldIDs.size(); i++ ) {
+        r2d_highlight_primitive ( _tools->context->doc->sceneid, oldIDs[i], false );
+    }
+
+    if ( lastPos[0] < startPos[0] ) {
+        cout << "-----minmax = " << minmax[0] << "," << minmax[1] << ", " << minmax[2] << "," << minmax[3] << endl;
+        idcnt = r2d_crosspick ( _tools->context->doc->sceneid, minmax, &ids );
+        cout << "-----r2d_crosspick idcnt = " << idcnt << endl;
+    } else {
+        idcnt = r2d_containpick ( _tools->context->doc->sceneid, minmax, &ids );
+    }
+    
+    oldIDs.clear();
+    for ( int i=0; i<idcnt; i++ ) {
+        r2d_highlight_primitive ( _tools->context->doc->sceneid, ids[i], true );
+        oldIDs.push_back ( ids[i] );
+    }
+    
+    _tools->parent->widget->updateGL ();
+}
+
+//================================================================================
+
+void ArrowTool::OnLMouseMove ( int x, int y )
+{
+    RubberBoxTool::OnLMouseMove ( x, y );
+    _tools->parent->widget->updateGL ();
+}
+
+//--------------------------------------------------------------------------------
+
 Tools::Tools ( ViewerContext* cont, GLScrollWidget* p)
 {
     context = cont;
@@ -289,6 +348,9 @@ int Tools::selectTool ( int tooltype )
 	break;
     case ZOOM_TOOL:
 	parent->widget->setCursor ( Qt::CrossCursor );
+	break;
+    case ARROW_TOOL:
+	parent->widget->setCursor ( Qt::ArrowCursor );
 	break;
     default:
 	break;

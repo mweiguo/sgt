@@ -11,7 +11,7 @@ public:
 private:
     void counter ( int type );
     void traverse ( LC& lc );
-    string getContent ( int type, int idx, LC& lc, int gidx );
+    std::string getContent ( int type, int idx, LC& lc, int gidx );
 
     int cscene;
     int cmat;
@@ -24,6 +24,7 @@ private:
     int ctri;
     int cquad;
     int ctext;
+    int csmartiles;
 
     LC* _lc;
     bool _dumpTree;

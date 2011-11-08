@@ -38,6 +38,7 @@ public:
     vector<vec3f>               plinebuffer;
     vector<vec3f>               polytessellationbuffer;
     vector<vec2f>               texturecoordbuffer;
+    vector<SmartTileRecord>     smartilesdata;
     map<string, int>            materialMap;
 
 private:
@@ -56,6 +57,7 @@ private:
     int polyIdx;
     int textIdx;
     int matIdx;
+    int smartilesIdx;
 
     list<Mat4f> _current_matrix_stack;
     float _current_matrix[16];

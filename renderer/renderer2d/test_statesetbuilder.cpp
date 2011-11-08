@@ -1,4 +1,4 @@
-#include <list>
+#include <vector>
 #include <string>
 #include <fstream>
 #include <ctime>
@@ -13,7 +13,7 @@ using namespace std;
 float currentScale = 1;
 int main ( int argc, char* argv[] )
 {
-    if ( argc != 3 )
+    if ( argc != 4 )
     {
 	cout << "usage : " << argv[0] << " slcFileName stateSetDump";
 	return 0;
@@ -38,12 +38,21 @@ int main ( int argc, char* argv[] )
     cout << "view frustum culling ok, elapse " << clock() - t << "(ms), render object count = " << vfc.renderObjects.size() << endl;
 
     t = clock();
-    StateSetBuilder::build ( &lc, vfc.renderObjects );
+    vector<StateSet*> opaques, transparents;
+    StateSetBuilder2::build ( &lc, vfc.renderObjects, opaques, transparents );
     cout << "stateset builder ok, elapse " << clock() - t << "(ms) " << endl;
-    string xml = StateSetBuilder::root->toXML();
+
+    string opxml, trxml;
+    for ( vector<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	opxml += (*pp)->toXML();
+    for ( vector<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	trxml += (*pp)->toXML();
     ofstream o;
     o.open ( argv[2] );
-    o << xml;
+    o << opxml;
+    o.close ();
+    o.open ( argv[3] );
+    o << trxml;
     o.close ();
     StateSetBuilder::clear();
 

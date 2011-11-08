@@ -35,13 +35,17 @@ public:
     list<SLCNode*> children;
 };
 
+class SLCMaterial;
 class SLCSceneNode : public SLCNode
 {
 public:
     SLCSceneNode ( const char* gname );
+    ~SLCSceneNode ();
     virtual int getType() { return SLC_SCENE; }
     virtual string toXML () const;
     string name;
+/* protected: */
+/*     SLCMaterial* hightlight_mat; */
 };
 
 class SLCMaterial : public SLCNode
@@ -73,6 +77,7 @@ public:
     virtual string toXML () const;
     string name;
     bool visible;
+    bool pickable;
     SLCMaterial* bindmat;
 };
 
@@ -205,6 +210,20 @@ public:
     virtual void getMinMax ( float* minmaxabc );
     vector<vec2f> pnts;
     float z;
+};
+
+class SLCSmartTilesNode : public SLCPrimitiveNode
+{
+public:
+    SLCSmartTilesNode ( SLCMaterial* mat );
+    SLCSmartTilesNode ( const SLCSmartTilesNode& rhs );
+    virtual int getType () { return SLC_SMARTILES; }
+    virtual string toXML () const;
+    virtual SLCPrimitiveNode* copy();
+    virtual void getMinMax ( float* minmaxabc );
+    vec2f pnts[4];
+    float z;
+    int levelcnt;
 };
 
 class SLCTransformNode : public SLCNode

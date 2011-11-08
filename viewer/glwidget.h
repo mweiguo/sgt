@@ -86,4 +86,12 @@ private:
 
 };
 
+class GLResourceWidget : public QGLWidget
+{
+public:
+    GLResourceWidget(QWidget *parent = 0, QGLWidget *shareWidget = 0);
+    void initializeGL();
+    int loadTexture ( const char* filename );
+};
+
 #endif // _GL_WIDGET_H_

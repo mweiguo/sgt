@@ -19,6 +19,7 @@ LCReport::LCReport ( LC& lc, bool dumpTree ) : _dumpTree(dumpTree)
     ctri   = 0;
     cquad  = 0;
     ctext  = 0;
+    csmartiles = 0;
 
     _lc = &lc;
     lc.toElement ( ROOT );
@@ -32,17 +33,18 @@ LCReport::LCReport ( LC& lc, bool dumpTree ) : _dumpTree(dumpTree)
 void LCReport::printCounter ()
 {
     cout << "================== counter =======================" << endl;
-    cout << "SLC_SCENE    count = " << cscene << endl;
-    cout << "SLC_MATERIAL count = " << cmat << endl;
-    cout << "SLC_LAYER    count = " << clayer << endl;
-    cout << "SLC_LOD      count = " << clod << endl;
-    cout << "SLC_LODPAGE  count = " << clodpage << endl;
-    cout << "SLC_PLINE    count = " << cpline << endl;
-    cout << "SLC_POLY     count = " << cpoly << endl;
-    cout << "SLC_LINE     count = " << cline << endl;
-    cout << "SLC_TRIANGLE count = " << ctri << endl;
-    cout << "SLC_QUAD     count = " << cquad << endl;
-    cout << "SLC_TEXT     count = " << ctext << endl;
+    cout << "SLC_SCENE     count = " << cscene << endl;
+    cout << "SLC_MATERIAL  count = " << cmat << endl;
+    cout << "SLC_LAYER     count = " << clayer << endl;
+    cout << "SLC_LOD       count = " << clod << endl;
+    cout << "SLC_LODPAGE   count = " << clodpage << endl;
+    cout << "SLC_PLINE     count = " << cpline << endl;
+    cout << "SLC_POLY      count = " << cpoly << endl;
+    cout << "SLC_LINE      count = " << cline << endl;
+    cout << "SLC_TRIANGLE  count = " << ctri << endl;
+    cout << "SLC_QUAD      count = " << cquad << endl;
+    cout << "SLC_TEXT      count = " << ctext << endl;
+    cout << "SLC_SMARTILES count = " << csmartiles << endl;
     cout << "================== memory =======================" << endl;
     cout << "globalLCEntry count = " << _lc->globalLCEntry->LCLen << ", size = " << _lc->globalLCEntry->LCLen * sizeof(GlobalLCRecord) + sizeof(int) << "(Byte)" << endl;
     int levelLCEntriesSize = 0;
@@ -93,6 +95,9 @@ void LCReport::counter ( int type )
         break;
     case SLC_MATERIAL:
         cmat++;
+        break;
+    case SLC_SMARTILES:
+        csmartiles++;
         break;
     }
 }
@@ -235,6 +240,21 @@ string LCReport::getContent ( int type, int idx, LC& lc, int gidx )
             " ), linewidth = " << mr.linewidth << ", linetype = " << mr.linetype << ", linetypefactor = " << mr.linetypefactor;
 	ss << ", font=" << mr.fontfile;
 	ss << ", texfilename=" << mr.texturefile;
+        break;
+    }
+    case SLC_SMARTILES:
+    {
+        SmartTileRecord& smartile = lc.smartTilesEntry->LCRecords[idx];
+	ss << "matidx = " << smartile.materialIdx << "; levelcnt = " << smartile.levelcnt << "; ";
+        vec3f& p0 = smartile.data[0];
+        vec3f& p1 = smartile.data[1];
+        vec3f& p2 = smartile.data[2];
+        vec3f& p3 = smartile.data[3];
+        ss << "corner : (" << 
+            p0.x() << ", " << p0.y() << ", " << p0.z() << ") (" <<
+            p1.x() << ", " << p1.y() << ", " << p1.z() << ") (" << 
+            p2.x() << ", " << p2.y() << ", " << p2.z() << ") (" << 
+            p3.x() << ", " << p3.y() << ", " << p3.z() << ")";
         break;
     }
     default:

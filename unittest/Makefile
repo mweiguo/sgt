@@ -30,7 +30,7 @@ LINKFLAGS += -lfreetype -lpthread -lopengl32  -L"../thirdparty/DevIL-SDK-x86-1.7
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = tst_bboxupdater tst_buildkdtreecase1 tst_buildkdtreecase2 tst_kdtreerect1 tst_kdtreecase2 tst_kdtreetext1 tst_math tst_smartiles
+TESTS = tst_bboxupdater tst_buildkdtreecase1 tst_buildkdtreecase2 tst_kdtreerect1 tst_kdtreecase2 tst_kdtreetext1 tst_math tst_vfculler_smartiles
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -52,7 +52,7 @@ runtest : all
 	./tst_kdtreerect1
 	./tst_kdtreecase2
 	./tst_kdtreetext1
-	./tst_smartiles
+	./tst_vfculler_smartiles
 
 # Builds gtest.a and gtest_main.a.
 
@@ -103,8 +103,8 @@ tst_kdtreecase2.o : tst_kdtreecase2.cpp $(GTEST_HEADERS)
 tst_kdtreetext1.o : tst_kdtreetext1.cpp $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_kdtreetext1.cpp
 
-tst_smartiles.o : tst_smartiles.cpp $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_smartiles.cpp
+tst_vfculler_smartiles.o : tst_vfculler_smartiles.cpp $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c tst_vfculler_smartiles.cpp
 
 ########################## user code ############################
 sgr_lc.o : $(USER_DIR)/sgr_lc.h $(USER_DIR)/sgr_lc.cpp
@@ -137,6 +137,9 @@ sgr_texture.o : $(USER_DIR)/sgr_texture.h $(USER_DIR)/sgr_texture.cpp
 sgr_smartiles.o : $(USER_DIR)/sgr_smartiles.h $(USER_DIR)/sgr_smartiles.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_smartiles.c
 
+sgr_vfculler.o : $(USER_DIR)/sgr_vfculler.h $(USER_DIR)/sgr_vfculler.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_vfculler.cpp
+
 
 tst_math : gtest_main.a tst_math.o sgr_math.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
@@ -159,5 +162,5 @@ tst_kdtreetext1 : gtest_main.a tst_kdtreetext1.o sgr_lc.o sgr_node2lc.o sgr_node
 tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_smartiles : gtest_main.a tst_smartiles.o sgr_smartiles.o
+tst_vfculler_smartiles : gtest_main.a tst_vfculler_smartiles.o sgr_smartiles.o sgr_lc.o sgr_nodes.o sgr_node2lc.o sgr_vfculler.o sgr_font.o sgr_texture.o mat4f.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)

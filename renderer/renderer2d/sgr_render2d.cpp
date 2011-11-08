@@ -14,6 +14,10 @@
 #include "mat4.h"
 #include <ctime>
 
+#include <stdlib.h>
+
+extern LoadTex_Proc loadtex_proc;
+
 using namespace std;
 
 vector<LC*> globalLC;
@@ -34,6 +38,7 @@ void r2d_init ()
 //     glEnable ( GL_ALPHA_TEST );
 //     glAlphaFunc ( GL_GREATER, 0.01 );
     glEnableClientState ( GL_VERTEX_ARRAY );
+    glEnableClientState ( GL_TEXTURE_COORD_ARRAY );
     mvmat.loadIdentity ();
 
     initLC();
@@ -114,13 +119,12 @@ void draw ( int* ids, int length, float* viewfrustum_minmax )
 
 void draw2 ( int* ids, int length, float* viewfrustum_minmax )
 {
-    list<StateSet*> opaques, transparents;
+    vector<StateSet*> opaques, transparents;
     int cleantime = 0;
     int culltime = 0;
     int cullobjcnt = 0;
     int ssbuildtime = 0;
 
-    cout << "length = " << length << endl;
     for ( int i=0; i<length; i++ )
     {
 	if ( ids[i]<0 || ids[i]>=globalLC.size() || globalLC[ids[i]] == 0 )
@@ -139,23 +143,10 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
 	cullobjcnt += vfculler::renderObjects.size();
 
 	t = clock();
-	// collect opaque objects & transparent objects
+	// collect opxaque objects & transparent objects
 	StateSetBuilder2::build ( lc, vfculler::renderObjects, opaques, transparents );
 	ssbuildtime += clock() - t;
     }
-
-//     string opxml, trxml;
-//     for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
-// 	opxml += (*pp)->toXML();
-//     for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
-// 	trxml += (*pp)->toXML();
-//     ofstream o;
-//     o.open ( "op.xml" );
-//     o << opxml;
-//     o.close ();
-//     o.open ( "tr.xml" );
-//     o << trxml;
-//     o.close ();
 
     cout << "cull finished, elapse " << culltime << "(ms), object count = " << cullobjcnt << endl;
     cout << "stateset build finished, elapse " << ssbuildtime << "(ms)" << endl;
@@ -165,7 +156,7 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     if ( opaques.empty() == false )
     {
 	glEnable ( GL_DEPTH_TEST );
-	for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+	for ( vector<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
 	{
 	    (*pp)->render();
 	}
@@ -174,7 +165,7 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     if ( transparents.empty() == false )
     {
 	glDisable ( GL_DEPTH_TEST );
-	for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+	for ( vector<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
 	{
 	    (*pp)->render();
 	}
@@ -182,9 +173,9 @@ void draw2 ( int* ids, int length, float* viewfrustum_minmax )
     cout << "render finished, elapse " << clock() - t << "(ms)" << endl;
 
     t = clock();
-    for ( list<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
+    for ( vector<StateSet*>::iterator pp=transparents.begin(); pp!=transparents.end(); ++pp )
 	delete *pp;
-    for ( list<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
+    for ( vector<StateSet*>::iterator pp=opaques.begin(); pp!=opaques.end(); ++pp )
 	delete *pp;
     cout << "clean finished, elapse " << cleantime + clock() - t<< "(ms)" << endl;
 }
@@ -451,6 +442,62 @@ void r2d_get_layer_background_color ( int sceneID, int layerid, unsigned short* 
     }
 }
 
+void r2d_highlight_primitive ( int sceneID, int primitiveID, bool highlight )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+	LC* lc = globalLC[sceneID];
+	GlobalLCRecord& grecord = lc->globalLCEntry->LCRecords[primitiveID];
+        DrawableRecord* drawable;
+        switch ( grecord.type )
+        {
+        case SLC_SMARTILES:
+            drawable = &(lc->smartTilesEntry->LCRecords[grecord.value]);
+             break;
+        case SLC_PLINE:
+            drawable = &(lc->plineEntry->LCRecords[grecord.value]);
+            break;
+        case SLC_POLY:
+            drawable = &(lc->polyEntry->LCRecords[grecord.value]);
+            break;
+        case SLC_RECT:
+            drawable = &(lc->rectEntry->LCRecords[grecord.value]);
+            break;
+        case SLC_TEXT:
+            drawable = &(lc->textEntry->LCRecords[grecord.value]);
+            break;
+        default:
+            drawable = 0;
+            break;
+        }
+        if ( 0 == drawable )
+            return;
+
+        MaterialRecord& mat = lc->materialEntry->LCRecords[drawable->materialIdx];
+        int halflen = lc->materialEntry->LCLen / 2;
+        bool isAlreadyHighlight = (drawable->materialIdx >= halflen);
+        if ( true == highlight ) {
+            // check if already highlighted
+            // if so: do nothing
+            // else: insert new record to hightlightRecoreds
+            if ( false == isAlreadyHighlight )
+            {
+                MaterialRecord& highlightmat = lc->materialEntry->LCRecords[drawable->materialIdx+halflen];
+                highlightmat.background_color = vec4i ( 0, 0, 255, 255 );
+                drawable->materialIdx += halflen;
+            }
+        } else {
+            // check if already non-highlighted
+            // if so: do nothing
+            // else: remove correspond record in hightlightRecoreds & restore old materialIdx
+            if ( true == isAlreadyHighlight )
+            {
+                drawable->materialIdx -= halflen;
+            }
+        }
+    }    
+}
+
 // ================================================================================
 
 int r2d_to_element ( int sceneID, int elementType )
@@ -480,3 +527,61 @@ void r2d_rect_points ( int sceneID, int rectid, float* xyz )
     // should be lazy update, but need LC support arbitery cursor
     BBox2dUpdater::forward_update ( *lc );
 }
+
+void r2d_loadtexture_callback ( LoadTex_Proc proc )
+{
+    loadtex_proc = proc;
+//    cout << "loadtex_proc = " << loadtex_proc << endl;
+}
+
+int* pickedlist = 0;
+int r2d_crosspick ( int sceneID, float* minmax, int** outIds )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+        if ( pickedlist != 0 ) {
+            free ( pickedlist );
+            pickedlist = 0;
+        }
+        
+	vfculler::clear ();
+	LC* lc = globalLC[sceneID];
+	lc->toElement ( ROOT );
+	vfculler::cull ( *lc, minmax, currentScale, true );
+        if ( vfculler::renderObjects.empty() == true )
+            return 0;
+
+        pickedlist = (int*)calloc ( vfculler::renderObjects.size(), sizeof(int) );
+        memcpy ( pickedlist, &(vfculler::renderObjects[0]), vfculler::renderObjects.size()*sizeof(int) );
+        *outIds = pickedlist;
+        return vfculler::renderObjects.size();
+    }
+    *outIds = 0;
+    return 0;
+}
+
+int r2d_containpick ( int sceneID, float* minmax, int** outIds )
+{
+    if ( sceneID >=0 && sceneID<globalLC.size() )
+    {
+        if ( pickedlist != 0 ) {
+            free ( pickedlist );
+            pickedlist = 0;
+        }
+
+	vfculler::clear ();
+	LC* lc = globalLC[sceneID];
+	lc->toElement ( ROOT );
+	vfculler::cull2 ( *lc, minmax, currentScale, true );
+        if ( vfculler::renderObjects.empty() == true )
+            return 0;
+
+        pickedlist = (int*)calloc ( vfculler::renderObjects.size(), sizeof(int) );
+        memcpy ( pickedlist, &(vfculler::renderObjects[0]), vfculler::renderObjects.size()*sizeof(int) );
+        *outIds = pickedlist;
+        return vfculler::renderObjects.size();
+    }
+    *outIds = 0;
+    return 0;
+}
+

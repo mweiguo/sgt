@@ -42,6 +42,13 @@ int main ( int argc, char* argv[] )
     mat->linewidth = 1;
     mat->fontfilename = "simhei.ttf";
     mat->texturefilename = "hands.jpg";
+    SLCMaterial* mat2 = new SLCMaterial ( "mat2" );
+    mat2->foreground_color = vec4i(155, 144, 0, 255);
+    mat2->background_color = vec4i(44, 155, 155, 255);
+    mat2->linetype = 0xFFFF;//SLCMaterial::LINETYPE_DASH;
+    mat2->linewidth = 1;
+    mat2->fontfilename = "simhei.ttf";
+    mat2->texturefilename = "hands.jpg";
     SLCLayerNode* layer = new SLCLayerNode ( "layer1", mat_layer );
     SLCLODNode* lod = new SLCLODNode();
     SLCLODPageNode* lodpage = new SLCLODPageNode();
@@ -112,8 +119,19 @@ int main ( int argc, char* argv[] )
     nodes.push_back ( poly );
     lodpage->addChild ( poly );
 
+    SLCSmartTilesNode* tiles = new SLCSmartTilesNode ( mat2 );
+    tiles->pnts[0] = vec2f ( 0, 0 );
+    tiles->pnts[1] = vec2f ( 25600, 0 );
+    tiles->pnts[2] = vec2f ( 25600, 25600 );
+    tiles->pnts[3] = vec2f ( 0, 25600 );
+    tiles->z = 0;
+    tiles->levelcnt = 6;
+    nodes.push_back ( tiles );
+    layer->addChild ( tiles );
+
     scene.addChild ( mat_layer );
     scene.addChild ( mat );
+    scene.addChild ( mat2 );
     scene.addChild ( layer );
 
     layer->addChild ( lod );
@@ -121,6 +139,7 @@ int main ( int argc, char* argv[] )
 
     nodes.push_back ( mat_layer );
     nodes.push_back ( mat );
+    nodes.push_back ( mat2 );
     nodes.push_back ( layer );
     nodes.push_back ( lod );
     nodes.push_back ( lodpage );

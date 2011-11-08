@@ -716,6 +716,523 @@ TEST_F ( KdTreeRectTestCase1, clear ) {
     EXPECT_EQ ( 0u, _kdt->_nodes.size() );
 }
 
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow1Col1 ) {
+
+    vector<int> out;
+    { 
+	float box[] = { -2, -2, -1, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 0, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 0.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 1, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 1.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 2, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 2.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 3, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 3.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 4, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { -2, -2, 4.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow1Col2 ) {
+
+    vector<int> out;
+    {
+	float box[] = { 0, -2, 0.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 1, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 1.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 2, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 2.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 3, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 3.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 4, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 0, -2, 4.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow1Col3 ) {
+
+    vector<int> out;
+    {
+	float box[] = { 1, -2, 1.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 2, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 2.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 3, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 3.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 4, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	float box[] = { 1, -2, 4.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow1Col4 ) {
+    {
+	vector<int> out;
+	float box[] = { 4, -2, 4.5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 4.5, -2, 5, -1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow2Col1 ) {
+
+    { 
+	vector<int> out;
+	float box[] = { -2, -1, -1, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, -1, 0, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, -1, 0.5, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, -1, 1, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, -1, 1.5, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+//================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow2Col2 ) {
+
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 0.5, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1.5, 0 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow3Col1 ) {
+
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 0.5, 0.5 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1, 0.5 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { 0, -1, 1.5, 0.5 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow3 ) {
+
+    { 
+	vector<int> out;
+	float box[] = { -2, 0, -1, 1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 0, 1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 0.5, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 1, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 1.5, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 2, 1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 2.5, 1 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 3, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 3.5, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 4, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 0, 4.5, 1 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow4 ) {
+
+    { 
+	vector<int> out;
+	float box[] = { -2, 1, -1, 2 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 0, 2 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 0.5, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 1, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 1.5, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 2, 2 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 2.5, 2 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 3, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 3.5, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 4, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 1, 4.5, 2 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainRow5 ) {
+    { 
+	vector<int> out;
+	float box[] = { -2, 2, -1, 3 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 0, 3 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 0.5, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 1, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 1.5, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 2, 3 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 2.5, 3 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 3, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 3.5, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 4, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+    {
+	vector<int> out;
+	float box[] = { -2, 2, 4.5, 3 };
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainContain ) {
+
+    { 
+	vector<int> out;
+	float box[] = { -2, -2, 2, 2 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( true, isHit );
+	EXPECT_EQ ( 1u, out.size() );
+	EXPECT_EQ ( 6, out[0] );
+    }
+}
+
+// ================================================================================
+
+TEST_F ( KdTreeRectTestCase1, ContainInside ) {
+
+    { 
+	vector<int> out;
+	float box[] = { 0.25, 0.25, 0.75, 0.75 }; 
+	bool isHit = _kdt->contain( _lc, box, back_inserter(out) );
+	EXPECT_EQ ( false, isHit );
+    }
+}
+
+// ================================================================================
+
 
 // ********************************************************************************
 

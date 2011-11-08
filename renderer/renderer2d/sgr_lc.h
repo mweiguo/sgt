@@ -7,7 +7,11 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-using namespace std;
+#include <map>
+
+#include "sgr_smartiles.h"
+
+typedef void (*LoadTex_Proc)(Tile*, int);
 
 void initLC ();
 
@@ -60,12 +64,13 @@ struct MaterialRecord
 
 struct LayerRecord
 {
-    LayerRecord ( const char* nm="layer", bool isVisible=true, int matIdx=-1 );
+    LayerRecord ( const char* nm="layer", bool isVisible=true, bool isPickable=true, int matIdx=-1 );
     char name[32];
 //    int  flags;
     int  materialIdx;
     int  visible : 1;
-    int  reserved : sizeof(int) - 1;
+    int  pickable : 1;
+    int  reserved : sizeof(int) - 2;
 };
 
 struct LODRecord
@@ -176,6 +181,16 @@ struct PolyRecord : public FillableRecord
 
 typedef DataGroup1<vec3f> VertexRecord;
 
+struct SmartTileRecord : public DrawableRecord
+{
+    SmartTileRecord ();
+    SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int levelcnt, int matidx );
+    vec3f data[4];
+    int levelcnt;
+    Tile tiles[16];
+    int tilecnt;
+};
+
 template < class RecType >
 struct LCEntry 
 {
@@ -203,11 +218,12 @@ typedef LCEntry<vec3f>                TextSilhouetteBufferEntry;
 typedef LCEntry<vec3f>                PLineBufferEntry;
 typedef LCEntry<vec3f>                PolyTessellationBufferEntry;
 typedef LCEntry<vec2f>                TexCoordBufferEntry;
+typedef LCEntry<SmartTileRecord>      SmartTilesEntry;
 
 struct TextSilhouetteRecord
 {
     TextSilhouetteRecord () : isDirty(true) {}
-    vector<vec2f> silhouette;
+    std::vector<vec2f> silhouette;
     bool isDirty;
 };
 
@@ -233,7 +249,7 @@ public:
      */
     int toElement ( int direction );
     int getType ();
-    string getTypeStr ();
+    std::string getTypeStr ();
     int getDepth ();
     int getValue ();
     int getGIndex ();
@@ -266,17 +282,24 @@ public:
     PLineBufferEntry     *plineBufferEntry;
     PolyTessellationBufferEntry *polyTessellationBufferEntry;
     TexCoordBufferEntry  *texCoordBufferEntry;
+    SmartTilesEntry      *smartTilesEntry;
     // kdtree support
-    vector< KdTree<int>* > kdtrees;
+    std::vector< KdTree<int>* > kdtrees;
     // auxiliary infomation
-    vector< Font* > fonts;
-    vector< Texture* > textures;
-/*     vector< TextSilhouetteRecord > textSilhouettes; */
+    std::vector< Font* > fonts;
+    std::vector< Texture* > textures;
+    
+/*     /\** if set primitive's property to hightlight, then old material index will stored in highlightRecords.  */
+/*      * the record will be removed when hightlight flag restored.  */
+/*      *  map<int,int>: globalindex, materialIdx */
+/*      *\/ */
+/*     std::map<int,int> highlightRecords; */
+
 protected:
     // navigation
     int cursorDepth;  // base from 0
     int cursor[256];  // store offset for each levelLCEntry
-    vector<ModifyCommand> modifyCommands;
+    std::vector<ModifyCommand> modifyCommands;
 };
 
 struct GetPrimitiveCenter

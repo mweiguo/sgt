@@ -14,6 +14,9 @@
 
 #include <sgr_render2d.h>
 
+#include <IL/il.h>
+#include <IL/ilut.h>
+
 using namespace std;
 
 GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLFormat& fmt, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f ) :
@@ -172,10 +175,9 @@ GLMainView::GLMainView ( ViewerContext* context, Tools* t, int* mainSceneId, con
 
 void GLMainView::paintGL ()
 {
-//    cout << "GLMainView::paintGL ()" << endl;
     setTransform();
     int ids[] = {document->sceneid, document->miscsceneid, document->birdviewmiscid };
-    r2d_update_scenes ( ids, 1 );
+    r2d_update_scenes ( ids, 2 );
 //    swapBuffers ();
 }
 
@@ -540,3 +542,21 @@ void GLScrollWidget::homeposition1()
 	cerr << ex.what() << endl;
     }
 }
+
+GLResourceWidget::GLResourceWidget(QWidget *parent, QGLWidget *shareWidget)
+    : QGLWidget(parent, shareWidget)
+{
+}
+
+void GLResourceWidget::initializeGL()
+{
+    ilInit();
+    ilutRenderer(ILUT_OPENGL);
+}
+
+int GLResourceWidget::loadTexture ( const char* filename )
+{
+    makeCurrent();
+    return ilutGLLoadImage ( const_cast<char*>(filename) );
+}
+

@@ -1,7 +1,6 @@
 #ifndef _SGR_STATESET_H_
 #define _SGR_STATESET_H_
 #include <vector>
-#include <list>
 #include <string>
 using namespace std;
 #include <vec4.h>
@@ -45,7 +44,7 @@ public:
     vector<int> renderObjects;
 
     StateSet ();
-    StateSet ( LC* lc, MaterialRecord* mat, std::list<int> objs );
+    StateSet ( LC* lc, MaterialRecord* mat, std::vector<int> objs );
     StateSet* CreateOrReuseStateSet ( LC* lc, MaterialRecord* mat );
     int getMatchCount ( MaterialRecord* mat );    
     void addState ( const State& rhs );

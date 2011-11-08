@@ -57,7 +57,7 @@ int main ( int argc, char* argv[] )
 	rc1->pnts[1] = vec2f ( 0, 0 );
 	rc1->pnts[2] = vec2f ( 0, 0 );
 	rc1->pnts[3] = vec2f ( 0, 0 );
-	rc1->z = 100;
+	rc1->z = 40;
 	lodpage->addChild ( rc1 );
     }
 

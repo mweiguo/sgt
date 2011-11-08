@@ -5,9 +5,9 @@
 TEMPLATE = app
 TARGET = viewer
 DEPENDPATH += . debug tmp\rcc\release_shared
-INCLUDEPATH += . ../renderer/renderer2d
+INCLUDEPATH += . ../renderer/renderer2d  ../thirdparty/DevIL-SDK-x86-1.7.8/include ../graphbase
 #LIBS += -L../renderer/renderer2d -lrender2d
-win32:LIBS += ../renderer/renderer2d/librender2d.so
+win32:LIBS += ../renderer/renderer2d/librender2d.so ../thirdparty/DevIL-SDK-x86-1.7.8/lib/DevIL.lib ../thirdparty/DevIL-SDK-x86-1.7.8/lib/ILUT.lib
 QT += opengl
 CONFIG += console
 binary.path = ../build/bin

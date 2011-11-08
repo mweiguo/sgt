@@ -88,6 +88,15 @@ private:
     float startPos[2];
 };
 
+class ArrowTool : public RubberBoxTool
+{
+public:
+    ArrowTool ( Tools* tools );
+    virtual void OnLButtonDown ( int x, int y );
+    virtual void OnLButtonUp ( int x, int y );
+    virtual void OnLMouseMove ( int x, int y );
+};
+
 
 class MainWindow;
 class GLScrollWidget;
@@ -115,7 +124,8 @@ public:
 	NONE_TOOL     = 1,
 	ZOOM_TOOL     = 2,
 	HAND_TOOL     = 4,
-	KEY_TOOL      = 8
+	KEY_TOOL      = 8,
+	ARROW_TOOL    = 16
     };
     Tools ( ViewerContext* cont, GLScrollWidget* parent );
     ~Tools ();

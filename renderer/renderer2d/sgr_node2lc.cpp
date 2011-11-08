@@ -26,6 +26,7 @@ SLCNode2LC::SLCNode2LC ( SLCNode* node )
     polyIdx = 0;
     textIdx = 0;
     matIdx = 0;
+    smartilesIdx = 0;
     mat_loadidentity ( _current_matrix );
 
     collectNodeRecord ( node );
@@ -60,7 +61,7 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCLayerNode* layer = dynamic_cast<SLCLayerNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( layer->bindmat->name );
         if ( pp!=materialMap.end() )
-            layerdata.push_back ( LayerRecord(layer->name.c_str(), layer->visible, pp->second ) );
+            layerdata.push_back ( LayerRecord(layer->name.c_str(), layer->visible, layer->pickable, pp->second ) );
         ii = layerIdx++; break;
     }
     case SLC_LOD:
@@ -217,6 +218,24 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
 	calcCurrentMatrix ();
 	return;
     }
+    case SLC_SMARTILES:
+    {
+        SLCSmartTilesNode* tiles = dynamic_cast<SLCSmartTilesNode*>(node);
+        map<string, int>::iterator pp = materialMap.find ( tiles->bindmat->name );
+        if ( pp!=materialMap.end() )
+	{
+	    float p0[] = { tiles->pnts[0].x(), tiles->pnts[0].y(), tiles->z, 1 };
+	    mat_multvector ( _current_matrix, p0 );
+	    float p1[] = { tiles->pnts[1].x(), tiles->pnts[1].y(), tiles->z, 1 };
+	    mat_multvector ( _current_matrix, p1 );
+	    float p2[] = { tiles->pnts[2].x(), tiles->pnts[2].y(), tiles->z, 1 };
+	    mat_multvector ( _current_matrix, p2 );
+	    float p3[] = { tiles->pnts[3].x(), tiles->pnts[3].y(), tiles->z, 1 };
+	    mat_multvector ( _current_matrix, p3 );
+            smartilesdata.push_back ( SmartTileRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), tiles->levelcnt, pp->second ) );
+	}
+        ii = smartilesIdx++; break;
+    }
     
     }
     grecord.value  = ii;
@@ -253,7 +272,7 @@ LC* SLCNode2LC::generateLC ()
     LC *lc = new LC();
     lc->globalLCEntry 	 = (GlobalLCEntry*)    malloc( sizeof(int) + ( globalRecords.empty() ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * globalRecords.size() ));
     lc->sceneEntry    	 = (SceneEntry*)       malloc( sizeof(int) + ( scenedata.empty() ? sizeof(SceneRecord) : sizeof(SceneRecord) * scenedata.size() ));
-    lc->materialEntry 	 = (MaterialEntry*)    malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : sizeof(MaterialRecord) * materialdata.size() ));
+    lc->materialEntry 	 = (MaterialEntry*)    malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : 2 * sizeof(MaterialRecord) * materialdata.size() ));
     lc->layerEntry    	 = (LayerEntry*)       malloc( sizeof(int) + ( layerdata.empty() ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerdata.size() ));
     lc->lodEntry      	 = (LODEntry*)         malloc( sizeof(int) + ( loddata.empty() ? sizeof(LODRecord) : sizeof(LODRecord) * loddata.size() ));
     lc->lodpageEntry  	 = (LODPageEntry*)     malloc( sizeof(int) + ( lodpagedata.empty() ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpagedata.size() ));
@@ -268,6 +287,7 @@ LC* SLCNode2LC::generateLC ()
     lc->plineBufferEntry = (PLineBufferEntry*) malloc( sizeof(int) + ( plinebuffer.empty() ? sizeof(vec3f) : sizeof(vec3f) * plinebuffer.size() ));
     lc->polyTessellationBufferEntry = (PolyTessellationBufferEntry*) malloc( sizeof(int) + ( polytessellationbuffer.empty() ? sizeof(vec3f) : sizeof(vec3f) * polytessellationbuffer.size() ));
     lc->texCoordBufferEntry = (TexCoordBufferEntry*) malloc( sizeof(int) + ( texturecoordbuffer.empty() ? sizeof(vec2f) : sizeof(vec2f) * texturecoordbuffer.size() ));
+    lc->smartTilesEntry = (SmartTilesEntry*) malloc( sizeof(int) + ( smartilesdata.empty() ? sizeof(SmartTileRecord) : sizeof(SmartTileRecord) * smartilesdata.size() ));
 
     // fill data
     lc->globalLCEntry->LCLen = globalRecords.size();
@@ -278,12 +298,14 @@ LC* SLCNode2LC::generateLC ()
     if ( lc->sceneEntry->LCLen > 0 )
         memcpy ( lc->sceneEntry->LCRecords, &(scenedata[0]), sizeof(SceneRecord) * scenedata.size() );
 
-    lc->materialEntry->LCLen = materialdata.size();
-    if ( lc->materialEntry->LCLen > 0 )
+    lc->materialEntry->LCLen = materialdata.size() * 2;
+    if ( lc->materialEntry->LCLen > 0 ) {
         memcpy ( lc->materialEntry->LCRecords, &(materialdata[0]), sizeof(MaterialRecord) * materialdata.size() );
+        memcpy ( lc->materialEntry->LCRecords + materialdata.size(), &(materialdata[0]), sizeof(MaterialRecord) * materialdata.size() );
+    }
 
     // fonts
-	for ( int ii=0; ii<lc->materialEntry->LCLen; ii++ )
+	for ( size_t ii=0; ii<materialdata.size(); ii++ )
 	{
 		Font* ft = 0;
 		MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
@@ -362,6 +384,10 @@ LC* SLCNode2LC::generateLC ()
     if ( lc->texCoordBufferEntry->LCLen > 0 )
         memcpy ( lc->texCoordBufferEntry->LCRecords, &(texturecoordbuffer[0]), sizeof(vec2f) * texturecoordbuffer.size() );
 
+    lc->smartTilesEntry->LCLen = smartilesdata.size();
+    if ( lc->smartTilesEntry->LCLen > 0 )
+        memcpy ( lc->smartTilesEntry->LCRecords, &(smartilesdata[0]), sizeof(SmartTileRecord) * smartilesdata.size() );
+
     // build level data
     lc->buildLevelLC ();
 
@@ -387,6 +413,7 @@ void SLCNode2LC::freeLC ( LC* lc )
     free ( lc->plineBufferEntry );
     free ( lc->polyTessellationBufferEntry );
     free ( lc->texCoordBufferEntry );
+    free ( lc->smartTilesEntry );
 
     lc->freeLevelLC ();
     delete lc;

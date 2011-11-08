@@ -4,11 +4,11 @@
 
 StateSet* StateSetBuilder::root = NULL;
 map<StateSet*,StateSet*> StateSetBuilder::_nodes;
-map<MaterialRecord*,list<int> > StateSetBuilder2::onodes; // opaque nodes
-map<MaterialRecord*,list<int> > StateSetBuilder2::tnodes; // transparent nodes
+map<MaterialRecord*,vector<int> > StateSetBuilder2::onodes; // opaque nodes
+map<MaterialRecord*,vector<int> > StateSetBuilder2::tnodes; // transparent nodes
 
 
-void StateSetBuilder::build ( LC* lc, list<int>& input )
+void StateSetBuilder::build ( LC* lc, vector<int>& input )
 {
     if ( input.empty() )
 	return;
@@ -18,7 +18,7 @@ void StateSetBuilder::build ( LC* lc, list<int>& input )
 	_nodes[root] = root;
     }
 
-    for ( list<int>::iterator pp=input.begin(); pp!=input.end(); ++pp )
+    for ( vector<int>::iterator pp=input.begin(); pp!=input.end(); ++pp )
     {
 	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[*pp];
 	switch ( grcd.type )
@@ -82,12 +82,12 @@ void StateSetBuilder::clear ()
 
 //================================================================================
 
-void StateSetBuilder2::build ( LC* lc, list<int>& input, list<StateSet*>& opaques, list<StateSet*>& transparents )
+void StateSetBuilder2::build ( LC* lc, vector<int>& input, vector<StateSet*>& opaques, vector<StateSet*>& transparents )
 {
     if ( input.empty() )
 	return;
 
-    for ( list<int>::iterator pp=input.begin(); pp!=input.end(); ++pp )
+    for ( vector<int>::iterator pp=input.begin(); pp!=input.end(); ++pp )
     {
 	GlobalLCRecord& grcd = lc->globalLCEntry->LCRecords[*pp];
 	MaterialRecord* mat = 0;
@@ -105,29 +105,32 @@ void StateSetBuilder2::build ( LC* lc, list<int>& input, list<StateSet*>& opaque
 	case SLC_POLY:
 	    mat = &(lc->materialEntry->LCRecords[lc->polyEntry->LCRecords[grcd.value].materialIdx]);
 	    break;
+	case SLC_SMARTILES:
+	    mat = &(lc->materialEntry->LCRecords[lc->smartTilesEntry->LCRecords[grcd.value].materialIdx]);
+	    break;
 	}
 
 	if ( mat == 0 ) 
 	    continue;
 
-	std::map<MaterialRecord*,std::list<int> >* nodes;
+	std::map<MaterialRecord*,std::vector<int> >* nodes;
 //	if ( mat->background_color.w() != 1 || mat->foreground_color.w() != 1 )
 	if ( mat->background_color.w() == 255 )// || mat->foreground_color.w() != 1 )
 	    nodes = &onodes;
 	else
 	    nodes = &tnodes;
 
-	map<MaterialRecord*,list<int> >::iterator pp1 = nodes->find ( mat );
+	map<MaterialRecord*,vector<int> >::iterator pp1 = nodes->find ( mat );
 	if ( pp1 == nodes->end() ) {
-	    nodes->insert ( pair<MaterialRecord*, list<int> >(mat,list<int> (1, *pp)) );
+	    nodes->insert ( pair<MaterialRecord*, vector<int> >(mat,vector<int> (1, *pp)) );
 	} else {
 	    pp1->second.push_back ( *pp );
 	}
     }
 
-    for ( map<MaterialRecord*,list<int> >::iterator pp=onodes.begin(); pp!=onodes.end(); ++pp )
+    for ( map<MaterialRecord*,vector<int> >::iterator pp=onodes.begin(); pp!=onodes.end(); ++pp )
 	opaques.push_back ( new StateSet ( lc, pp->first, pp->second ) );
-    for ( map<MaterialRecord*,list<int> >::iterator pp=tnodes.begin(); pp!=tnodes.end(); ++pp )
+    for ( map<MaterialRecord*,vector<int> >::iterator pp=tnodes.begin(); pp!=tnodes.end(); ++pp )
 	transparents.push_back ( new StateSet ( lc, pp->first, pp->second ) );
 }
 

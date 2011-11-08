@@ -1,6 +1,7 @@
 #ifndef _SGR_RENDERER2D_H_
 #define _SGR_RENDERER2D_H_
 
+#include "sgr_smartiles.h"
 /**
  * render2d features:
  * 1. scene management
@@ -45,6 +46,10 @@ void r2d_get_layer_background_color ( int sceneID, int layerid, unsigned short* 
  */
 void r2d_get_viewport_rect ( float* x_y_width_height );
 
+/** high light primitive
+ */
+void r2d_highlight_primitive ( int sceneID, int primitiveID, bool highlight );
+
 /** element traverse
  */
 #define R2D_ROOT          0
@@ -57,4 +62,15 @@ void r2d_get_viewport_rect ( float* x_y_width_height );
 int r2d_to_element ( int sceneID, int elementType );
 int r2d_get_node_type ( int sceneID );
 void r2d_rect_points ( int sceneID, int rectid, float* xyzxyz );
+
+/** load texture, obsolete
+ */
+typedef void (*LoadTex_Proc)(Tile*, int);
+void r2d_loadtexture_callback ( LoadTex_Proc );
+
+/** pick
+ */
+int r2d_crosspick ( int sceneID, float* minmax, int** outIds );
+int r2d_containpick ( int sceneID, float* minmax, int** outIds );
+
 #endif //_SGR_RENDERER2D_H_

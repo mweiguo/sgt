@@ -111,7 +111,7 @@ StateSet::StateSet ()
 
 //================================================================================
 
-StateSet::StateSet ( LC* c, MaterialRecord* mat, list<int> objs )
+StateSet::StateSet ( LC* c, MaterialRecord* mat, vector<int> objs )
 {
     parent = NULL;
     lc = c;
@@ -372,6 +372,7 @@ void StateSet::render ( LC* lc )
     vector<float> rects;
     vector<float> polys;
     vector<TextRecord*> texts;
+    cout << "before render" << endl;
     for ( vector<int>::iterator pp=renderObjects.begin(); pp!=renderObjects.end(); ++pp )
     {
 	// get primitive
@@ -427,6 +428,8 @@ void StateSet::render ( LC* lc )
 	}
     }
 
+    cout << "after collect" << endl;
+
     // draw rects
     if ( false == rects.empty() ) {
 //	cout << "glDisable ( GL_TEXTURE_2D );" << endl;
@@ -448,6 +451,8 @@ void StateSet::render ( LC* lc )
 	glEnable ( GL_TEXTURE_2D );
 //	cout << "glEnable ( GL_TEXTURE_2D );" << endl;
     }
+    cout << "pass drawrect" << endl;
+
 
     // draw text
     for ( vector<TextRecord*>::iterator pp=texts.begin(); pp!=texts.end(); ++pp )
@@ -469,6 +474,7 @@ void StateSet::render ( LC* lc )
 	glDisable ( GL_TEXTURE_2D );
 //	cout << "glDisable ( GL_TEXTURE_2D );" << endl;
     }
+    cout << "pass drawtext" << endl;
 }
 
 //================================================================================
@@ -521,6 +527,35 @@ void StateSet::render ()
 	    glEnable ( GL_TEXTURE_2D );
 	    break;
 	}
+        case SLC_SMARTILES:
+        {
+            // for each tile, bind texture & draw quad
+	    SmartTileRecord& smartile = lc->smartTilesEntry->LCRecords[g.value];
+            if ( smartile.tilecnt < 16 ) {
+                for ( int i=0; i<smartile.tilecnt; i++ ) {
+                    Tile* tile = smartile.tiles + i;
+                    // bind texture
+                    if ( tile->texid > 0 ) {
+                        glBindTexture ( GL_TEXTURE_2D, tile->texid );
+                    } else {
+                        glDisable ( GL_TEXTURE_2D );
+                    }
+
+                    // draw quad
+                    float z = smartile.data[0].z();
+                    float rc0[] = {tile->minmax[0], tile->minmax[1], z, tile->minmax[2], tile->minmax[1], z, tile->minmax[2], tile->minmax[3], z, tile->minmax[0], tile->minmax[3], z };
+                    vector<float> rc;
+                    copy ( rc0, rc0+sizeof(rc0), back_inserter(rc) );
+                    glVertexPointer ( 3, GL_FLOAT, 0, &(rc[0]) );
+                    float texcoord[] = {0, 0, 1, 0, 1, 1, 0, 1 };
+                    glTexCoordPointer ( 2, GL_FLOAT, 0, texcoord );
+                    glDrawArrays ( GL_QUADS, 0, rc.size()/3 );
+                    if ( tile->texid <= 0 )
+                        glEnable ( GL_TEXTURE_2D );
+                }
+            }
+            break;
+        }
 	}
     }
 
@@ -533,7 +568,6 @@ void StateSet::render ()
         glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE );
         glColor3f ( 1, 1, 1 );
 	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
-        glPopAttrib ();
         glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
 
 	glEnable ( GL_TEXTURE_2D );
