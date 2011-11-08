@@ -13,7 +13,7 @@ SLCMaterial *gmat;
 void initMaterials ()
 {
     gmat = new SLCMaterial ( "layer_material");
-    gmat->foreground_color = vec4i(155, 0, 0, 155);
+    gmat->foreground_color = vec4i(0, 155, 0, 155);
     gmat->background_color = vec4i(200, 0, 200, 255);
     gmat->linetype = 0xFFFF;//SLCMaterial::LINETYPE_SOLID;
     gmat->linewidth = 1;

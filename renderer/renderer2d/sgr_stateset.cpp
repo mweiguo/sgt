@@ -107,6 +107,8 @@ void State::applyState ()
 StateSet::StateSet ()
 {
     parent = NULL;
+    backgroundcolor = -1;
+    foregroundcolor = -1;
 }
 
 //================================================================================
@@ -117,7 +119,9 @@ StateSet::StateSet ( LC* c, MaterialRecord* mat, vector<int> objs )
     lc = c;
     renderObjects.assign ( objs.begin(), objs.end() );
     
+    backgroundcolor = states.size();
     addState ( State(State::BACKGROUND_COLOR, mat->background_color, State::INHERIT) );
+    foregroundcolor = states.size();
     addState ( State(State::FOREGROUND_COLOR, mat->foreground_color, State::INHERIT) );
     addState ( State(State::LINE_TYPE, (int)MAKELONG(mat->linetype,mat->linetypefactor), State::INHERIT) );
     addState ( State(State::LINE_WIDTH, mat->linewidth, State::INHERIT) );
@@ -561,15 +565,21 @@ void StateSet::render ()
 
     // draw rects
     if ( false == rects.empty() ) {
+        State& bg = states[backgroundcolor];
+        State& fg = states[foregroundcolor];
+
 	glDisable ( GL_TEXTURE_2D );
 	glVertexPointer ( 3, GL_FLOAT, 0, &(rects[0]) );
-        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
-	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
-        glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE );
-        glColor3f ( 1, 1, 1 );
-	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
-        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
 
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_LINE );
+        glColor4f ( fg.vec4iValue.x()/255.0, fg.vec4iValue.y()/255.0, fg.vec4iValue.z()/255.0, fg.vec4iValue.w()/255.0f );//, fg.vec4iValue.w()/255.0f );
+	glDrawArrays ( GL_QUADS, 0, rects.size()/3 );
+        glColor4f ( bg.vec4iValue.x()/255.0, bg.vec4iValue.y()/255.0, bg.vec4iValue.z()/255.0, bg.vec4iValue.w()/255.0f );
+
+        glPolygonMode ( GL_FRONT_AND_BACK, GL_FILL );
 	glEnable ( GL_TEXTURE_2D );
     }
 

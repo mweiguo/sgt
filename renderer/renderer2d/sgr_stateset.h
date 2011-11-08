@@ -42,6 +42,8 @@ public:
     vector<StateSet*> children;
     vector<State> states;
     vector<int> renderObjects;
+    int backgroundcolor;
+    int foregroundcolor;
 
     StateSet ();
     StateSet ( LC* lc, MaterialRecord* mat, std::vector<int> objs );

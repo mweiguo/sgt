@@ -18,7 +18,7 @@ void vfculler::cull ( LC& lc, const BBox2d& vfbbox, float s, bool dopick )
     doPick = dopick;
     scale = s;
     vfbbox2d = vfbbox;
-    cout << "(" << vfbbox2d.minvec().x() << "," << vfbbox2d.minvec().y() << "), (" << vfbbox2d.maxvec().x() << "," << vfbbox2d.maxvec().y() << ") " << endl;
+//    cout << "(" << vfbbox2d.minvec().x() << "," << vfbbox2d.minvec().y() << "), (" << vfbbox2d.maxvec().x() << "," << vfbbox2d.maxvec().y() << ") " << endl;
 
     if ( cull_test ( lc.getType(), lc.getGIndex(), lc )==CHILD_NOT_CULLED ) {
         traverse ( lc );
@@ -126,7 +126,7 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
                 vector<int> out;
 //		kdt->intersect_cnt = 0;
                 bool isHit = kdt->intersect ( &lc, (float*)&vfbbox2d, back_inserter(out) );
-                cout << "isHit = " << isHit << ", size = " << out.size() << endl;
+//                cout << "isHit = " << isHit << ", size = " << out.size() << endl;
                 if ( isHit )
                     copy ( out.begin(), out.end(), back_inserter(renderObjects) );
 //		cout << "intersect_cnt : " << kdt->intersect_cnt << endl;
