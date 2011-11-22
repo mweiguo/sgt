@@ -11,6 +11,8 @@
 #include <cstdlib>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <sqlite3.h>
+
 using namespace std;
 
 SLCNode2LC::SLCNode2LC ( SLCNode* node )
@@ -84,10 +86,10 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     case SLC_LINE:
     {
         SLCLineNode* line = dynamic_cast<SLCLineNode*>(node);
-	float v[] = { line->pnts[0].x(), line->pnts[0].y(), 0, 1 };
-	mat_multvector ( _current_matrix, v );
-	float v1[] = { line->pnts[1].x(), line->pnts[1].y(), 0, 1 };
-	mat_multvector ( _current_matrix, v1 );
+        float v[] = { line->pnts[0].x(), line->pnts[0].y(), 0, 1 };
+        mat_multvector ( _current_matrix, v );
+        float v1[] = { line->pnts[1].x(), line->pnts[1].y(), 0, 1 };
+        mat_multvector ( _current_matrix, v1 );
 
         linedata.push_back ( LineRecord( v, v1 ) );
         ii = lineIdx++; break;
@@ -95,12 +97,12 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
     case SLC_TRIANGLE:
     {
         SLCTriNode* tri = dynamic_cast<SLCTriNode*>(node);
-	float v[] = { tri->pnts[0].x(), tri->pnts[0].y(), 0, 1 };
-	mat_multvector ( _current_matrix, v );
-	float v1[] = { tri->pnts[1].x(), tri->pnts[1].y(), 0, 1 };
-	mat_multvector ( _current_matrix, v1 );
-	float v2[] = { tri->pnts[2].x(), tri->pnts[2].y(), 0, 1 };
-	mat_multvector ( _current_matrix, v2 );
+        float v[] = { tri->pnts[0].x(), tri->pnts[0].y(), 0, 1 };
+        mat_multvector ( _current_matrix, v );
+        float v1[] = { tri->pnts[1].x(), tri->pnts[1].y(), 0, 1 };
+        mat_multvector ( _current_matrix, v1 );
+        float v2[] = { tri->pnts[2].x(), tri->pnts[2].y(), 0, 1 };
+        mat_multvector ( _current_matrix, v2 );
 
         tridata.push_back ( TriangleRecord( v, v1, v2 ) );
         ii = triIdx++; break;
@@ -110,20 +112,20 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCRectNode* rc = dynamic_cast<SLCRectNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( rc->bindmat->name );
         if ( pp!=materialMap.end() )
-	{
-	    float p0[] = { rc->pnts[0].x(), rc->pnts[0].y(), rc->z, 1 };
-	    mat_multvector ( _current_matrix, p0 );
-	    float p1[] = { rc->pnts[1].x(), rc->pnts[1].y(), rc->z, 1 };
-	    mat_multvector ( _current_matrix, p1 );
-	    float p2[] = { rc->pnts[2].x(), rc->pnts[2].y(), rc->z, 1 };
-	    mat_multvector ( _current_matrix, p2 );
-	    float p3[] = { rc->pnts[3].x(), rc->pnts[3].y(), rc->z, 1 };
-	    mat_multvector ( _current_matrix, p3 );
-	    if ( rc->filltexture )
-		quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), true, rc->textureAngle, rc->textureScale, pp->second ) );
-	    else
-		quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), false, rc->textureAngle, rc->textureScale, pp->second ) );
-	}
+        {
+            float p0[] = { rc->pnts[0].x(), rc->pnts[0].y(), rc->z, 1 };
+            mat_multvector ( _current_matrix, p0 );
+            float p1[] = { rc->pnts[1].x(), rc->pnts[1].y(), rc->z, 1 };
+            mat_multvector ( _current_matrix, p1 );
+            float p2[] = { rc->pnts[2].x(), rc->pnts[2].y(), rc->z, 1 };
+            mat_multvector ( _current_matrix, p2 );
+            float p3[] = { rc->pnts[3].x(), rc->pnts[3].y(), rc->z, 1 };
+            mat_multvector ( _current_matrix, p3 );
+            if ( rc->filltexture )
+                quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), true, rc->textureAngle, rc->textureScale, pp->second ) );
+            else
+                quaddata.push_back ( RectRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), false, rc->textureAngle, rc->textureScale, pp->second ) );
+        }
         ii = rectIdx++; break;
     }
     case SLC_PLINE:
@@ -131,14 +133,14 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCPLineNode* pline = dynamic_cast<SLCPLineNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( pline->bindmat->name );
         if ( pp!=materialMap.end() ) {
-	    size_t istart = plinebuffer.size();
-	    for ( size_t ii=0; ii<pline->pnts.size(); ii++ ) {
-		float v[] = { pline->pnts[ii].x(), pline->pnts[ii].y(), pline->z, 1 };
-		mat_multvector ( _current_matrix, v );
-		plinebuffer.push_back ( vec3f( v ) );
-	    }
-	    plinedata.push_back ( PLineRecord(istart, pline->pnts.size()+istart, pp->second) );
-	}
+            size_t istart = plinebuffer.size();
+            for ( size_t ii=0; ii<pline->pnts.size(); ii++ ) {
+                float v[] = { pline->pnts[ii].x(), pline->pnts[ii].y(), pline->z, 1 };
+                mat_multvector ( _current_matrix, v );
+                plinebuffer.push_back ( vec3f( v ) );
+            }
+            plinedata.push_back ( PLineRecord(istart, pline->pnts.size()+istart, pp->second) );
+        }
         ii = plineIdx++; break;
     }
     case SLC_POLY:
@@ -146,47 +148,47 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCPolyNode* poly = dynamic_cast<SLCPolyNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( poly->bindmat->name );
         if ( pp!=materialMap.end() ) {
-	    size_t istart = plinebuffer.size();
-	    for ( size_t ii=0; ii<poly->pnts.size(); ii++ ) {
-		float v[] = { poly->pnts[ii].x(), poly->pnts[ii].y(), poly->z, 1 };
-		mat_multvector ( _current_matrix, v );
-		plinebuffer.push_back ( vec3f( v ) );
-	    }
+            size_t istart = plinebuffer.size();
+            for ( size_t ii=0; ii<poly->pnts.size(); ii++ ) {
+                float v[] = { poly->pnts[ii].x(), poly->pnts[ii].y(), poly->z, 1 };
+                mat_multvector ( _current_matrix, v );
+                plinebuffer.push_back ( vec3f( v ) );
+            }
 
-	    // calculate tessellation
-	    int tessStart = polytessellationbuffer.size();
-	    vector<vec2f> tempout;
-	    Triangulate::Process ( poly->pnts, back_inserter(tempout) );
-	    for ( size_t ii=0; ii<tempout.size(); ii++ ) {
-		float v[] = { tempout[ii].x(), tempout[ii].y(), poly->z, 1 };
-		mat_multvector ( _current_matrix, v );
-		polytessellationbuffer.push_back ( vec3f(v) );
-	    }
-//	    Triangulate::Process ( poly->pnts, back_inserter(polytessellationbuffer) );
-	    int tessEnd = polytessellationbuffer.size();
-	    if ( poly->filltexture )
-	    {
-		double topi = M_PI / 180;
-		// calculate texture coordinate
-		float cosalpha = cos ( topi * poly->textureAngle );
-		float sinalpha = sin ( topi * poly->textureAngle );
-		int texcoordStart = texturecoordbuffer.size();
-		for ( int i=tessStart; i!=tessEnd; i++ )
-		{
-		    vec3f& t = polytessellationbuffer[i];
-		    float x = t.x() * cosalpha - t.y() * sinalpha;
-		    float y = t.x() * sinalpha + t.y() * cosalpha;
-		    vec2f texcoord;
-		    texcoord.x ( x / (200 * poly->textureScale ) );
-		    texcoord.y ( y / (200 * poly->textureScale ) );
-		    texturecoordbuffer.push_back ( texcoord );
-		}
-		int texcoordEnd = texturecoordbuffer.size();
-		polydata.push_back ( PolyRecord(istart, poly->pnts.size()+istart, texcoordStart, texcoordEnd, tessStart, tessEnd, true, poly->textureAngle, poly->textureScale, pp->second) );
-	    }
-	    else
-		polydata.push_back ( PolyRecord(istart, poly->pnts.size()+istart, -1, -1, tessStart, tessEnd, false, 0, 1, pp->second) );
-	}
+            // calculate tessellation
+            int tessStart = polytessellationbuffer.size();
+            vector<vec2f> tempout;
+            Triangulate::Process ( poly->pnts, back_inserter(tempout) );
+            for ( size_t ii=0; ii<tempout.size(); ii++ ) {
+                float v[] = { tempout[ii].x(), tempout[ii].y(), poly->z, 1 };
+                mat_multvector ( _current_matrix, v );
+                polytessellationbuffer.push_back ( vec3f(v) );
+            }
+//          Triangulate::Process ( poly->pnts, back_inserter(polytessellationbuffer) );
+            int tessEnd = polytessellationbuffer.size();
+            if ( poly->filltexture )
+            {
+                double topi = M_PI / 180;
+                // calculate texture coordinate
+                float cosalpha = cos ( topi * poly->textureAngle );
+                float sinalpha = sin ( topi * poly->textureAngle );
+                int texcoordStart = texturecoordbuffer.size();
+                for ( int i=tessStart; i!=tessEnd; i++ )
+                {
+                    vec3f& t = polytessellationbuffer[i];
+                    float x = t.x() * cosalpha - t.y() * sinalpha;
+                    float y = t.x() * sinalpha + t.y() * cosalpha;
+                    vec2f texcoord;
+                    texcoord.x ( x / (200 * poly->textureScale ) );
+                    texcoord.y ( y / (200 * poly->textureScale ) );
+                    texturecoordbuffer.push_back ( texcoord );
+                }
+                int texcoordEnd = texturecoordbuffer.size();
+                polydata.push_back ( PolyRecord(istart, poly->pnts.size()+istart, texcoordStart, texcoordEnd, tessStart, tessEnd, true, poly->textureAngle, poly->textureScale, pp->second) );
+            }
+            else
+                polydata.push_back ( PolyRecord(istart, poly->pnts.size()+istart, -1, -1, tessStart, tessEnd, false, 0, 1, pp->second) );
+        }
         ii = polyIdx++; break;
     }
     case SLC_TEXT:
@@ -194,46 +196,46 @@ void SLCNode2LC::collectNodeRecord ( SLCNode* node )
         SLCTextNode* tc = dynamic_cast<SLCTextNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( tc->bindmat->name );
         if ( pp!=materialMap.end() ) {
-	    size_t istart = textbuffer.size();
-	    copy ( tc->text.begin(), tc->text.end(), back_inserter(textbuffer) );
-	    textbuffer.push_back ( 0 );
-	    int sstart = textsilhouettebuffer.size();
-	    textsilhouettebuffer.resize ( textsilhouettebuffer.size() + 4 );
-	    int send = textsilhouettebuffer.size();
+            size_t istart = textbuffer.size();
+            copy ( tc->text.begin(), tc->text.end(), back_inserter(textbuffer) );
+            textbuffer.push_back ( 0 );
+            int sstart = textsilhouettebuffer.size();
+            textsilhouettebuffer.resize ( textsilhouettebuffer.size() + 4 );
+            int send = textsilhouettebuffer.size();
 
-	    float v[] = { tc->pos.x(), tc->pos.y(), tc->pos.z(), 1 };
-	    mat_multvector ( _current_matrix, v );
+            float v[] = { tc->pos.x(), tc->pos.y(), tc->pos.z(), 1 };
+            mat_multvector ( _current_matrix, v );
 
-	    textdata.push_back ( TextRecord(istart, vec3f(v), tc->scale, tc->rotz, sstart, send, pp->second ) );
-	}
+            textdata.push_back ( TextRecord(istart, vec3f(v), tc->scale, tc->rotz, sstart, send, pp->second ) );
+        }
         ii = textIdx++; break;
     }
     case SLC_TRANSFORM:
     {
-	// update current transform
+        // update current transform
         SLCTransformNode* t = dynamic_cast<SLCTransformNode*>(node);
-	Mat4f m;
-	memcpy ( m.mat, t->mat, sizeof(float)*16 );
-	_current_matrix_stack.push_back ( m );
-	calcCurrentMatrix ();
-	return;
+        Mat4f m;
+        memcpy ( m.mat, t->mat, sizeof(float)*16 );
+        _current_matrix_stack.push_back ( m );
+        calcCurrentMatrix ();
+        return;
     }
     case SLC_SMARTILES:
     {
         SLCSmartTilesNode* tiles = dynamic_cast<SLCSmartTilesNode*>(node);
         map<string, int>::iterator pp = materialMap.find ( tiles->bindmat->name );
         if ( pp!=materialMap.end() )
-	{
-	    float p0[] = { tiles->pnts[0].x(), tiles->pnts[0].y(), tiles->z, 1 };
-	    mat_multvector ( _current_matrix, p0 );
-	    float p1[] = { tiles->pnts[1].x(), tiles->pnts[1].y(), tiles->z, 1 };
-	    mat_multvector ( _current_matrix, p1 );
-	    float p2[] = { tiles->pnts[2].x(), tiles->pnts[2].y(), tiles->z, 1 };
-	    mat_multvector ( _current_matrix, p2 );
-	    float p3[] = { tiles->pnts[3].x(), tiles->pnts[3].y(), tiles->z, 1 };
-	    mat_multvector ( _current_matrix, p3 );
-            smartilesdata.push_back ( SmartTileRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), tiles->levelcnt, pp->second ) );
-	}
+        {
+            float p0[] = { tiles->pnts[0].x(), tiles->pnts[0].y(), tiles->z, 1 };
+            mat_multvector ( _current_matrix, p0 );
+            float p1[] = { tiles->pnts[1].x(), tiles->pnts[1].y(), tiles->z, 1 };
+            mat_multvector ( _current_matrix, p1 );
+            float p2[] = { tiles->pnts[2].x(), tiles->pnts[2].y(), tiles->z, 1 };
+            mat_multvector ( _current_matrix, p2 );
+            float p3[] = { tiles->pnts[3].x(), tiles->pnts[3].y(), tiles->z, 1 };
+            mat_multvector ( _current_matrix, p3 );
+            smartilesdata.push_back ( SmartTileRecord( vec3f(p0), vec3f(p1), vec3f(p2), vec3f(p3), tiles->levelcnt, tiles->dbname.c_str(), pp->second ) );
+        }
         ii = smartilesIdx++; break;
     }
     
@@ -249,10 +251,10 @@ void SLCNode2LC::collectChildrenRecords ( SLCNode* node )
     {
         collectNodeRecord ( *pp );
         collectChildrenRecords ( *pp );
-	if ( (*pp)->getType() == SLC_TRANSFORM ) {
-	    _current_matrix_stack.pop_back ();
-	    calcCurrentMatrix ();
-	}
+        if ( (*pp)->getType() == SLC_TRANSFORM ) {
+            _current_matrix_stack.pop_back ();
+            calcCurrentMatrix ();
+        }
     }
 }
 
@@ -260,9 +262,9 @@ void SLCNode2LC::calcCurrentMatrix ()
 {
     mat_loadidentity ( _current_matrix );
     for ( list<Mat4f>::iterator pp=_current_matrix_stack.begin();
-	  pp!=_current_matrix_stack.end(); ++pp )
+          pp!=_current_matrix_stack.end(); ++pp )
     {
-	mat_multmatrix ( _current_matrix, pp->mat );
+        mat_multmatrix ( _current_matrix, pp->mat );
     }
 }
 
@@ -270,18 +272,18 @@ LC* SLCNode2LC::generateLC ()
 {
     // alloc memory
     LC *lc = new LC();
-    lc->globalLCEntry 	 = (GlobalLCEntry*)    malloc( sizeof(int) + ( globalRecords.empty() ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * globalRecords.size() ));
-    lc->sceneEntry    	 = (SceneEntry*)       malloc( sizeof(int) + ( scenedata.empty() ? sizeof(SceneRecord) : sizeof(SceneRecord) * scenedata.size() ));
-    lc->materialEntry 	 = (MaterialEntry*)    malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : 2 * sizeof(MaterialRecord) * materialdata.size() ));
-    lc->layerEntry    	 = (LayerEntry*)       malloc( sizeof(int) + ( layerdata.empty() ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerdata.size() ));
-    lc->lodEntry      	 = (LODEntry*)         malloc( sizeof(int) + ( loddata.empty() ? sizeof(LODRecord) : sizeof(LODRecord) * loddata.size() ));
-    lc->lodpageEntry  	 = (LODPageEntry*)     malloc( sizeof(int) + ( lodpagedata.empty() ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpagedata.size() ));
-    lc->lineEntry     	 = (LineEntry*)        malloc( sizeof(int) + ( linedata.empty() ? sizeof(LineRecord) : sizeof(LineRecord) * linedata.size() ));
-    lc->triangleEntry 	 = (TriangleEntry*)    malloc( sizeof(int) + ( tridata.empty() ? sizeof(TriangleRecord) : sizeof(TriangleRecord) * tridata.size() ));
-    lc->rectEntry     	 = (RectEntry*)        malloc( sizeof(int) + ( quaddata.empty() ? sizeof(RectRecord) : sizeof(RectRecord) * quaddata.size() ));
-    lc->plineEntry     	 = (PLineEntry*)       malloc( sizeof(int) + ( plinedata.empty() ? sizeof(PLineRecord) : sizeof(PLineRecord) * plinedata.size() ));
-    lc->polyEntry     	 = (PolyEntry*)        malloc( sizeof(int) + ( polydata.empty() ? sizeof(PolyRecord) : sizeof(PolyRecord) * polydata.size() ));
-    lc->textEntry     	 = (TextEntry*)        malloc( sizeof(int) + ( textdata.empty() ? sizeof(TextRecord) : sizeof(TextRecord) * textdata.size() ));
+    lc->globalLCEntry    = (GlobalLCEntry*)    malloc( sizeof(int) + ( globalRecords.empty() ? sizeof(GlobalLCRecord) : sizeof(GlobalLCRecord) * globalRecords.size() ));
+    lc->sceneEntry       = (SceneEntry*)       malloc( sizeof(int) + ( scenedata.empty() ? sizeof(SceneRecord) : sizeof(SceneRecord) * scenedata.size() ));
+    lc->materialEntry    = (MaterialEntry*)    malloc( sizeof(int) + ( materialdata.empty() ? sizeof(MaterialRecord) : 2 * sizeof(MaterialRecord) * materialdata.size() ));
+    lc->layerEntry       = (LayerEntry*)       malloc( sizeof(int) + ( layerdata.empty() ? sizeof(LayerRecord) : sizeof(LayerRecord) * layerdata.size() ));
+    lc->lodEntry         = (LODEntry*)         malloc( sizeof(int) + ( loddata.empty() ? sizeof(LODRecord) : sizeof(LODRecord) * loddata.size() ));
+    lc->lodpageEntry     = (LODPageEntry*)     malloc( sizeof(int) + ( lodpagedata.empty() ? sizeof(LODPageRecord) : sizeof(LODPageRecord) * lodpagedata.size() ));
+    lc->lineEntry        = (LineEntry*)        malloc( sizeof(int) + ( linedata.empty() ? sizeof(LineRecord) : sizeof(LineRecord) * linedata.size() ));
+    lc->triangleEntry    = (TriangleEntry*)    malloc( sizeof(int) + ( tridata.empty() ? sizeof(TriangleRecord) : sizeof(TriangleRecord) * tridata.size() ));
+    lc->rectEntry        = (RectEntry*)        malloc( sizeof(int) + ( quaddata.empty() ? sizeof(RectRecord) : sizeof(RectRecord) * quaddata.size() ));
+    lc->plineEntry       = (PLineEntry*)       malloc( sizeof(int) + ( plinedata.empty() ? sizeof(PLineRecord) : sizeof(PLineRecord) * plinedata.size() ));
+    lc->polyEntry        = (PolyEntry*)        malloc( sizeof(int) + ( polydata.empty() ? sizeof(PolyRecord) : sizeof(PolyRecord) * polydata.size() ));
+    lc->textEntry        = (TextEntry*)        malloc( sizeof(int) + ( textdata.empty() ? sizeof(TextRecord) : sizeof(TextRecord) * textdata.size() ));
     lc->textBufferEntry  = (TextBufferEntry*)  malloc( sizeof(int) + ( textbuffer.empty() ? sizeof(char) : sizeof(char) * textbuffer.size() ));
     lc->textSilhouetteBufferEntry  = (TextSilhouetteBufferEntry*)  malloc( sizeof(int) + ( textsilhouettebuffer.empty() ? sizeof(vec2f) : sizeof(vec3f) * textsilhouettebuffer.size() ));
     lc->plineBufferEntry = (PLineBufferEntry*) malloc( sizeof(int) + ( plinebuffer.empty() ? sizeof(vec3f) : sizeof(vec3f) * plinebuffer.size() ));
@@ -305,27 +307,27 @@ LC* SLCNode2LC::generateLC ()
     }
 
     // fonts
-	for ( size_t ii=0; ii<materialdata.size(); ii++ )
-	{
-		Font* ft = 0;
-		MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
-		if ( string("") == mr.fontfile )
-			strcpy ( mr.fontfile, "simhei.ttf" );
-		for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
-		{
-			if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
-				ft = lc->fonts[jj];
-				mr.fontIdx = jj;
-				break;
-			}
-		}
+    for ( size_t ii=0; ii<materialdata.size(); ii++ )
+    {
+        Font* ft = 0;
+        MaterialRecord& mr = lc->materialEntry->LCRecords[ii];
+        if ( string("") == mr.fontfile )
+            strcpy ( mr.fontfile, "simhei.ttf" );
+        for ( size_t jj=0; jj<lc->fonts.size(); jj++ )
+        {
+            if ( lc->fonts[jj]->fontfilename == mr.fontfile ) {
+                ft = lc->fonts[jj];
+                mr.fontIdx = jj;
+                break;
+            }
+        }
 
-		if ( NULL == ft && string("")!=mr.fontfile ) {
-			ft = new Font ( mr.fontfile );
-			mr.fontIdx = lc->fonts.size();
-			lc->fonts.push_back ( ft );
-		}
-	}
+        if ( NULL == ft && string("")!=mr.fontfile ) {
+            ft = new Font ( mr.fontfile );
+            mr.fontIdx = lc->fonts.size();
+            lc->fonts.push_back ( ft );
+        }
+    }
 
 
     lc->layerEntry->LCLen = layerdata.size();
@@ -387,6 +389,15 @@ LC* SLCNode2LC::generateLC ()
     lc->smartTilesEntry->LCLen = smartilesdata.size();
     if ( lc->smartTilesEntry->LCLen > 0 )
         memcpy ( lc->smartTilesEntry->LCRecords, &(smartilesdata[0]), sizeof(SmartTileRecord) * smartilesdata.size() );
+    for ( int i=0; i<lc->smartTilesEntry->LCLen; i++ )
+    {
+        if ( strcmp("", lc->smartTilesEntry->LCRecords[i].dbname)!=0 ) {
+            if ( SQLITE_OK != sqlite3_open ( lc->smartTilesEntry->LCRecords[i].dbname, (sqlite3**)&lc->smartTilesEntry->LCRecords[i].pDB)) {
+                lc->smartTilesEntry->LCRecords[i].pDB = NULL;
+                cerr << "load database " << lc->smartTilesEntry->LCRecords[i].dbname << " failed" << endl;
+            }
+        }
+    }
 
     // build level data
     lc->buildLevelLC ();
@@ -396,6 +407,11 @@ LC* SLCNode2LC::generateLC ()
 
 void SLCNode2LC::freeLC ( LC* lc )
 {
+    for ( int i=0; i<lc->smartTilesEntry->LCLen; i++ ) {
+        if ( lc->smartTilesEntry->LCRecords[i].pDB != 0 ) {
+            sqlite3_close ( (sqlite3*)lc->smartTilesEntry->LCRecords[i].pDB );
+        }
+    }
     free ( lc->globalLCEntry );
     free ( lc->sceneEntry );
     free ( lc->materialEntry );

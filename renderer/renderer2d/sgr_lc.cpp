@@ -19,6 +19,8 @@ using namespace std;
 #include <IL/il.h>
 #include <IL/ilut.h>
 
+#include <sqlite3.h>
+
 LoadTex_Proc loadtex_proc = 0;
 
 void initLC ()
@@ -217,9 +219,10 @@ SmartTileRecord::SmartTileRecord ()
 {
     levelcnt = 0;
     tilecnt = 0;    
+    pDB = 0;
 }
 
-SmartTileRecord::SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int l, int matidx )
+SmartTileRecord::SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int l, const char* name, int matidx )
     : DrawableRecord ( matidx )
 {
     data[0] = p0;
@@ -228,6 +231,8 @@ SmartTileRecord::SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f
     data[3] = p3;
     levelcnt = l;
     tilecnt = 0;
+    strcpy ( dbname, name );
+    pDB = 0;
 }
 
 // --------------------------------------------------------------------------------
@@ -557,6 +562,16 @@ bool LC::load ( const char* filename )
     smartTilesEntry = (SmartTilesEntry*)malloc ( sz );
     smartTilesEntry->LCLen = length;
     in.read ( (char*)smartTilesEntry->LCRecords, sz-sizeof(int) );
+    // load db
+    for ( int i=0; i<length; i++ )
+    {
+        if ( strcmp("", smartTilesEntry->LCRecords[i].dbname)!=0 ) {
+            if ( SQLITE_OK != sqlite3_open ( smartTilesEntry->LCRecords[i].dbname, (sqlite3**)&smartTilesEntry->LCRecords[i].pDB)) {
+                smartTilesEntry->LCRecords[i].pDB = NULL;
+                cerr << "load database " << smartTilesEntry->LCRecords[i].dbname << " failed" << endl;
+            }
+        }
+    }
 
     // read GlobalLCEntry
     in.read ( (char*)&length, sizeof(int) );
@@ -599,6 +614,12 @@ bool LC::load ( const char* filename )
 
 void LC::free ()
 {
+    for ( int i=0; i<smartTilesEntry->LCLen; i++ ) {
+        if ( smartTilesEntry->LCRecords[i].pDB != 0 ) {
+            sqlite3_close ( (sqlite3*)smartTilesEntry->LCRecords[i].pDB );
+        }
+    }
+
     ::free ( sceneEntry );
     ::free ( materialEntry );
     ::free ( layerEntry );
@@ -650,6 +671,10 @@ void LC::free ()
     for ( vector<Texture*>::iterator pp=textures.begin(); pp!=textures.end(); ++pp )
         delete *pp;
 
+    for ( map<string,unsigned int>::iterator pp=smartile_textures.begin();
+          pp!=smartile_textures.end(); ++pp )
+        glDeleteTextures ( 1, &(pp->second) );
+    smartile_textures.clear();
 }
 
 void LC::buildLevelLC ()

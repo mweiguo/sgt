@@ -184,11 +184,13 @@ typedef DataGroup1<vec3f> VertexRecord;
 struct SmartTileRecord : public DrawableRecord
 {
     SmartTileRecord ();
-    SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int levelcnt, int matidx );
+    SmartTileRecord ( const vec3f& p0, const vec3f& p1, const vec3f& p2, const vec3f& p3, int levelcnt, const char* dbname, int matidx );
     vec3f data[4];
     int levelcnt;
     Tile tiles[16];
     int tilecnt;
+    char dbname[256];
+    void* pDB;
 };
 
 template < class RecType >
@@ -294,7 +296,7 @@ public:
 /*      *  map<int,int>: globalindex, materialIdx */
 /*      *\/ */
 /*     std::map<int,int> highlightRecords; */
-
+    std::map<std::string,unsigned int> smartile_textures;
 protected:
     // navigation
     int cursorDepth;  // base from 0

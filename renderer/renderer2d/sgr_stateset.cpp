@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include "sgr_stateset.h"
 #include "sgr_lc.h"
 #include "sgr_nodetypes.h"

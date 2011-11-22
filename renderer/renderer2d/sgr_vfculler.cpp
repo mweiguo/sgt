@@ -1,9 +1,12 @@
+#include <GL/glew.h>
 #include "sgr_vfculler.h"
 #include "sgr_nodetypes.h"
 #include <sgr_math.h>
 #include "kdtree.h"
 #include <cstring>
 #include <IL/ilut.h>
+#include "teximage.h"
+#include <sqlite3.h>
 
 vector<int> vfculler::renderObjects;
 BBox2d vfculler::vfbbox2d;
@@ -147,11 +150,24 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
 
             for ( int i=0; i<smartile.tilecnt; i++ ) {
                 Tile* tile = smartile.tiles + i;
-                int texid;
-                if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 )
-                    tile->texid = -1;
-                else
-                    tile->texid = texid;
+                map<string,unsigned int>::iterator pp = lc.smartile_textures.find ( tile->filename );
+                if ( pp == lc.smartile_textures.end() ) {
+                    int texid;
+                    if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 ) {
+                        tile->texid = -1;
+//                        cout << "---------- load texture " << tile->filename << " failed" << endl;
+                    } else {
+                        if (GLEW_VERSION_1_3) {
+                            glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+                            glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+                        }
+                        tile->texid = texid;
+                        lc.smartile_textures.insert ( pair<string,unsigned int>(tile->filename,texid) );
+//                        cout << "---------- load texture " << tile->filename << " ok. " << tile->texid << endl;
+                    }
+                } else {
+                    tile->texid = pp->second;
+                }
             }
             renderObjects.push_back ( gIdx );
             return CHILD_NOT_CULLED;
@@ -319,6 +335,7 @@ int vfculler::cull_test2 ( int type, int gIdx, LC& lc )
     }
     case SLC_SMARTILES:
     {
+        cout << "---------- load texture " << endl;
         // check if bbox outside smartiles
         const BBox2d* nodeBBox = (const BBox2d*)(lc.globalLCEntry->LCRecords[gIdx].minmax);
         if ( false == is_inside (vfbbox2d, *nodeBBox) ) {
@@ -326,15 +343,37 @@ int vfculler::cull_test2 ( int type, int gIdx, LC& lc )
         } else {
             // get each tiles
 	    SmartTileRecord& smartile = lc.smartTilesEntry->LCRecords[lc.getValue()];
+            if ( smartile.pDB == 0 ) {
+                cerr << "invalid smartile, dbname = " << smartile.dbname << endl;
+                return CHILD_NOT_CULLED;
+            }
             smartile.tilecnt = GetTiles ( &smartile, (float*)&vfbbox2d, smartile.tiles );
 
             for ( int i=0; i<smartile.tilecnt; i++ ) {
                 Tile* tile = smartile.tiles + i;
-                int texid;
-                if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 )
+                int texid = 0;
+                // get imagedata
+                int memsize;
+
+                const unsigned char* jpgfile_mem = get_image_blobdata ( (sqlite3*)smartile.pDB, tile->level, tile->id, &memsize );
+                if ( jpgfile_mem != NULL )
+                    texid = create_texture_from_jpgmem ( jpgfile_mem, memsize );
+
+                if ( texid == 0 ) {
                     tile->texid = -1;
-                else
+                    cout << "---------- load texture " << tile->filename << " failed" << endl;
+                } else {
                     tile->texid = texid;
+                    cout << "---------- load texture " << tile->filename << " ok" << endl;
+                }
+
+//                 if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 ) {
+//                     tile->texid = -1;
+//                     cout << "---------- load texture " << tile->filename << " failed" << endl;
+//                 } else {
+//                     tile->texid = texid;
+//                     cout << "---------- load texture " << tile->filename << " ok" << endl;
+//                 }
             }
             renderObjects.push_back ( gIdx );
             return CHILD_NOT_CULLED;

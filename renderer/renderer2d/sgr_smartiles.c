@@ -3,11 +3,14 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <iostream>
 #include <sstream>
 using namespace std;
 
+#include <sqlite3.h>
+#include <math.h>
 //SmartTiles* curSmartTiles;
 
 /*
@@ -48,10 +51,10 @@ int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles )
         tiles->minmax[1] = curSmartTiles->data[0].y();
         tiles->minmax[2] = tiles->minmax[0] + gsize;
         tiles->minmax[3] = tiles->minmax[1] + gsize;
-        tiles->texid     = -1;
+//        tiles->texid     = -1;
 
         stringstream ss;
-        ss << level << "/" << tiles->id << ".png";
+        ss << level << "/0/0/0/0.png";
         strcpy ( tiles->filename, ss.str().c_str() );
         return 1;
     } else {
@@ -97,10 +100,10 @@ int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles )
             tiles->minmax[1] = j * delta;
             tiles->minmax[2] = tiles->minmax[0] + delta;
             tiles->minmax[3] = tiles->minmax[1] + delta;
-            tiles->texid     = -1;
+//            tiles->texid     = -1;
 
             stringstream ss;
-            ss << level << "/" << tiles->id << ".png";
+            ss << level << "/" << i/1024 << "/" << i%1024 << "/" << (xtilecnt-j-1)/1024 << "/" << (xtilecnt-j-1)%1024 << ".png";
             strcpy ( tiles->filename, ss.str().c_str() );
 
             tiles++;
@@ -108,5 +111,34 @@ int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles )
     }
 
     return (tiles - bak);
+}
+
+const unsigned char* get_image_blobdata ( void* db, int level, int id, int* length )
+{
+    sqlite3* pDB = (sqlite3*)db;
+    const unsigned char* rtn = 0;
+    *length = 0;
+    sqlite3_stmt *pStmt;
+    char stmt[256];
+    sprintf ( stmt, "select b from ttt where level=%d and id=%d;", level, id );
+    int rc = sqlite3_prepare ( pDB, stmt, -1, &pStmt, 0);
+    if (rc == SQLITE_OK && pStmt != NULL) {
+        if ( sqlite3_step(pStmt) == SQLITE_ROW ) {
+            if ( sqlite3_column_count ( pStmt ) == 1 ) {
+                if ( SQLITE_BLOB==sqlite3_column_type ( pStmt, 0) ) {
+                    rtn = (const unsigned char*)sqlite3_column_blob(pStmt, 0);
+                    *length = sqlite3_column_bytes(pStmt, 0);
+/*
+                    FILE* fp;
+                    fp = fopen ( "test.jpg", "wb" );
+                    fwrite ( rtn, length, 1, fp );
+                    fclose ( fp );
+*/
+                }
+            }
+        }
+        rc = sqlite3_finalize(pStmt);
+    }
+    return rtn;
 }
 

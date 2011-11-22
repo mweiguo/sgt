@@ -9,8 +9,10 @@
 #include <fstream>
 
 #include <windows.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+
 #include "mat4.h"
 #include <ctime>
 
@@ -27,9 +29,16 @@ float currentScale = 1;
 
 void r2d_init ()
 {
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+        cerr << "Error: " << glewGetErrorString(err) << endl;
+
     glClearColor ( 0.0, 0.0, 0.0, 1.0 );
     glEnable ( GL_DEPTH_TEST );
     glEnable ( GL_TEXTURE_2D );
+//     if (GLEW_VERSION_1_3)
+//         glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+
     glEnable ( GL_LINE_SMOOTH );
 
     glEnable ( GL_BLEND );

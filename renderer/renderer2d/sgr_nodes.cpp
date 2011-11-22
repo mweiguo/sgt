@@ -481,12 +481,15 @@ SLCSmartTilesNode::SLCSmartTilesNode ( const SLCSmartTilesNode& rhs )
     pnts[3] = rhs.pnts[3];
     z = rhs.z;
     levelcnt = rhs.levelcnt;
+    dbname = rhs.dbname;
 }
 
 string SLCSmartTilesNode::toXML () const
 {
     stringstream ss;
-    ss << "<primitive type=\"smartiles\" bindmaterial=\"" << bindmat->name << "\" levelcnt=\"" << levelcnt << "\">";
+    ss << "<primitive type=\"smartiles\" bindmaterial=\"" << bindmat->name <<
+        "\" levelcnt=\"" << levelcnt <<
+        "\" dbname=\"" << dbname << "\">";
     for ( int i=0; i<4; i++ ) {
 	float v[] = { pnts[i].x(), pnts[i].y(), z, 1 };
 	mat_multvector ( _current_matrix, v );

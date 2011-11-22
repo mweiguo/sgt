@@ -48,7 +48,8 @@ int main ( int argc, char* argv[] )
         tiles->pnts[2] = vec2f ( 256, 256 );
         tiles->pnts[3] = vec2f ( 0, 256 );
         tiles->z = 1;
-        tiles->levelcnt = 3;
+        tiles->levelcnt = 8;
+        tiles->dbname = "satelite.db";
         layer->addChild ( tiles );
     }
 

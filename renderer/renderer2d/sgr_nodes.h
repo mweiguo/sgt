@@ -224,6 +224,7 @@ public:
     vec2f pnts[4];
     float z;
     int levelcnt;
+    string dbname;
 };
 
 class SLCTransformNode : public SLCNode
