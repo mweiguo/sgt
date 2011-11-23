@@ -24,10 +24,12 @@ public:
     static void clear ();
     static vector<int> renderObjects;
 private:
+    // cross pick
     static int cull_test ( int type, int idx, LC& lc );
     static void traverse ( LC& lc );
     static void traverse ( LC& lc, int i );
 
+    // contain pick
     static int cull_test2 ( int type, int idx, LC& lc );
     static void traverse2 ( LC& lc );
     static void traverse2 ( LC& lc, int i );

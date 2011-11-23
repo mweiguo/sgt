@@ -78,7 +78,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level0 )
 
     EXPECT_EQ ( 0u, tile->id );
     EXPECT_EQ ( 0u, tile->level );
-    EXPECT_STREQ ( "0/0.png", tile->filename );
+    EXPECT_STREQ ( "0/0/0/0/0.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }
@@ -105,7 +105,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level1 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 12800, tile->minmax[2] );
     EXPECT_EQ ( 12800, tile->minmax[3] );
-    EXPECT_STREQ ( "1/0.png", tile->filename );
+    EXPECT_STREQ ( "1/0/0/0/1.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -115,7 +115,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level1 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 25600, tile->minmax[2] );
     EXPECT_EQ ( 12800, tile->minmax[3] );
-    EXPECT_STREQ ( "1/1.png", tile->filename );
+    EXPECT_STREQ ( "1/0/1/0/1.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -125,7 +125,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level1 )
     EXPECT_EQ ( 12800, tile->minmax[1] );
     EXPECT_EQ ( 12800, tile->minmax[2] );
     EXPECT_EQ ( 25600, tile->minmax[3] );
-    EXPECT_STREQ ( "1/2.png", tile->filename );
+    EXPECT_STREQ ( "1/0/0/0/0.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -135,7 +135,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level1 )
     EXPECT_EQ ( 12800, tile->minmax[1] );
     EXPECT_EQ ( 25600, tile->minmax[2] );
     EXPECT_EQ ( 25600, tile->minmax[3] );
-    EXPECT_STREQ ( "1/3.png", tile->filename );
+    EXPECT_STREQ ( "1/0/1/0/0.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }
@@ -162,7 +162,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level2 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 6400,  tile->minmax[2] );
     EXPECT_EQ ( 6400,  tile->minmax[3] );
-    EXPECT_STREQ ( "2/0.png", tile->filename );
+    EXPECT_STREQ ( "2/0/0/0/3.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -172,7 +172,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level2 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 12800, tile->minmax[2] );
     EXPECT_EQ ( 6400,  tile->minmax[3] );
-    EXPECT_STREQ ( "2/1.png", tile->filename );
+    EXPECT_STREQ ( "2/0/1/0/3.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -182,7 +182,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level2 )
     EXPECT_EQ ( 6400,  tile->minmax[1] );
     EXPECT_EQ ( 6400,  tile->minmax[2] );
     EXPECT_EQ ( 12800, tile->minmax[3] );
-    EXPECT_STREQ ( "2/4.png", tile->filename );
+    EXPECT_STREQ ( "2/0/0/0/2.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -192,7 +192,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level2 )
     EXPECT_EQ ( 6400,  tile->minmax[1] );
     EXPECT_EQ ( 12800, tile->minmax[2] );
     EXPECT_EQ ( 12800, tile->minmax[3] );
-    EXPECT_STREQ ( "2/5.png", tile->filename );
+    EXPECT_STREQ ( "2/0/1/0/2.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }
@@ -219,7 +219,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level3 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 3200,  tile->minmax[2] );
     EXPECT_EQ ( 3200,  tile->minmax[3] );
-    EXPECT_STREQ ( "3/0.png", tile->filename );
+    EXPECT_STREQ ( "3/0/0/0/7.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -229,7 +229,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level3 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 6400,  tile->minmax[2] );
     EXPECT_EQ ( 3200,  tile->minmax[3] );
-    EXPECT_STREQ ( "3/1.png", tile->filename );
+    EXPECT_STREQ ( "3/0/1/0/7.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -239,7 +239,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level3 )
     EXPECT_EQ ( 3200,  tile->minmax[1] );
     EXPECT_EQ ( 3200,  tile->minmax[2] );
     EXPECT_EQ ( 6400,  tile->minmax[3] );
-    EXPECT_STREQ ( "3/8.png", tile->filename );
+    EXPECT_STREQ ( "3/0/0/0/6.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -249,7 +249,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level3 )
     EXPECT_EQ ( 3200,  tile->minmax[1] );
     EXPECT_EQ ( 6400,  tile->minmax[2] );
     EXPECT_EQ ( 6400,  tile->minmax[3] );
-    EXPECT_STREQ ( "3/9.png", tile->filename );
+    EXPECT_STREQ ( "3/0/1/0/6.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }
@@ -276,7 +276,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level4 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 1600,  tile->minmax[2] );
     EXPECT_EQ ( 1600,  tile->minmax[3] );
-    EXPECT_STREQ ( "4/0.png", tile->filename );
+    EXPECT_STREQ ( "4/0/0/0/15.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -286,7 +286,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level4 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 3200,  tile->minmax[2] );
     EXPECT_EQ ( 1600,  tile->minmax[3] );
-    EXPECT_STREQ ( "4/1.png", tile->filename );
+    EXPECT_STREQ ( "4/0/1/0/15.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -296,7 +296,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level4 )
     EXPECT_EQ ( 1600,  tile->minmax[1] );
     EXPECT_EQ ( 1600,  tile->minmax[2] );
     EXPECT_EQ ( 3200,  tile->minmax[3] );
-    EXPECT_STREQ ( "4/16.png", tile->filename );
+    EXPECT_STREQ ( "4/0/0/0/14.png", tile->filename );
 
     tile++;
     EXPECT_NE ( NULL,  (int)tile );
@@ -306,7 +306,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level4 )
     EXPECT_EQ ( 1600,  tile->minmax[1] );
     EXPECT_EQ ( 3200,  tile->minmax[2] );
     EXPECT_EQ ( 3200,  tile->minmax[3] );
-    EXPECT_STREQ ( "4/17.png", tile->filename );
+    EXPECT_STREQ ( "4/0/1/0/14.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }
@@ -333,7 +333,7 @@ TEST_F ( VFCullerSmartTilesTestCase, GetTiles_level5 )
     EXPECT_EQ ( 0,     tile->minmax[1] );
     EXPECT_EQ ( 1600,  tile->minmax[2] );
     EXPECT_EQ ( 1600,  tile->minmax[3] );
-    EXPECT_STREQ ( "4/0.png", tile->filename );
+    EXPECT_STREQ ( "4/0/0/0/15.png", tile->filename );
 
     vfculler::renderObjects.clear();
 }

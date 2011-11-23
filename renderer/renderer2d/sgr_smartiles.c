@@ -29,6 +29,17 @@ void SetupTiles ( int levelcnt, float size )
 }
 */
 
+/*
+              x
+  .------------
+  |           
+  |
+  |
+  |
+  |
+y |
+
+*/
 int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles )
 {
     // normalize minmax

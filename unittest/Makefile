@@ -21,12 +21,12 @@ USER_DIR = ../renderer/renderer2d
 USER_DIR2 = ../graphbase
 
 # Flags passed to the preprocessor.
-CPPFLAGS += -I$(GTEST_DIR)/include -I$(USER_DIR) -I$(USER_DIR2) -I../thirdparty/utf8_v2_3_1/source/ -I../thirdparty/DevIL-SDK-x86-1.7.8/include/
+CPPFLAGS += -I$(GTEST_DIR)/include -I$(USER_DIR) -I$(USER_DIR2) -I../thirdparty/utf8_v2_3_1/source/ -I../thirdparty/DevIL-SDK-x86-1.7.8/include/ -I../thirdparty/sqlite-autoconf-3070900 -I../thirdparty/glew-1.6.0/include -I../thirdparty/jpeg-8c -I../thirdparty/libpng-1.5.6
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra
 
-LINKFLAGS += -lfreetype -lpthread -lopengl32  -L"../thirdparty/DevIL-SDK-x86-1.7.8/lib" -lDevIL -lILUT
+LINKFLAGS += -L"../thirdparty/DevIL-SDK-x86-1.7.8/lib" -L"../thirdparty/sqlite-autoconf-3070900/.libs" -L"../thirdparty/jpeg-8c/.libs" -L"../thirdparty/libpng-1.5.6/.libs" -L"../thirdparty/zlib/lib" -L../thirdparty/glew-1.6.0/lib -lfreetype -lpthread -lopengl32 -lDevIL -lILUT -lsqlite3 -lglew32.dll -ljpeg -lpng15 -lz
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -140,6 +140,8 @@ sgr_smartiles.o : $(USER_DIR)/sgr_smartiles.h $(USER_DIR)/sgr_smartiles.c
 sgr_vfculler.o : $(USER_DIR)/sgr_vfculler.h $(USER_DIR)/sgr_vfculler.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sgr_vfculler.cpp
 
+teximage.o : $(USER_DIR)/teximage.h $(USER_DIR)/teximage.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/teximage.c
 
 tst_math : gtest_main.a tst_math.o sgr_math.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
@@ -162,5 +164,5 @@ tst_kdtreetext1 : gtest_main.a tst_kdtreetext1.o sgr_lc.o sgr_node2lc.o sgr_node
 tst_bboxupdater : gtest_main.a tst_bboxupdater.o sgr_lc.o sgr_node2lc.o sgr_nodes.o sgr_bboxupdater.o sgr_lc2kdtree.o sgr_font.o sgr_texture.o mat4f.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
 
-tst_vfculler_smartiles : gtest_main.a tst_vfculler_smartiles.o sgr_smartiles.o sgr_lc.o sgr_nodes.o sgr_node2lc.o sgr_vfculler.o sgr_font.o sgr_texture.o mat4f.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o
+tst_vfculler_smartiles : gtest_main.a tst_vfculler_smartiles.o sgr_smartiles.o sgr_lc.o sgr_nodes.o sgr_node2lc.o sgr_vfculler.o sgr_font.o sgr_texture.o mat4f.o sgr_lc2kdtree.o sgr_math.o sgr_bboxupdater.o teximage.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LINKFLAGS)
