@@ -44,11 +44,11 @@ int main ( int argc, char* argv[] )
 
         SLCSmartTilesNode* tiles = new SLCSmartTilesNode ( gmat );
         tiles->pnts[0] = vec2f ( 0, 0 );
-        tiles->pnts[1] = vec2f ( 256, 0 );
-        tiles->pnts[2] = vec2f ( 256, 256 );
-        tiles->pnts[3] = vec2f ( 0, 256 );
+        tiles->pnts[1] = vec2f ( 25600, 0 );
+        tiles->pnts[2] = vec2f ( 25600, 25600 );
+        tiles->pnts[3] = vec2f ( 0, 25600 );
         tiles->z = 1;
-        tiles->levelcnt = 8;
+        tiles->levelcnt = 17;
         tiles->dbname = "satelite.db";
         layer->addChild ( tiles );
     }

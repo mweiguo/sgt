@@ -44,11 +44,27 @@ void Tool::OnMMouseMove ( int x, int y )
 {
 }
 
+void Tool::OnRButtonDown ( int x, int y )
+{
+}
+
+void Tool::OnRButtonUp ( int x, int y )
+{
+}
+
+void Tool::OnRMouseMove ( int x, int y )
+{
+}
+
 void Tool::OnKeyPress ( int key, int modifiers )
 {
 }
 
 void Tool::OnKeyRelease ( int key, int modifiers )
+{
+}
+
+void Tool::OnDBClick ( int x, int y )
 {
 }
 
@@ -189,38 +205,47 @@ void ZoomTool::OnLMouseMove ( int x, int y )
 
 HandTool::HandTool ( Tools* tools ) : Tool ( tools )
 {
+    movelock = true;
 }
 
 //================================================================================
 
 void HandTool::OnLButtonDown ( int x, int y )
 {
-    _tools->parent->widget->setCursor ( Qt::ClosedHandCursor );
-    r2d_get_scene_position ( x, y, startPos[0], startPos[1] );
+    if ( true == movelock ) {
+        _tools->parent->widget->setCursor ( Qt::ClosedHandCursor );
+        r2d_get_scene_position ( x, y, startPos[0], startPos[1] );
+        movelock = false;
+    }
 }
 
 //================================================================================
 
 void HandTool::OnLButtonUp ( int x, int y )
 {    
-    _tools->parent->widget->setCursor ( Qt::OpenHandCursor );
-    OnLMouseMove ( x, y );
-    _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
-					   _tools->parent->widget->translate[0], 
-					   _tools->parent->widget->translate[1] );
+    if ( false == movelock ) {
+        _tools->parent->widget->setCursor ( Qt::OpenHandCursor );
+        OnLMouseMove ( x, y );
+        _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
+                                               _tools->parent->widget->translate[0], 
+                                               _tools->parent->widget->translate[1] );
+        movelock = true;
+    }
 }
 
 //================================================================================
 
 void HandTool::OnLMouseMove ( int x, int y )
 {
-    float ScenePos[2];
-    r2d_get_scene_position ( x, y, ScenePos[0], ScenePos[1] );
-    float dx = ScenePos[0] - startPos[0];
-    float dy = ScenePos[1] - startPos[1];
-    _tools->parent->widget->translate[0] += dx;
-    _tools->parent->widget->translate[1] += dy;
-    _tools->parent->widget->update();
+    if ( false == movelock ) {
+        float ScenePos[2];
+        r2d_get_scene_position ( x, y, ScenePos[0], ScenePos[1] );
+        float dx = ScenePos[0] - startPos[0];
+        float dy = ScenePos[1] - startPos[1];
+        _tools->parent->widget->translate[0] += dx;
+        _tools->parent->widget->translate[1] += dy;
+        _tools->parent->widget->update();
+    }
 }
 
 //================================================================================
@@ -242,6 +267,34 @@ void HandTool::OnMButtonUp ( int x, int y )
 void HandTool::OnMMouseMove ( int x, int y )
 {
     OnLMouseMove ( x, y );
+}
+
+//================================================================================
+
+void HandTool::OnDBClick ( int x, int y )
+{
+    float center[2];
+    r2d_get_scene_position ( x, y, center[0], center[1] );
+    r2d_loadidentity ();
+    _tools->parent->widget->scale *= 1.2;
+    _tools->parent->widget->translate[0] = -center[0];
+    _tools->parent->widget->translate[1] = -center[1];
+    _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
+					   _tools->parent->widget->translate[0], 
+					   _tools->parent->widget->translate[1] );
+}
+
+void HandTool::OnRButtonDown ( int x, int y )
+{
+    float center[2];
+    r2d_get_scene_position ( x, y, center[0], center[1] );
+    r2d_loadidentity ();
+    _tools->parent->widget->scale /= 1.2;
+    _tools->parent->widget->translate[0] = -center[0];
+    _tools->parent->widget->translate[1] = -center[1];
+    _tools->parent->setViewportTransform ( _tools->parent->widget->scale,
+					   _tools->parent->widget->translate[0], 
+					   _tools->parent->widget->translate[1] );
 }
 
 //--------------------------------------------------------------------------------

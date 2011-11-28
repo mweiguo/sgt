@@ -27,8 +27,12 @@ public:
     virtual void OnMButtonDown ( int x, int y );
     virtual void OnMButtonUp ( int x, int y );
     virtual void OnMMouseMove ( int x, int y );
+    virtual void OnRButtonDown ( int x, int y );
+    virtual void OnRButtonUp ( int x, int y );
+    virtual void OnRMouseMove ( int x, int y );
     virtual void OnKeyPress ( int key, int modifiers );
     virtual void OnKeyRelease ( int key, int modifiers );
+    virtual void OnDBClick ( int x, int y );
 
 protected:
     Tools* _tools;
@@ -84,8 +88,12 @@ public:
     virtual void OnMButtonDown ( int x, int y );
     virtual void OnMButtonUp ( int x, int y );
     virtual void OnMMouseMove ( int x, int y );
+    virtual void OnRButtonDown ( int x, int y );
+    virtual void OnDBClick ( int x, int y );
 private:
     float startPos[2];
+    bool movelock
+;
 };
 
 class ArrowTool : public RubberBoxTool

@@ -15,5 +15,5 @@ binary.files = debug/map.exe
 INSTALLS += binary
 
 # Input
-HEADERS += mapmainwindow.h
+HEADERS += mapmainwindow.h d:/svn_workspace/smallexperiments/qt_customdraw_widget/mapslider.h
 SOURCES += main.cpp mapmainwindow.cpp

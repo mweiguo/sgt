@@ -38,7 +38,7 @@ protected:
     virtual void mouseMoveEvent ( QMouseEvent * event );
     virtual void mousePressEvent ( QMouseEvent * event );
     virtual void mouseReleaseEvent ( QMouseEvent * event );
-
+    virtual void mouseDoubleClickEvent ( QMouseEvent * event );
     int _oldTool;
 };
 
@@ -55,6 +55,7 @@ public:
     GLBirdView ( ViewerContext* context, Tools* tools, int* mainSceneId, const QGLFormat& fmt, QWidget* parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0 );
     virtual void paintGL ();
     virtual void resizeGL ( int width, int height );
+    void setLocation ( float x1, float y1, float x2, float y2 );
     int rectid;
 };
 

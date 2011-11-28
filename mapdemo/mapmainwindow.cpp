@@ -12,6 +12,7 @@
 #include <list>
 using namespace std;
 
+//#include "d:/svn_workspace/smallexperiments/qt_customdraw_widget/mapslider.h"
 MapMainWindow::MapMainWindow()
 {
     doc = new Document;
@@ -46,16 +47,23 @@ MapMainWindow::MapMainWindow()
     
     setCentralWidget(displayer);
 
+//     MapSlider* slider = new MapSlider();
+//     slider->setParent ( displayer->widget );
+//     slider->setGeometry ( 200, 200, 300, 300 );
+
     createActions();
     createMenus();
     createToolBars();
     createStatusBar();
     createDockWindows();
 
-    setWindowTitle(tr("Dock Widgets"));
+    setWindowTitle(tr("map"));
     setUnifiedTitleAndToolBarOnMac(true);
     setMouseTracking ( false );
     r2d_init ();
+
+    handAct->setChecked(true);
+    actionEvent( handAct );
 }
 
 MapMainWindow::~MapMainWindow()
@@ -283,16 +291,18 @@ void MapMainWindow::createStatusBar()
 
 void MapMainWindow::createDockWindows()
 {
-    QDockWidget *dock = new QDockWidget(tr("Layers"), this);
+//    QDockWidget *dock = new QDockWidget(tr("Layers"), this);
     list<QGLWidget*> lst;
     lst.push_back ( displayer->widget );
     lst.push_back ( birdview );
-    layerManagerWidget = new LayerManagerWidget(lst, dock);
+    layerManagerWidget = new LayerManagerWidget(lst, 0);
+    layerManagerWidget->hide();
 
-    dock->setWidget(layerManagerWidget);
-    addDockWidget(Qt::RightDockWidgetArea, dock);
+//    dock->setWidget(layerManagerWidget);
+//    addDockWidget(Qt::RightDockWidgetArea, dock);
 
-    dock = new QDockWidget(tr("birdview"), this);
+    QDockWidget *dock = new QDockWidget(tr("birdview"), this);
+    dock->setFloating ( true );
     dock->setMinimumSize ( 230, 200 );
     dock->setMaximumSize ( 230, 200 );
     dock->setWidget(birdview);

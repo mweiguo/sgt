@@ -37,6 +37,50 @@ void vfculler::clear ()
 
 //================================================================================
 
+void free_image_blobdata ( void* data )
+{
+    free ( data );
+}
+
+//================================================================================
+
+//const unsigned char* get_image_blobdata ( sqlite3* pDB, int level, int id, int* length )
+int get_image_blobdata ( sqlite3* pDB, int level, int id, unsigned char** data )
+{
+//    cout << "---------------get_image_blobdata " << pDB << ", " << length << endl;
+    int length = 0;
+    *data = 0;
+    sqlite3_stmt *pStmt;
+    char stmt[256];
+    sprintf ( stmt, "select b from ttt where level=%d and id=%d;", level, id );
+    int rc = sqlite3_prepare ( pDB, stmt, -1, &pStmt, 0);
+    if (rc == SQLITE_OK && pStmt != NULL) {
+        if ( sqlite3_step(pStmt) == SQLITE_ROW ) {
+            if ( sqlite3_column_count ( pStmt ) == 1 ) {
+                if ( SQLITE_BLOB==sqlite3_column_type ( pStmt, 0) ) {
+                    length = sqlite3_column_bytes(pStmt, 0);
+                    *data = (unsigned char*)malloc ( length * sizeof(char) );
+                    unsigned char* tmp = (unsigned char*)sqlite3_column_blob(pStmt, 0);
+                    memcpy ( *data, tmp, length*sizeof(char) );
+//                    sqlite3_column_bytes(pStmt, 0);
+                } else {
+                    printf ( "error: %s\n", sqlite3_errmsg (pDB ) );
+                }
+            } else {
+                printf ( "error: %s\n", sqlite3_errmsg (pDB ) );
+            }
+        } else {
+            printf ( "error: %s\n", sqlite3_errmsg (pDB ) );
+        }
+//        cout << 6 << endl;
+        rc = sqlite3_finalize(pStmt);
+    } else {
+        printf ( "error: %s\n", sqlite3_errmsg (pDB ) );
+    }
+//    cout << 7 << endl;
+    return length;
+}
+
 /**
  * return true if object culled, else return false
  */
@@ -148,14 +192,27 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
 	    SmartTileRecord& smartile = lc.smartTilesEntry->LCRecords[lc.getValue()];
             smartile.tilecnt = GetTiles ( &smartile, (float*)&vfbbox2d, smartile.tiles );
 
+            cout << "...........tiles cache have " << lc.smartile_textures.size() << " tiles" << endl;
             for ( int i=0; i<smartile.tilecnt; i++ ) {
                 Tile* tile = smartile.tiles + i;
                 map<string,unsigned int>::iterator pp = lc.smartile_textures.find ( tile->filename );
                 if ( pp == lc.smartile_textures.end() ) {
-                    int texid;
-                    if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 ) {
+                    int texid = 0;
+
+                    cout << "...... before load texture " << tile->filename << endl;
+                    unsigned char* memdata;
+                    int len = get_image_blobdata ( (sqlite3*)smartile.pDB, tile->level, tile->id, &memdata );
+//                    printf ( "memdata = %x, len=%d\n", memdata, len );
+                    if ( memdata != 0 ) {
+                        texid = create_texture_from_jpgmem ( memdata, len );
+                        cout << "...... create_texture_from_jpgmem finished" << endl;
+                    }
+                    free_image_blobdata ( memdata );
+
+//                     if ( (texid=ilutGLLoadImage ( const_cast<char*>(tile->filename))) == 0 ) {
+                    if ( texid == 0 ) {
                         tile->texid = -1;
-//                        cout << "---------- load texture " << tile->filename << " failed" << endl;
+                        cout << "---------- load texture " << tile->filename << " failed" << endl;
                     } else {
                         if (GLEW_VERSION_1_3) {
                             glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -163,7 +220,7 @@ int vfculler::cull_test ( int type, int gIdx, LC& lc )
                         }
                         tile->texid = texid;
                         lc.smartile_textures.insert ( pair<string,unsigned int>(tile->filename,texid) );
-//                        cout << "---------- load texture " << tile->filename << " ok. " << tile->texid << endl;
+                        cout << "---------- load texture " << tile->filename << " ok. " << tile->texid << endl;
                     }
                 } else {
                     tile->texid = pp->second;
@@ -353,11 +410,13 @@ int vfculler::cull_test2 ( int type, int gIdx, LC& lc )
                 Tile* tile = smartile.tiles + i;
                 int texid = 0;
                 // get imagedata
-                int memsize;
-
-                const unsigned char* jpgfile_mem = get_image_blobdata ( (sqlite3*)smartile.pDB, tile->level, tile->id, &memsize );
+                
+                unsigned char* jpgfile_mem;
+                int memsize = get_image_blobdata ( (sqlite3*)smartile.pDB, tile->level, tile->id, &jpgfile_mem );
                 if ( jpgfile_mem != NULL )
                     texid = create_texture_from_jpgmem ( jpgfile_mem, memsize );
+                free_image_blobdata ( jpgfile_mem );
+
 
                 if ( texid == 0 ) {
                     tile->texid = -1;

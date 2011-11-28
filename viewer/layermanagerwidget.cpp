@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QtGui>
 #include <math.h>
+#include <stdlib.h>
 using namespace std;
 
 LayerItem::LayerItem ()
@@ -14,8 +15,10 @@ LayerItem::LayerItem ()
     memset ( frgba, 0, sizeof(unsigned short) * 4 );
     memset ( brgba, 0, sizeof(unsigned short) * 4 );
 
-    _trueimage.load ( "d:/git_workspace/sgt/viewer/images/tick_16.png" );
-    _falseimage.load ( "d:/git_workspace/sgt/viewer/images/delete.png" );
+    char* SGT_HOME = getenv ("SGT_HOME");
+    string home_path = SGT_HOME;
+    _trueimage.load ( (home_path + "/images/tick_16.png").c_str() );
+    _falseimage.load ( (home_path + "/images/delete.png").c_str() );
 }
 
 QSize LayerItem::sizeHint() const

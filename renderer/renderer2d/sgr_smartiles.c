@@ -105,7 +105,7 @@ int GetTiles ( SmartTileRecord* curSmartTiles, float* minmax, Tile* tiles )
     {
         for ( int i=xidx_min; i<=xidx_max; i++ )
         {
-            tiles->id        = j * xtilecnt + i;
+            tiles->id        = ( xtilecnt - j - 1 ) * xtilecnt + i;
             tiles->level     = level;
             tiles->minmax[0] = i * delta;
             tiles->minmax[1] = j * delta;

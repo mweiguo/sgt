@@ -29,6 +29,7 @@ GLWidget::GLWidget ( ViewerContext* cont, Tools* t, int* mainSceneId, const QGLF
     tools = t;
     scale = 1;
     translate[0] = translate[1] = 0;
+    setAutoFillBackground(false);
 }
 
 void GLWidget::zoomin()
@@ -214,6 +215,11 @@ void GLBirdView::resizeGL ( int width, int height )
     GLWidget::resizeGL ( width, height );
     homeposition();
 }
+
+void GLBirdView::setLocation ( float x1, float y1, float x2, float y2 )
+{
+}
+
 //================================================================================
 
 void GLWidget::keyReleaseEvent ( QKeyEvent * event )
@@ -279,6 +285,8 @@ void GLWidget::mousePressEvent ( QMouseEvent * event )
 		} else if ( Qt::MidButton & event->buttons() ) {
 		    _oldTool = tools->selectTool ( Tools::HAND_TOOL );
 		    tools->currentTool->OnMButtonDown ( event->x(), event->y() );
+		} else if ( Qt::RightButton & event->buttons() ) {
+		    tools->currentTool->OnRButtonDown ( event->x(), event->y() );
 		}
 	    } else {
 		if ( Qt::MidButton & event->buttons() ) {
@@ -312,11 +320,38 @@ void GLWidget::mouseReleaseEvent ( QMouseEvent * event )
 		} else if ( Qt::MidButton == event->button() ) {
 		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
 		    tools->selectTool ( _oldTool );
+		} else if ( Qt::RightButton & event->buttons() ) {
+		    tools->currentTool->OnRButtonUp ( event->x(), event->y() );
 		}
 	    } else {
 		if ( Qt::MidButton == event->button() ) {
 		    tools->currentTool->OnMButtonUp ( event->x(), event->y() );
 		    tools->selectTool ( _oldTool );
+		}
+	    }
+	}
+//	cout << "end GLWidget::mouseReleaseEvent" << endl;
+    }
+    catch ( exception& ex )
+    {
+	cerr << ex.what() << endl;
+    }
+}
+
+//================================================================================
+
+void GLWidget::mouseDoubleClickEvent ( QMouseEvent * event )
+{
+    try
+    {
+//	cout << "begin GLWidget::mouseReleaseEvent" << endl;
+	if ( tools )
+	{
+	    makeCurrent();
+	    if ( tools->currentTool )
+	    {
+		if ( Qt::LeftButton == event->button() ) {
+		    tools->currentTool->OnDBClick ( event->x(), event->y() );
 		}
 	    }
 	}

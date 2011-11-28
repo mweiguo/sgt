@@ -566,9 +566,12 @@ bool LC::load ( const char* filename )
     for ( int i=0; i<length; i++ )
     {
         if ( strcmp("", smartTilesEntry->LCRecords[i].dbname)!=0 ) {
-            if ( SQLITE_OK != sqlite3_open ( smartTilesEntry->LCRecords[i].dbname, (sqlite3**)&smartTilesEntry->LCRecords[i].pDB)) {
+            if ( SQLITE_OK != sqlite3_open ( smartTilesEntry->LCRecords[i].dbname, 
+                                             (sqlite3**)&smartTilesEntry->LCRecords[i].pDB)) {
                 smartTilesEntry->LCRecords[i].pDB = NULL;
                 cerr << "load database " << smartTilesEntry->LCRecords[i].dbname << " failed" << endl;
+            } else {
+                cout << "load database " << smartTilesEntry->LCRecords[i].dbname << " ok" << endl;
             }
         }
     }
