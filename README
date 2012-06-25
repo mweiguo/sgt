@@ -7,3 +7,26 @@ renderer:   include core implementation of sgrenderer
 graphbase:  include basic graphical item and algorithm
 data:       include data
 plugins:    include firefox plugin
+mapdemo:    include map navigation app
+
+
+how to run mapdemo :
+1. compile source code
+    cd to root dir
+    make
+    make install
+2. build misc data
+    cd build/bin
+    ./buildmisc miscscene.slc
+    ./buildbirdview birdviewmisc.slc
+    ./buildmap map.slc
+3. generate image data
+   all tiles fetch from internet, GMapCacher(http://code.google.com/p/gmapcatcher/) is used for this purpose
+   suppose the image data is in "cache" directory
+   use a script 'yahoosat2smartiles.py' generate "imagelist" file, this file is used to generate db file with real image data.
+   after generate a imagelist by 'yahoosat2smartiles.py', then type
+   img2sql satelite.db imagelist
+   this command will generate a database file satelite.db, this db file is specified in map.slc
+4. run
+   ./map.exe -f map.slc
+img2sql satelite.db imagelist
